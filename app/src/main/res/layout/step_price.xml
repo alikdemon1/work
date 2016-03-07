@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:padding="10dp" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:orientation="vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#f5f5f5"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:layout_marginBottom="20dp"
+            android:text="Вам необходимо указать конкретную стоимость, чтобы исполнители оценили выгодность проекта."/>
+
+        <EditText
+            android:id="@+id/new_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_gravity="center"
+            android:hint="300"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:inputType="numberDecimal"
+            android:textColor="#000000"
+            android:textColorHint="@color/input_register_hint" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,4 +1,4 @@
-package com.alisher.work;
+package com.alisher.work.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -9,11 +9,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.alisher.work.R;
+
 /**
  * Created by Alisher on 3/2/2016.
  */
 public class LoginActivity extends AppCompatActivity{
-    private static final String TAG = RegisterActivity.class.getSimpleName();
     private Button btnLogin;
     private Button btnLinkToRegister;
     private EditText inputEmail;
@@ -30,10 +31,8 @@ public class LoginActivity extends AppCompatActivity{
         btnLogin = (Button) findViewById(R.id.btnLogin);
         btnLinkToRegister = (Button) findViewById(R.id.btnLinkToRegisterScreen);
 
-        // Progress dialog
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
-
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,12 +40,10 @@ public class LoginActivity extends AppCompatActivity{
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
 
-                // Check for empty data in the form
                 if (!email.isEmpty() && !password.isEmpty()) {
-                    // login user
                     checkLogin(email, password);
                 } else {
-                    // Prompt user to enter credentials
+
                     Toast.makeText(getApplicationContext(),
                             "Please enter the credentials!", Toast.LENGTH_LONG)
                             .show();
@@ -57,8 +54,7 @@ public class LoginActivity extends AppCompatActivity{
         btnLinkToRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(),
-                        RegisterActivity.class);
+                Intent i = new Intent(getApplicationContext(), RegisterActivity.class);
                 startActivity(i);
                 finish();
             }
@@ -72,6 +68,8 @@ public class LoginActivity extends AppCompatActivity{
         if(email.equals("admin") && password.equals("admin")){
             hideDialog();
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.putExtra("email", email);
+            intent.putExtra("pass", password);
             startActivity(intent);
             finish();
         } else {

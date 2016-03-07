@@ -6,8 +6,10 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+        <!-- Menu -->
     <string name="action_settings">Settings</string>
 
+        <!-- Register and Login -->
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="hint_name">Fullname</string>
@@ -18,4 +20,11 @@
     <string name="welcome">Welcome</string>
     <string name="btn_logout">LOGOUT</string>
     <string name="name">Fullname</string>
+
+
+        <!-- New Task -->
+    <string name="hint_desc">Пожалуйста, опишите задание максимально подробно. Так вы сможете быстрее подобрать подходящего исполнителя.</string>
+    <string name="hint_title">Заголовок задания</string>
+    <string name="new_apply">Разместить</string>
+    <string name="btn_pass_test">To see any new tasks you have to pass the TEST!!!</string>
 </resources>

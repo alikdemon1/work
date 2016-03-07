@@ -1,4 +1,4 @@
-package com.alisher.work;
+package com.alisher.work.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.alisher.work.R;
 
 /**
  * Created by Alisher on 3/2/2016.

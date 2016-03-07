@@ -2,14 +2,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="info.androidhive.materialtabs.fragments.OneFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.alisher.work.fragments.ClientFragment">
 
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/client_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/addTask"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Client Fragment"
-        android:textSize="40dp"
-        android:textStyle="bold"
-        android:layout_centerInParent="true"/>
+        android:layout_margin="16dp"
+        app:borderWidth="0dp"
+        android:backgroundTint="#ed1c11"
+        android:src="@drawable/ic_plus"
+        app:elevation="8dp"
+        app:fabSize="normal"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        />
 
 </RelativeLayout>
