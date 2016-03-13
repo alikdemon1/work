@@ -21,7 +21,7 @@
             android:label="@string/login_name"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/LoginAndRegisterTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,17 +34,17 @@
             android:label="@string/register_name"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/LoginAndRegisterTheme"/>
 
         <activity
             android:name=".newtask.CategoryActivity"
-            android:label="Новое задание"
+            android:label="New Task"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" />
 
         <activity
             android:name=".newtask.NewTaskActivity"
-            android:label="Разместить задание"
+            android:label="Apply Task"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" />
 

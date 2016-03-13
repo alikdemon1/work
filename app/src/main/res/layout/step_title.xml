@@ -16,7 +16,7 @@
         <EditText
             android:id="@+id/new_title"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:layout_marginBottom="10dp"
             android:hint="@string/hint_title"
             android:padding="10dp"
@@ -28,15 +28,15 @@
         <EditText
             android:id="@+id/new_desc"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="200dp"
             android:layout_marginBottom="10dp"
-
             android:hint="@string/hint_desc"
             android:inputType="text|textMultiLine"
             android:padding="10dp"
             android:singleLine="true"
             android:textColor="@color/input_register"
-            android:textColorHint="@color/input_register_hint" />
+            android:textColorHint="@color/input_register_hint"
+            android:maxLength="255"/>
 
     </LinearLayout>
 
