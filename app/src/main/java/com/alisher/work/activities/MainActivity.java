@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity
         initViewPager();
         initTablayout();
         initDrawer();
-        initProfile();
+        //initProfile();
     }
 
     private void initProfile(){

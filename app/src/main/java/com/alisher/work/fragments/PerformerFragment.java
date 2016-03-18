@@ -51,8 +51,6 @@ public class PerformerFragment extends Fragment {
 
             }
         });
-
-
         return v;
     }
 

@@ -10,6 +10,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.parse.LogInCallback;
+import com.parse.ParseException;
+import com.parse.ParseUser;
 
 /**
  * Created by Alisher on 3/2/2016.
@@ -65,17 +68,31 @@ public class LoginActivity extends AppCompatActivity{
         pDialog.setMessage("Logging in ...");
         showDialog();
 
-        if(email.equals("admin") && password.equals("admin")){
-            hideDialog();
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            intent.putExtra("email", email);
-            intent.putExtra("pass", password);
-            startActivity(intent);
-            finish();
-        } else {
-            hideDialog();
-            Toast.makeText(getApplicationContext(),"Incorrect login or password", Toast.LENGTH_LONG).show();
-        }
+        ParseUser.logInInBackground(email, password, new LogInCallback() {
+            @Override
+            public void done(ParseUser parseUser, ParseException e) {
+                if (e == null) {
+                    hideDialog();
+                    Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(i);
+                } else {
+                   hideDialog();
+                    Toast.makeText(getApplicationContext(),"Incorrect login or password", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+//        if(email.equals("admin") && password.equals("admin")){
+//            hideDialog();
+//            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//            intent.putExtra("email", email);
+//            intent.putExtra("pass", password);
+//            startActivity(intent);
+//            finish();
+//        } else {
+//            hideDialog();
+//            Toast.makeText(getApplicationContext(),"Incorrect login or password", Toast.LENGTH_LONG).show();
+//        }
     }
 
     private void showDialog() {

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -63,7 +64,7 @@ public class CategoryActivity extends AppCompatActivity{
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 2){
+        if(requestCode == 2 && resultCode == RESULT_OK){
             Intent i = getIntent();
             i.putExtra("name_category", data.getStringExtra("name_category"));
             i.putExtra("title", data.getStringExtra("title"));
@@ -80,7 +81,8 @@ public class CategoryActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
-                onBackPressed();
+                setResult(RESULT_CANCELED);
+                finish();
                 break;
         }
         return super.onOptionsItemSelected(item);

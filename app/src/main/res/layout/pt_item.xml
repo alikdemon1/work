@@ -15,28 +15,42 @@
             android:padding="16dp">
 
             <ImageView
-                android:id="@+id/category_image"
+                android:id="@+id/pt_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginRight="16dp" />
+                android:layout_marginRight="16dp"
+                android:src="@drawable/ava"/>
 
             <TextView
-                android:id="@+id/category_title"
+                android:id="@+id/pt_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_toRightOf="@+id/category_image"
-                android:textSize="30sp" />
+                android:layout_toRightOf="@+id/pt_image"
+                android:textSize="20sp"
+                android:text="Name"/>
 
-            <TextView
-                android:id="@+id/category_desc"
+            <RatingBar
+                style="@style/ratingBarStyle"
+                android:id="@+id/pt_rating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/category_title"
-                android:layout_toRightOf="@+id/category_image" />
+                android:numStars="5"
+                android:clickable="false"
+                android:isIndicator="true"
+                android:layout_below="@+id/pt_title"
+                android:layout_toRightOf="@+id/pt_image"/>
 
+            <ImageButton
+                android:id="@+id/accept"
+                android:background="@null"
+                android:src="@drawable/plus"
+                android:layout_alignParentRight="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
         </RelativeLayout>
 
     </android.support.v7.widget.CardView>

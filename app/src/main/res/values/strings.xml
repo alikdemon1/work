@@ -25,6 +25,8 @@
         <!-- New Task -->
     <string name="hint_desc">Пожалуйста, опишите задание максимально подробно. Так вы сможете быстрее подобрать подходящего исполнителя.</string>
     <string name="hint_title">Заголовок задания</string>
-    <string name="new_apply">Разместить</string>
+    <string name="new_apply">Apply</string>
     <string name="btn_pass_test">To see any new tasks you have to pass the TEST!!!</string>
+
+    <string name="message_elipses">Message...</string>
 </resources>

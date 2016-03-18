@@ -1,8 +1,9 @@
 package com.alisher.work.newtask;
 
-
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.EditText;
 
 import com.alisher.work.R;
@@ -22,6 +23,12 @@ public class NewTaskActivity extends progressMobileStepper {
 
     List<Class> stepperFragmentList = new ArrayList<>();
     private EditText priceText;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
     @Override
     public void onStepperCompleted() {
@@ -65,5 +72,16 @@ public class NewTaskActivity extends progressMobileStepper {
         stepperFragmentList.add(PriceFragment.class);
 
         return stepperFragmentList;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                setResult(RESULT_CANCELED);
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
