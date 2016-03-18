@@ -16,12 +16,25 @@
         android:paddingRight="20dp">
 
         <EditText
-            android:id="@+id/name"
+            android:id="@+id/first_name"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:background="@color/colorWhite"
-            android:hint="@string/hint_name"
+            android:hint="First name"
+            android:inputType="textCapWords"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:textColor="@color/colorBlack"
+            android:textColorHint="@color/input_register_hint" />
+
+        <EditText
+            android:id="@+id/last_name"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/colorWhite"
+            android:hint="Last name"
             android:inputType="textCapWords"
             android:padding="10dp"
             android:singleLine="true"

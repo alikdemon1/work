@@ -17,7 +17,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.alisher.work.activities.ChatActivity;
+import com.alisher.work.activities.PerformsForEachTaskActivity;
 import com.alisher.work.adapters.ExpandableListAdapter;
+import com.alisher.work.models.Category;
 import com.alisher.work.models.Task;
 import com.alisher.work.newtask.CategoryActivity;
 
@@ -33,10 +36,17 @@ public class ClientFragment extends Fragment {
     // ExpandableList
     ExpandableListAdapter listAdapter;
     ExpandableListView expListView;
+
     List<String> listDataHeader;
+    HashMap<String, List<Task>> listDataChild;
+
     List<Task> inSearchList;
     List<Task> inWorkList;
-    HashMap<String, List<Task>> listDataChild;
+    List<Task> inQueueList;
+    List<Task> waitForCheckList;
+    List<Task> deniedList;
+    List<Task> arbitrageList;
+    List<Task> finishedList;
 
     // RecyclerView
     RecyclerView mRecyclerView;
@@ -71,14 +81,19 @@ public class ClientFragment extends Fragment {
         expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                Toast.makeText(
-                        getActivity(),
-                        listDataHeader.get(groupPosition)
-                                + " : "
-                                + listDataChild.get(
-                                listDataHeader.get(groupPosition)).get(
-                                childPosition), Toast.LENGTH_SHORT)
+                Toast.makeText(getActivity(), listDataHeader.get(groupPosition) + " : "
+                                + listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition),
+                        Toast.LENGTH_SHORT)
                         .show();
+                if (groupPosition == 0){
+                    Intent i = new Intent(getActivity(), PerformsForEachTaskActivity.class);
+                    i.putExtra("group_position", childPosition);
+                    i.putExtra("child_position", childPosition);
+                    startActivityForResult(i, 2);
+                } else if (groupPosition == 1){
+                    startActivity(new Intent(getActivity(), ChatActivity.class));
+                }
+
                 return false;
             }
         });
@@ -138,6 +153,11 @@ public class ClientFragment extends Fragment {
         listDataChild = new HashMap<String, List<Task>>();
         inSearchList = new ArrayList<>();
         inWorkList = new ArrayList<>();
+        inQueueList = new ArrayList<>();
+        waitForCheckList = new ArrayList<>();
+        deniedList = new ArrayList<>();
+        arbitrageList = new ArrayList<>();
+        finishedList = new ArrayList<>();
 
         listDataHeader.add("In Search");
         listDataHeader.add("In the work");
@@ -147,12 +167,13 @@ public class ClientFragment extends Fragment {
         listDataHeader.add("Arbitrage");
         listDataHeader.add("Finished");
 
-        Task task = new Task();
-        task.setTitle("EPTA");
-        inSearchList.add(task);
         listDataChild.put(listDataHeader.get(0), inSearchList);
         listDataChild.put(listDataHeader.get(1), inWorkList);
-
+        listDataChild.put(listDataHeader.get(2), inQueueList);
+        listDataChild.put(listDataHeader.get(3), waitForCheckList);
+        listDataChild.put(listDataHeader.get(4), deniedList);
+        listDataChild.put(listDataHeader.get(5), arbitrageList);
+        listDataChild.put(listDataHeader.get(6), finishedList);
     }
 
     private void addTask(View view) {
@@ -181,8 +202,17 @@ public class ClientFragment extends Fragment {
             inSearchList.add(task);
             listDataChild.put(listDataHeader.get(0), inSearchList); // Header, Child data
             listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
-            // setting list adapter
             expListView.setAdapter(listAdapter);
+        } else if(requestCode == 2 && resultCode == Activity.RESULT_OK){
+            int child = data.getIntExtra("child",0);
+            int group = data.getIntExtra("group",0);
+            Task newTask = listDataChild.get(listDataHeader.get(group)).get(child);
+            listDataChild.get(listDataHeader.get(group)).remove(child);
+            inWorkList.add(newTask);
+            listDataChild.put(listDataHeader.get(1), inWorkList);
+            listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
+            expListView.setAdapter(listAdapter);
+            Log.d("NEW_TASK", newTask.toString());
         }
     }
 }
