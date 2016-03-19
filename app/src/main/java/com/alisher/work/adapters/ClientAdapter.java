@@ -51,10 +51,10 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ViewHolder
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
         Task nature = mItems.get(i);
         viewHolder.title.setText(nature.getTitle());
-        viewHolder.time.setText(nature.getTime());
+        viewHolder.time.setText(nature.getDuration());
         viewHolder.price.setText(nature.getPrice()+"");
         viewHolder.desc.setText(nature.getDesc());
-        viewHolder.img.setImageResource(nature.getImage());
+        viewHolder.img.setImageBitmap(nature.getImage());
     }
 
     @Override

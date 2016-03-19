@@ -22,6 +22,9 @@ public class TimeFragment extends stepperFragment {
 
     @Override
     public boolean onNextButtonHandler() {
+        DataHolder.getInstance().setDay(day.getValue());
+        DataHolder.getInstance().setHours(hours.getValue());
+        DataHolder.getInstance().setMinutes(minutes.getValue());
         DataHolder.getInstance().setTime(day.getValue() + " дней" + hours.getValue() + " часов" + minutes.getValue() + " минут");
         return true;
     }

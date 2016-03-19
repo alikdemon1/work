@@ -22,6 +22,11 @@ import android.widget.TextView;
 import com.alisher.work.R;
 import com.alisher.work.fragments.ClientFragment;
 import com.alisher.work.fragments.PerformerFragment;
+import com.parse.FindCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +40,8 @@ public class MainActivity extends AppCompatActivity
     private ViewPager viewPager;
     private TextView emailText;
     private NavigationView navigationView;
+    private ParseUser currentUser = ParseUser.getCurrentUser();
+    private TextView nameText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,16 +52,30 @@ public class MainActivity extends AppCompatActivity
         initViewPager();
         initTablayout();
         initDrawer();
-        //initProfile();
+        initProfile();
     }
 
     private void initProfile(){
         View header = navigationView.getHeaderView(0);
         emailText = (TextView) header.findViewById(R.id.profile_email);
-        Intent i = getIntent();
-        String email = i.getStringExtra("email");
-        Log.d("TAG", email);
-        emailText.setText(email + "");
+        nameText = (TextView) header.findViewById(R.id.profile_name);
+        ParseQuery<ParseUser> query = ParseUser.getQuery();
+        query.whereEqualTo("objectId", currentUser.getObjectId());
+        query.findInBackground(new FindCallback<ParseUser>() {
+            @Override
+            public void done(List<ParseUser> list, ParseException e) {
+                if (e == null) {
+                    for (ParseUser user : list) {
+                        String name = user.getString("firstName") + " " + user.getString("lastName");
+                        String email = user.getUsername();
+                        nameText.setText(name);
+                        emailText.setText(email);
+                    }
+                } else {
+                    Log.e("MainActivity", e.getMessage());
+                }
+            }
+        });
     }
 
     private void initTablayout() {

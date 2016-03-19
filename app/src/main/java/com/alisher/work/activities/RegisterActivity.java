@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.alisher.work.R;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
@@ -78,6 +79,8 @@ public class RegisterActivity  extends AppCompatActivity {
         user.setPassword(password);
         user.put("firstName", firstName);
         user.put("lastName", lastName);
+        user.put("clientRating", 0);
+        user.put("performerRating", 0);
         user.signUpInBackground(new SignUpCallback() {
             @Override
             public void done(ParseException e) {

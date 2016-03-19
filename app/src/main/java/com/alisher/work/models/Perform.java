@@ -5,16 +5,16 @@ package com.alisher.work.models;
  */
 public class Perform {
     private int id;
-    private String name;
+    private String firstName;
+    private String LastName;
     private String desc;
     private float rating;
     private int img;
 
-    public Perform(String name, float rating, int img) {
-        this.name = name;
-        this.rating = rating;
-        this.img = img;
+
+    public Perform() {
     }
+
 
     public int getId() {
         return id;
@@ -24,12 +24,20 @@ public class Perform {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return LastName;
+    }
+
+    public void setLastName(String lastName) {
+        LastName = lastName;
     }
 
     public String getDesc() {

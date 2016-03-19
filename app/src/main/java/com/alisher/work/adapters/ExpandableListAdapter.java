@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alisher.work.R;
@@ -56,7 +57,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView txtListChild = (TextView) convertView
                 .findViewById(R.id.client_title);
 
+        ImageView image = (ImageView) convertView
+                .findViewById(R.id.client_image);
+
         txtListChild.setText(childText.getTitle());
+        image.setImageBitmap(childText.getImage());
         return convertView;
     }
 

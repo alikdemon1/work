@@ -46,7 +46,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         Category nature = mItems.get(i);
         viewHolder.title.setText(nature.getName());
         viewHolder.desc.setText(nature.getDesc());
-        viewHolder.img.setImageResource(nature.getImage());
+        viewHolder.img.setImageBitmap(nature.getImage());
     }
 
     @Override

@@ -1,25 +1,25 @@
 package com.alisher.work.models;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by Alisher Kozhabay on 3/5/2016.
  */
 public class Category {
-    private long id;
+    private String id;
     private String name;
     private String desc;
-    private int image;
+    private Bitmap image;
 
-    public Category(String name, String desc, int image) {
-        this.name = name;
-        this.desc = desc;
-        this.image = image;
+    public Category() {
     }
 
-    public long getId() {
+
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -31,11 +31,11 @@ public class Category {
         this.desc = desc;
     }
 
-    public int getImage() {
+    public Bitmap getImage() {
         return image;
     }
 
-    public void setImage(int image) {
+    public void setImage(Bitmap image) {
         this.image = image;
     }
 

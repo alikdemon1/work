@@ -44,7 +44,7 @@ public class PerformsForEachTaskAdapter extends RecyclerView.Adapter<PerformsFor
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
         Perform nature = mItems.get(i);
-        viewHolder.title.setText(nature.getName());
+        viewHolder.title.setText(nature.getFirstName());
         viewHolder.img.setImageResource(nature.getImg());
         viewHolder.ratingBar.setRating(nature.getRating());
     }
