@@ -11,7 +11,6 @@ public class Perform {
     private float rating;
     private int img;
 
-
     public Perform() {
     }
 
