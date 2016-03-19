@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:background="@color/colorWhite"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/perf_image"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
+        android:layout_marginRight="16dp" />
+
     <TextView
-        android:id="@+id/textChild"
+        android:id="@+id/perf_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
-        android:text="s"
-        android:textColor="@color/lbl_name"/>
-    <Button
-        android:id="@+id/buttonChild"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:text="Button"
-        android:focusable="false"
-        android:enabled="false"/>
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/perf_image"
+        android:paddingTop="5dp"
+        android:text="Title"
+        android:textSize="15sp" />
+
 </LinearLayout>
