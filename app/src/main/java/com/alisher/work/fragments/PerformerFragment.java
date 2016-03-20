@@ -1,9 +1,13 @@
 package com.alisher.work.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +16,17 @@ import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.alisher.work.activities.TaskDescriptionActivity;
+import com.alisher.work.adapters.ExpandableListAdapter;
 import com.alisher.work.adapters.ExpandableListAdapterForPerf;
 import com.alisher.work.forTest.WelcomeTestActivity;
 import com.alisher.work.models.Task;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,16 +41,14 @@ public class PerformerFragment extends Fragment {
     ExpandableListAdapterForPerf listAdapter;
     ExpandableListView expListView;
 
-    List<String> listDataHeader;
+    List<String> listDataHeader, availibleCategories;
     HashMap<String, List<Task>> listDataChild;
 
     List<Task> inAvailibleList;
     List<Task> inWorkList;
-    List<Task> inQueueList;
-    List<Task> waitForCheckList;
-    List<Task> deniedList;
     List<Task> arbitrageList;
     List<Task> finishedList;
+    private Bitmap bmp;
 
     public PerformerFragment() {
 
@@ -56,11 +66,11 @@ public class PerformerFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_performer, container, false);
         passTest(v);
-        Button tempForm =(Button) v.findViewById(R.id.btnPassTest);
+        Button tempForm = (Button) v.findViewById(R.id.btnPassTest);
         tempForm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(),"Click fab button",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Click fab button", Toast.LENGTH_SHORT).show();
             }
         });
         // get the listview
@@ -69,19 +79,22 @@ public class PerformerFragment extends Fragment {
         // preparing list data
         prepareListData();
 
-        listAdapter = new ExpandableListAdapterForPerf(getActivity(), listDataHeader, listDataChild);
-
         // setting list adapter
         expListView.setAdapter(listAdapter);
         expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                Task newTask = listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition);
                 Toast.makeText(getActivity(), listDataHeader.get(groupPosition) + " : "
                                 + listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition),
                         Toast.LENGTH_SHORT)
                         .show();
                 if (groupPosition == 0) {
                     Toast.makeText(getContext(), "groupPosition == 0", Toast.LENGTH_SHORT).show();
+                    Intent i =new Intent(getContext(), TaskDescriptionActivity.class);
+                    i.putExtra("newTask",newTask);
+                    startActivity(i);
+
                 } else if (groupPosition == 1) {
                     Toast.makeText(getContext(), "groupPosition == 1", Toast.LENGTH_SHORT).show();
                 } else {
@@ -130,7 +143,7 @@ public class PerformerFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(),"passTest",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "passTest", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(getActivity(), WelcomeTestActivity.class));
             }
         });
@@ -141,12 +154,12 @@ public class PerformerFragment extends Fragment {
         listDataChild = new HashMap<String, List<Task>>();
         inAvailibleList = new ArrayList<>();
         inWorkList = new ArrayList<>();
-        inQueueList = new ArrayList<>();
-        waitForCheckList = new ArrayList<>();
-        deniedList = new ArrayList<>();
         arbitrageList = new ArrayList<>();
         finishedList = new ArrayList<>();
 
+        initStatusList();
+        initAvailibleList();
+/*
         listDataHeader.add("Availible");
         listDataHeader.add("In the work");
         listDataHeader.add("In the Queue");
@@ -161,7 +174,113 @@ public class PerformerFragment extends Fragment {
         listDataChild.put(listDataHeader.get(3), waitForCheckList);
         listDataChild.put(listDataHeader.get(4), deniedList);
         listDataChild.put(listDataHeader.get(5), arbitrageList);
-        listDataChild.put(listDataHeader.get(6), finishedList);
+        listDataChild.put(listDataHeader.get(6), finishedList);*/
     }
+
+    private void initStatusList() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Status");
+        try {
+            List<ParseObject> statusList = query.find();
+            for (ParseObject obj : statusList) {
+                listDataHeader.add(obj.getString("name"));
+            }
+            listDataChild.put(listDataHeader.get(0), inAvailibleList);
+            listDataChild.put(listDataHeader.get(1), inWorkList);
+            listDataChild.put(listDataHeader.get(2), arbitrageList);
+            listDataChild.put(listDataHeader.get(3), finishedList);
+
+            listAdapter = new ExpandableListAdapterForPerf(getActivity(), listDataHeader, listDataChild);
+            expListView.setAdapter(listAdapter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+            Task task = new Task();
+            task.setTitle(data.getStringExtra("title"));
+            task.setDuration(data.getStringExtra("time"));
+            task.setPrice(data.getIntExtra("price", 1));
+            task.setDesc(data.getStringExtra("desc"));
+            byte[] img = data.getByteArrayExtra("image_category");
+            Bitmap b = BitmapFactory.decodeByteArray(img, 0, img.length);
+            task.setImage(b);
+            String name = data.getStringExtra("name_category");
+            //Log.d("RECEIVED DATA", task.toString() + " | " + name);
+            inAvailibleList.add(task);
+            listDataChild.put(listDataHeader.get(0), inAvailibleList); // Header, Child data
+            listAdapter = new ExpandableListAdapterForPerf(getActivity(), listDataHeader, listDataChild);
+            expListView.setAdapter(listAdapter);
+        } else if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
+            int child = data.getIntExtra("child", 0);
+            int group = data.getIntExtra("group", 0);
+            Task newTask = listDataChild.get(listDataHeader.get(group)).get(child);
+            listDataChild.get(listDataHeader.get(group)).remove(child);
+            inWorkList.add(newTask);
+            listDataChild.put(listDataHeader.get(1), inWorkList);
+            listAdapter = new ExpandableListAdapterForPerf(getActivity(), listDataHeader, listDataChild);
+            expListView.setAdapter(listAdapter);
+            Log.d("NEW_TASK", newTask.toString());
+        }
+    }
+
+    private void initAvailibleList() {
+        availibleCategories=new ArrayList<>();
+        try {
+            ParseQuery<ParseObject> qTest = ParseQuery.getQuery("Test");
+            qTest.whereEqualTo("perfId", ParseUser.getCurrentUser().getObjectId());
+            qTest.whereGreaterThanOrEqualTo("result", 1);
+            List<ParseObject> parseObjects = qTest.find();
+            for (ParseObject o : parseObjects) {
+                availibleCategories.add(o.getString("catId"));
+            }
+
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+            List<ParseObject> objCat = new ArrayList<>();
+            for (int i = 0; i < availibleCategories.size(); i++) {
+                objCat.add(ParseObject.createWithoutData("Category", availibleCategories.get(i)));
+            }
+            ParseObject obj = ParseObject.createWithoutData("Status", "vVMYOEUIeY");
+            query.whereEqualTo("statusId", obj);
+            query.whereContainedIn("catId", objCat);
+            query.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> list, ParseException e) {
+                    if (e == null) {
+                        for (ParseObject o : list) {
+                            Task task = new Task();
+                            task.setId(o.getObjectId());
+                            task.setTitle(o.getString("name"));
+                            task.setDesc(o.getString("description"));
+                            task.setDuration(o.getString("duration"));
+                            task.setStartTime(o.getDate("startTime"));
+                            task.setEndTime(o.getDate("endTime"));
+                            task.setCatId(o.getString("catId"));
+                            ParseFile image = (ParseFile) o.get("img");
+                            try {
+                                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
+                            } catch (ParseException e1) {
+                                e1.printStackTrace();
+                            }
+                            task.setImage(bmp);
+                            inAvailibleList.add(task);
+                        }
+                        listDataChild.put(listDataHeader.get(0), inAvailibleList); // Header, Child data
+                        listAdapter = new ExpandableListAdapterForPerf(getActivity(), listDataHeader, listDataChild);
+                        expListView.setAdapter(listAdapter);
+                    }
+                }
+            });
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+    }
+
 
 }

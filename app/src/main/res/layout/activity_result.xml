@@ -28,6 +28,15 @@
             android:layout_weight="0.08"
             android:text="Large Text"
             android:textAppearance="?android:attr/textAppearanceLarge" />
-    </LinearLayout>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent"
+            android:text="Go To Main"
+            android:id="@+id/button"
+            android:layout_gravity="right"
+            android:onClick="goToMain"/>
+
+    </LinearLayout>
 </RelativeLayout>

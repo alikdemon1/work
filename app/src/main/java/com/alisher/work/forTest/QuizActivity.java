@@ -24,6 +24,7 @@ import java.util.List;
  */
 public class QuizActivity extends AppCompatActivity{
 
+    String cat_id;
     List<Question> quesList;
     int score=0;
     int qid=0;
@@ -55,7 +56,7 @@ public class QuizActivity extends AppCompatActivity{
                     score++;
                     Log.d("score", "Your score" + score);
                 }
-                if (qid < 1) {
+                if (qid < quesList.size()) {
                     currentQ = quesList.get(qid);
                     setQuestionView();
                 } else {
@@ -63,6 +64,7 @@ public class QuizActivity extends AppCompatActivity{
                     Bundle b = new Bundle();
                     b.putInt("score", score); //Your score
                     intent.putExtras(b); //Put your score to your next Intent
+                    intent.putExtra("categoryId",cat_id);
                     startActivity(intent);
                     finish();
                 }
@@ -81,7 +83,7 @@ public class QuizActivity extends AppCompatActivity{
 
     private void getAllQuestions() {
         quesList = new ArrayList<>();
-        String cat_id = getIntent().getStringExtra("catId");
+        cat_id = getIntent().getStringExtra("catId");
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Question");
         query.whereEqualTo("catId", cat_id);
         try {
