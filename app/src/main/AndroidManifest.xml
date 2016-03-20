@@ -66,6 +66,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".forTest.WelcomeTestActivity"
+            android:label="Chat"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".forTest.QuizActivity"
+            android:label="Chat"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".forTest.ResultActivity"
+            android:label="Chat"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan" />
 
     </application>
 

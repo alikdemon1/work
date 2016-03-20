@@ -5,29 +5,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.alisher.work.fragments.PerformerFragment">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Rating: 0(7261th) Beginner"
-        android:id="@+id/ratingText"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Grades:+0/0/-0"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/llForTest"
-        android:layout_below="@id/ratingText"
         android:layout_centerHorizontal="true"
         android:background="@drawable/shape">
         <TextView
@@ -48,8 +29,18 @@
     <ExpandableListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/expListView"
-        android:layout_below="@id/llForTest"
-        android:indicatorLeft="250dp"
-        android:indicatorRight="300dp"></ExpandableListView>
+        android:id="@+id/expLVPerf"
+        android:layout_below="@id/llForTest" />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/passTest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:borderWidth="0dp"
+        android:backgroundTint="#00838F"
+        android:src="@android:drawable/ic_menu_edit"
+        app:elevation="8dp"
+        app:fabSize="normal"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>
