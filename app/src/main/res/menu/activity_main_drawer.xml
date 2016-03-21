@@ -32,5 +32,10 @@
                 <!--android:title="Send" />-->
         <!--</menu>-->
     <!--</item>-->
-
+    <item android:id="@+id/nav_profile"
+        android:title="My Profile"
+        android:icon="@android:drawable/ic_menu_info_details"/>
+    <item android:id="@+id/nav_logOut"
+        android:title="Log out"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"/>
 </menu>

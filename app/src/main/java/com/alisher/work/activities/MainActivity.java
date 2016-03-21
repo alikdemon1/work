@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.fragments.ClientFragment;
@@ -137,11 +138,19 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
-//        if (id == R.id.nav_camera) {
-//            // Handle the camera action
-//        } else if (id == R.id.nav_gallery) {
-//
-//        } else if (id == R.id.nav_slideshow) {
+        if (id == R.id.nav_logOut) {
+            ParseUser user = ParseUser.getCurrentUser();
+            Toast.makeText(MainActivity.this, "Sign Out", Toast.LENGTH_SHORT).show();
+            if (user != null) {
+                ParseUser.logOut();
+                user=null;
+            }
+            startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+        } else if (id == R.id.nav_profile) {
+            Toast.makeText(MainActivity.this, "My Profile", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+        }
+//          else if (id == R.id.nav_slideshow) {
 //
 //        } else if (id == R.id.nav_manage) {
 //
@@ -150,6 +159,7 @@ public class MainActivity extends AppCompatActivity
 //        } else if (id == R.id.nav_send) {
 //
 //        }
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

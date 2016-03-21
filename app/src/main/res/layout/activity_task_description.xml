@@ -7,22 +7,50 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.alisher.work.activities.TaskDescriptionActivity">
+    tools:context="com.alisher.work.activities.TaskDescriptionActivity"
+    android:orientation="vertical"
+    android:gravity="center">
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/img_dec"/>
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:id="@+id/img_dec"
+        android:layout_marginBottom="20dp"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/name_dec"/>
+        android:text="here will be name"
+        android:id="@+id/name_dec"
+        android:textSize="20dp"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/dec_dec"/>
+        android:text="here will be description "
+        android:id="@+id/dec_dec"
+        android:textSize="20dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="cost "
+        android:id="@+id/cost_dec"
+        android:textSize="20dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="deadline "
+        android:id="@+id/deadline_dec"
+        android:textSize="20dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="download attached files "
+        android:id="@+id/url_dec"
+        android:textSize="20dp"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Accept"
-        android:onClick="acceptClicked"/>
+        android:onClick="acceptClicked"
+        android:background="@color/colorAccent"
+        android:textColor="@color/white_smoke"
+        android:layout_marginTop="20dp"/>
 </LinearLayout>

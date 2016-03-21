@@ -48,6 +48,8 @@
                 android:id="@+id/button1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="NEXT" />
+                android:text="NEXT"
+            android:background="@color/colorAccent"
+            android:textColor="@color/white_smoke"/>
     </LinearLayout>
 </RelativeLayout>
