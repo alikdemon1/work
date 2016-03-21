@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alisher.work.R;
@@ -55,8 +56,11 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
 
         TextView txtListChild = (TextView) convertView
                 .findViewById(R.id.perf_title);
+        ImageView image = (ImageView) convertView
+                .findViewById(R.id.perf_image);
 
         txtListChild.setText(childText.getTitle());
+        image.setImageBitmap(childText.getImage());
         return convertView;
     }
 
