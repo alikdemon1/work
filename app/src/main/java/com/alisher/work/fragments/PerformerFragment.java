@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.alisher.work.R;
 import com.alisher.work.activities.TaskDescriptionActivity;
 import com.alisher.work.adapters.ExpandableListAdapter;
 import com.alisher.work.adapters.ExpandableListAdapterForPerf;
+import com.alisher.work.chat.UserListActivity;
 import com.alisher.work.forTest.WelcomeTestActivity;
 import com.alisher.work.models.Task;
 import com.parse.FindCallback;
@@ -40,10 +42,11 @@ public class PerformerFragment extends Fragment {
     // ExpandableList
     ExpandableListAdapterForPerf listAdapter;
     ExpandableListView expListView;
+    SwipeRefreshLayout swipeRefreshLayout;
 
     List<String> listDataHeader, availibleCategories;
     HashMap<String, List<Task>> listDataChild;
-
+    List<String> taskIdOnWorkList;
     List<Task> inAvailibleList;
     List<Task> inWorkList;
     List<Task> arbitrageList;
@@ -66,16 +69,19 @@ public class PerformerFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_performer, container, false);
         passTest(v);
-        Button tempForm = (Button) v.findViewById(R.id.btnPassTest);
-        tempForm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getActivity(), "Click fab button", Toast.LENGTH_SHORT).show();
-            }
-        });
         // get the listview
         expListView = (ExpandableListView) v.findViewById(R.id.expLVPerf);
-
+        swipeRefreshLayout =(SwipeRefreshLayout) v.findViewById(R.id.swipeRefresher);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                inAvailibleList.clear();
+                inWorkList.clear();
+                initAvailibleList();
+                initWorkList();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
         // preparing list data
         prepareListData();
 
@@ -91,12 +97,18 @@ public class PerformerFragment extends Fragment {
                         .show();
                 if (groupPosition == 0) {
                     Toast.makeText(getContext(), "groupPosition == 0", Toast.LENGTH_SHORT).show();
-                    Intent i =new Intent(getContext(), TaskDescriptionActivity.class);
-                    i.putExtra("newTask",newTask);
+                    Intent i =new Intent(getActivity(), TaskDescriptionActivity.class);
+                    Log.d("asdasdad", newTask.getTitle()+" "+newTask.getDesc());
+                    i.putExtra("newTaskTitle", newTask.getTitle()+"");
+                    i.putExtra("newTaskDesc",newTask.getDesc()+"");
+                    i.putExtra("newTaskId",newTask.getId()+"");
                     startActivity(i);
 
                 } else if (groupPosition == 1) {
                     Toast.makeText(getContext(), "groupPosition == 1", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getActivity(), UserListActivity.class);
+                    intent.putExtra("task_id", newTask.getId());
+                    startActivity(intent);
                 } else {
                     Toast.makeText(getContext(), "else", Toast.LENGTH_SHORT).show();
                 }
@@ -156,7 +168,7 @@ public class PerformerFragment extends Fragment {
         inWorkList = new ArrayList<>();
         arbitrageList = new ArrayList<>();
         finishedList = new ArrayList<>();
-
+        taskIdOnWorkList = new ArrayList<String>();
         initStatusList();
         initAvailibleList();
 /*
@@ -184,6 +196,7 @@ public class PerformerFragment extends Fragment {
             for (ParseObject obj : statusList) {
                 listDataHeader.add(obj.getString("name"));
             }
+            initWorkList();
             listDataChild.put(listDataHeader.get(0), inAvailibleList);
             listDataChild.put(listDataHeader.get(1), inWorkList);
             listDataChild.put(listDataHeader.get(2), arbitrageList);
@@ -191,6 +204,44 @@ public class PerformerFragment extends Fragment {
 
             listAdapter = new ExpandableListAdapterForPerf(getActivity(), listDataHeader, listDataChild);
             expListView.setAdapter(listAdapter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initWorkList() {
+        ParseQuery<ParseObject> queryForId = ParseQuery.getQuery("Decision");
+        queryForId.whereEqualTo("perfId", ParseUser.getCurrentUser().getObjectId());
+        queryForId.whereEqualTo("clientDec", true);
+        try {
+            List<ParseObject> list = queryForId.find();
+            for (ParseObject o : list) {
+                taskIdOnWorkList.add(o.getString("taskId"));
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        ParseObject obj = ParseObject.createWithoutData("Status", "j6hNwQ01bt");
+        query.whereEqualTo("statusId", obj);
+        query.whereContainedIn("objectId", taskIdOnWorkList);
+        try {
+            List<ParseObject> list = query.find();
+            for (ParseObject o : list) {
+                Task task = new Task();
+                task.setId(o.getObjectId());
+                task.setTitle(o.getString("name"));
+                task.setDesc(o.getString("description"));
+                task.setDuration(o.getString("duration"));
+                task.setStartTime(o.getDate("startTime"));
+                task.setEndTime(o.getDate("endTime"));
+                task.setCatId(o.getString("catId"));
+                ParseFile image = (ParseFile) o.get("img");
+                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
+                task.setImage(bmp);
+                inWorkList.add(task);
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -281,6 +332,4 @@ public class PerformerFragment extends Fragment {
 
 
     }
-
-
 }

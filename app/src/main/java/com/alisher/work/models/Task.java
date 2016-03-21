@@ -2,13 +2,12 @@ package com.alisher.work.models;
 
 import android.graphics.Bitmap;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by Alisher Kozhabay on 3/5/2016.
  */
-public class Task implements Serializable{
+public class Task{
     private String id;
     private String title;
     private String desc;

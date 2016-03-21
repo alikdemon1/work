@@ -16,7 +16,6 @@ import com.alisher.work.chat.UserListActivity;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
-import com.sinch.android.rtc.SinchError;
 
 /**
  * Created by Alisher on 3/2/2016.
