@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" 
-    android:background="@color/white">
+    android:background="@color/white"
+    android:orientation="vertical">
 
     <TextView
+        android:id="@+id/tvName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Medium Text"
-        android:padding="@dimen/padding_5"
         android:background="@color/colorPrimary"
-        android:textColor="@color/white"
         android:gravity="center"
-        android:textStyle="bold"
-        android:id="@+id/tvName" />
+        android:padding="@dimen/padding_5"
+        android:text="Medium Text"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/white"
+        android:textStyle="bold" />
 
     <ListView
         android:id="@+id/chatlist"
@@ -28,36 +29,42 @@
         android:fastScrollEnabled="true"
         android:paddingBottom="@dimen/padding_10"
         android:paddingTop="@dimen/padding_10"
-        tools:listitem="@layout/chat_item_rcv" >
-    </ListView>
+        tools:listitem="@layout/chat_item_rcv"></ListView>
 
-   <LinearLayout 
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/gray_light"
-    android:gravity="center_vertical"
-    android:padding="@dimen/padding_5"
-    tools:context=".MainActivity" >
-
-    
-    <EditText
-        android:id="@+id/txt"
-        style="@style/edittext_msg"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:hint="@string/type_msg" >
+        android:background="@color/gray_light"
+        android:gravity="center_vertical"
+        android:padding="@dimen/padding_5"
+        tools:context=".MainActivity">
 
-        
-    </EditText>
+        <Button
+            android:id="@+id/btnAttach"
+            style="@style/btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@mipmap/attach" />
 
-    <Button
-        android:id="@+id/btnSend"
-        style="@style/btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@mipmap/ic_send" />
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/txt"
+            style="@style/edittext_msg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/type_msg">
+
+
+        </EditText>
+
+        <Button
+            android:id="@+id/btnSend"
+            style="@style/btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@mipmap/ic_send" />
+
+    </LinearLayout>
 
 </LinearLayout>

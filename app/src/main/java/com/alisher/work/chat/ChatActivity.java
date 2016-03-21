@@ -1,27 +1,39 @@
 package com.alisher.work.chat;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.activities.LoginActivity;
 import com.alisher.work.chat.utils.Const;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.PushService;
 import com.parse.SaveCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,6 +41,7 @@ import java.util.List;
 
 public class ChatActivity extends BaseActivity {
 
+    private static final String BUDDY_CHAT_PUSH_ACTION = "com.toprecur.android.buddychat.UPDATE_STATUS";
     /**
      * The Conversation list.
      */
@@ -70,7 +83,7 @@ public class ChatActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
-
+        initToolbar();
         convList = new ArrayList<Conversation>();
         ListView list = (ListView) findViewById(R.id.chatlist);
 
@@ -84,11 +97,68 @@ public class ChatActivity extends BaseActivity {
                 | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
 
         setTouchNClick(R.id.btnSend);
+        setTouchNClick(R.id.btnAttach);
 
         buddy = getIntent().getStringExtra(Const.EXTRA_DATA);
         tvname = (TextView) findViewById(R.id.tvName);
         tvname.setText(buddy);
         handler = new Handler();
+    }
+
+    public void initToolbar() {
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarChat);
+        getSupportActionBar();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.chat_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.arbitration) {
+            Intent i = getIntent();
+            Toast.makeText(ChatActivity.this, "Arbitration coming soon...", Toast.LENGTH_SHORT).show();
+            setIntent(i, "arbitrator");
+            return true;
+        } else if (id == R.id.finished) {
+            Intent i = getIntent();
+            setIntent(i, "finished");
+            deleteFinishedTask(i.getStringExtra("task_id"));
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void setIntent(Intent i, String s){
+        i.putExtra("child", i.getIntExtra("child", 0));
+        i.putExtra("group", i.getIntExtra("group", 0));
+        i.putExtra("flag", s);
+        setResult(RESULT_OK, i);
+        finish();
+    }
+
+    public void deleteFinishedTask(String task_id){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
+        query.whereEqualTo("taskId", task_id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.deleteEventually();
+                    }
+                } else {
+
+                }
+            }
+        });
     }
 
     @Override
@@ -110,9 +180,38 @@ public class ChatActivity extends BaseActivity {
         super.onClick(v);
         if (v.getId() == R.id.btnSend) {
             sendMessage();
+        } else if (v.getId() == R.id.btnAttach) {
+            sendAttach();
         }
-
     }
+
+    private void sendAttach() {
+        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+        i.setType("*/*");
+        startActivityForResult(i, 1);
+    }
+
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        String Fpath = data.getDataString();
+//        Log.d("FILEPATH", Fpath);
+//        File dir = Environment.getExternalStorageDirectory();
+//        File file = new File(Fpath);
+//        try {
+//            byte[] videoUp = IOUtil.readFile(file);
+//            ParseObject obj = new ParseObject("Task");
+//            ParseFile fileTest = new ParseFile("testEpta", videoUp);
+//            fileTest.saveInBackground();
+//            obj.put("attach", fileTest);
+//            obj.saveEventually();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//
+//        super.onActivityResult(requestCode, resultCode, data);
+//    }
+
 
     /**
      * Call this method to Send message to opponent. It does nothing if the text

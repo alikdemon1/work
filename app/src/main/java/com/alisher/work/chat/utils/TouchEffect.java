@@ -1,9 +1,11 @@
 package com.alisher.work.chat.utils;
 
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.Toast;
 
 /**
  * @author Faheem

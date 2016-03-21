@@ -1,13 +1,14 @@
 package com.alisher.work.chat;
 
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 
 import com.alisher.work.chat.utils.TouchEffect;
 
 
-public class BaseActivity extends FragmentActivity implements OnClickListener {
+public class BaseActivity extends AppCompatActivity implements OnClickListener {
 
     /**
      * Apply this Constant as touch listener for views to provide alpha touch

@@ -3,7 +3,12 @@
     package="com.alisher.work" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
 
     <application
         android:name=".MyApplication"
@@ -82,12 +87,14 @@
             android:name=".chat.ChatActivity"
             android:label="Chat"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan"
+            android:theme="@style/AppTheme"/>
 
         <activity android:name=".activities.TaskDescriptionActivity"
             android:label="Task Description"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan"/>
+
     </application>
 
 </manifest>
