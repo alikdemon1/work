@@ -1,12 +1,13 @@
 package com.alisher.work.forTest;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -22,7 +23,7 @@ import com.parse.ParseQuery;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WelcomeTestActivity extends Activity {
+public class WelcomeTestActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;
     RecyclerView.LayoutManager mLayoutManager;
     RecyclerView.Adapter mAdapter;
@@ -33,6 +34,8 @@ public class WelcomeTestActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_test);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         mRecyclerView = (RecyclerView) findViewById(R.id.test_recycler_view);
         mLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -82,5 +85,15 @@ public class WelcomeTestActivity extends Activity {
             }
         });
         ((CategoryAdapter)mAdapter).setCategories(categories);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                setResult(RESULT_CANCELED);
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

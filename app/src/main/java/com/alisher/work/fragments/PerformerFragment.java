@@ -1,6 +1,7 @@
 package com.alisher.work.fragments;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,15 +13,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.activities.TaskDescriptionActivity;
 import com.alisher.work.adapters.ExpandableListAdapter;
 import com.alisher.work.adapters.ExpandableListAdapterForPerf;
+import com.alisher.work.chat.ChatActivity;
 import com.alisher.work.chat.UserListActivity;
+import com.alisher.work.chat.utils.Const;
+import com.alisher.work.chat.utils.Utils;
 import com.alisher.work.forTest.WelcomeTestActivity;
 import com.alisher.work.models.Task;
 import com.parse.FindCallback;
@@ -71,10 +77,11 @@ public class PerformerFragment extends Fragment {
         passTest(v);
         // get the listview
         expListView = (ExpandableListView) v.findViewById(R.id.expLVPerf);
-        swipeRefreshLayout =(SwipeRefreshLayout) v.findViewById(R.id.swipeRefresher);
+        swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipeRefresher);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                swipeRefreshLayout.setRefreshing(true);
                 inAvailibleList.clear();
                 inWorkList.clear();
                 initAvailibleList();
@@ -96,19 +103,17 @@ public class PerformerFragment extends Fragment {
                         Toast.LENGTH_SHORT)
                         .show();
                 if (groupPosition == 0) {
-                    Toast.makeText(getContext(), "groupPosition == 0", Toast.LENGTH_SHORT).show();
-                    Intent i =new Intent(getActivity(), TaskDescriptionActivity.class);
-                    Log.d("asdasdad", newTask.getTitle()+" "+newTask.getDesc());
-                    i.putExtra("newTaskTitle", newTask.getTitle()+"");
-                    i.putExtra("newTaskDesc",newTask.getDesc()+"");
-                    i.putExtra("newTaskId",newTask.getId()+"");
+                    Intent i = new Intent(getActivity(), TaskDescriptionActivity.class);
+                    i.putExtra("newTaskTitle", newTask.getTitle() + "");
+                    i.putExtra("newTaskDesc", newTask.getDesc() + "");
+                    i.putExtra("newTaskId", newTask.getId() + "");
+                    i.putExtra("newTaskImage",newTask.getImage());
+                    i.putExtra("newTaskCost",String.valueOf(newTask.getPrice()));
+                    i.putExtra("newTaskDeadline",newTask.getEndTime().toString());
                     startActivity(i);
 
                 } else if (groupPosition == 1) {
-                    Toast.makeText(getContext(), "groupPosition == 1", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getActivity(), UserListActivity.class);
-                    intent.putExtra("task_id", newTask.getId());
-                    startActivity(intent);
+                    loadUserList(newTask.getId());
                 } else {
                     Toast.makeText(getContext(), "else", Toast.LENGTH_SHORT).show();
                 }
@@ -237,6 +242,7 @@ public class PerformerFragment extends Fragment {
                 task.setStartTime(o.getDate("startTime"));
                 task.setEndTime(o.getDate("endTime"));
                 task.setCatId(o.getString("catId"));
+                task.setPrice(o.getInt("cost"));
                 ParseFile image = (ParseFile) o.get("img");
                 bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
                 task.setImage(bmp);
@@ -280,7 +286,7 @@ public class PerformerFragment extends Fragment {
     }
 
     private void initAvailibleList() {
-        availibleCategories=new ArrayList<>();
+        availibleCategories = new ArrayList<>();
         try {
             ParseQuery<ParseObject> qTest = ParseQuery.getQuery("Test");
             qTest.whereEqualTo("perfId", ParseUser.getCurrentUser().getObjectId());
@@ -311,6 +317,7 @@ public class PerformerFragment extends Fragment {
                             task.setStartTime(o.getDate("startTime"));
                             task.setEndTime(o.getDate("endTime"));
                             task.setCatId(o.getString("catId"));
+                            task.setPrice(o.getInt("cost"));
                             ParseFile image = (ParseFile) o.get("img");
                             try {
                                 bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
@@ -326,10 +333,35 @@ public class PerformerFragment extends Fragment {
                     }
                 }
             });
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    private void loadUserList(String task_id) {
+        final ProgressDialog dia = ProgressDialog.show(getActivity(), null, getString(R.string.alert_loading));
+        ParseQuery<ParseObject> decQuery = ParseQuery.getQuery("Task");
+        decQuery.whereEqualTo("objectId", task_id);
+        decQuery.include("clientId");
+        decQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                dia.dismiss();
+                if (e == null) {
+                    if (list.size() == 0) Toast.makeText(getActivity(), R.string.msg_no_user_found, Toast.LENGTH_SHORT).show();
+                    ParseUser user = (ParseUser) list.get(0).getParseObject("clientId");
+                    startActivity(new Intent(getActivity(),
+                            ChatActivity.class).putExtra(
+                            Const.EXTRA_DATA, user.getUsername()));
+                } else {
+                    Utils.showDialog(
+                            getActivity(),
+                            getString(R.string.err_users) + " "
+                                    + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
 
+        });
     }
 }
