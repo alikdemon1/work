@@ -2,36 +2,35 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.alisher.work">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:name=".MyApplication"
         android:theme="@style/AppTheme">
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".activities.LoginActivity"
             android:label="@string/login_name"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustPan"
-            android:theme="@style/LoginAndRegisterTheme">
+            android:theme="@style/LoginAndRegisterTheme"
+            android:windowSoftInputMode="adjustPan">
         </activity>
 
         <activity
             android:name=".activities.RegisterActivity"
             android:label="@string/register_name"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustPan"
-            android:theme="@style/LoginAndRegisterTheme"/>
+            android:theme="@style/LoginAndRegisterTheme"
+            android:windowSoftInputMode="adjustPan" />
 
         <activity
             android:name=".newtask.CategoryActivity"
@@ -52,20 +51,16 @@
             android:windowSoftInputMode="adjustPan" />
 
         <activity
-            android:name=".activities.ChatActivity"
-            android:label="Chat"
+            android:name=".activities.StartActivity"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustPan" />
-
-        <activity android:name=".activities.StartActivity"
-            android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustPan"
-            android:theme="@style/LoginAndRegisterTheme">
+            android:theme="@style/LoginAndRegisterTheme"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".forTest.WelcomeTestActivity"
             android:label="Chat"
@@ -79,6 +74,18 @@
 
         <activity
             android:name=".forTest.ResultActivity"
+            android:label="Chat"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".chat.UserListActivity"
+            android:label="Chat"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".chat.ChatActivity"
             android:label="Chat"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" />

@@ -65,7 +65,7 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                 Button ok = (Button) dialog.findViewById(R.id.ok_btn);
                 Button cancel = (Button) dialog.findViewById(R.id.cancel_btn);
 
-                Perform perform = pts.get(position);
+                final Perform perform = pts.get(position);
                 name.setText("Perfrom name: " + perform.getFirstName());
                 starRate.setText("Perform rating: " + perform.getRating());
 
@@ -79,6 +79,7 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                 ok.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        choosedPerformer(perform.getId());
                         Intent i = getIntent();
                         i.putExtra("child", i.getIntExtra("child_position", 0));
                         i.putExtra("group", i.getIntExtra("group_position", 0));
@@ -89,6 +90,25 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                 dialog.show();
             }
         }));
+    }
+
+    public void choosedPerformer(String id){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
+        query.whereEqualTo("perfId", id);
+        query.whereEqualTo("taskId", getIntent().getStringExtra("taskId"));
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.put("clientDec", true);
+                        o.saveEventually();
+                    }
+                } else {
+                    Log.d("CHOOSED PERFORMER", e.getMessage());
+                }
+            }
+        });
     }
 
     public void initializeData(String taskId) throws ParseException {
@@ -103,6 +123,7 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
             Log.d("LIST", list.size() + "");
             for (ParseUser o : list) {
                 Perform perf = new Perform();
+                perf.setId(o.getObjectId());
                 perf.setFirstName(o.getString("firstName"));
                 perf.setLastName(o.getString("lastName"));
                 perf.setRating((float) o.getDouble("performerRating"));
@@ -110,11 +131,7 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                 pts.add(perf);
             }
             ((PerformsForEachTaskAdapter) mAdapter).setPerformsTask(pts);
-
         }
-//        pts.add(new Perform("Kozhabay Alisher", 4, R.drawable.ava));
-//        pts.add(new Perform("Adilov Esmakhan", 3.5f, R.drawable.ava));
-//        ((PerformsForEachTaskAdapter)mAdapter).setPerformsTask(pts);
     }
 
     @Override

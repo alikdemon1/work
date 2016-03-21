@@ -4,15 +4,19 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.alisher.work.chat.BaseActivity;
+import com.alisher.work.chat.UserListActivity;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
+import com.sinch.android.rtc.SinchError;
 
 /**
  * Created by Alisher on 3/2/2016.
@@ -23,10 +27,17 @@ public class LoginActivity extends AppCompatActivity{
     private EditText inputEmail;
     private EditText inputPassword;
     private ProgressDialog pDialog;
+    private ParseUser currentUser = ParseUser.getCurrentUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (currentUser != null) {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            Log.d("USERNAME", currentUser.getUsername());
+        }
+
         setContentView(R.layout.activity_login);
 
         inputEmail = (EditText) findViewById(R.id.email);
@@ -64,7 +75,8 @@ public class LoginActivity extends AppCompatActivity{
         });
     }
 
-    private void checkLogin(String email, String password) {
+
+    private void checkLogin(final String email, String password) {
         pDialog.setMessage("Logging in ...");
         showDialog();
 
@@ -74,25 +86,15 @@ public class LoginActivity extends AppCompatActivity{
                 if (e == null) {
                     hideDialog();
                     Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                    UserListActivity.user = parseUser;
                     startActivity(i);
+                    finish();
                 } else {
                    hideDialog();
                     Toast.makeText(getApplicationContext(),"Incorrect login or password", Toast.LENGTH_LONG).show();
                 }
             }
         });
-
-//        if(email.equals("admin") && password.equals("admin")){
-//            hideDialog();
-//            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//            intent.putExtra("email", email);
-//            intent.putExtra("pass", password);
-//            startActivity(intent);
-//            finish();
-//        } else {
-//            hideDialog();
-//            Toast.makeText(getApplicationContext(),"Incorrect login or password", Toast.LENGTH_LONG).show();
-//        }
     }
 
     private void showDialog() {

@@ -24,4 +24,13 @@
     <color name="off_white">#fffafafa</color>
     <color name="dark_gray">#ffb3b3b3</color>
     <color name="very_dark_gray">#636363</color>
+
+
+    <color name="main_color_gray_dk">#3b3b3b</color>
+    <color name="main_color_gray_lt">#acacac</color>
+    <color name="main_color_gray">#7d7d7d</color>
+    <color name="gray_light">#e8e8e8</color>
+    <color name="white_smoke">#F7F7F7</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
 </resources>

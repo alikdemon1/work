@@ -4,7 +4,7 @@ package com.alisher.work.models;
  * Created by Alisher Kozhabay on 3/13/2016.
  */
 public class Perform {
-    private int id;
+    private String id;
     private String firstName;
     private String LastName;
     private String desc;
@@ -14,12 +14,11 @@ public class Perform {
     public Perform() {
     }
 
-
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

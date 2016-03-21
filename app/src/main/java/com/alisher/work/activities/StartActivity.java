@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 
-import com.alisher.work.R;
+import com.alisher.work.chat.UserListActivity;
 import com.parse.ParseUser;
 
 
@@ -19,13 +19,13 @@ public class StartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_start);
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (currentUser != null){
+                if (currentUser != null) {
                     startActivity(new Intent(StartActivity.this, MainActivity.class));
+                    UserListActivity.user = currentUser;
                     finish();
                 } else {
                     startActivity(new Intent(StartActivity.this, LoginActivity.class));
@@ -33,5 +33,6 @@ public class StartActivity extends AppCompatActivity {
                 }
             }
         }, SPLASH_TIME_OUT);
+
     }
 }
