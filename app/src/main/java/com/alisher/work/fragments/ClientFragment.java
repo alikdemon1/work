@@ -3,6 +3,7 @@ package com.alisher.work.fragments;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,6 +11,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +31,7 @@ import com.alisher.work.chat.utils.Const;
 import com.alisher.work.chat.utils.Utils;
 import com.alisher.work.models.Task;
 import com.alisher.work.newtask.CategoryActivity;
+import com.alisher.work.newtask.DataHolder;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -36,6 +40,8 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -57,6 +63,9 @@ public class ClientFragment extends Fragment {
     List<Task> finishedList;
     private Bitmap bmp;
 
+    SwipeRefreshLayout swipeRefreshLayout;
+    private List<Task> draftList;
+
     public ClientFragment() {
     }
 
@@ -74,14 +83,33 @@ public class ClientFragment extends Fragment {
         // get the listview
         expListView = (ExpandableListView) view.findViewById(R.id.lvExp);
 
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefresherClient);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swipeRefreshLayout.setRefreshing(true);
+                checkTime();
+                inSearchList.clear();
+                inWorkList.clear();
+                finishedList.clear();
+                draftList.clear();
+                initSearchList();
+                initWorkList();
+                initFinishedList();
+                initDraftList();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
         // preparing list data
         prepareListData();
         listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
         expListView.setAdapter(listAdapter);
 
+        checkTime();
+
         expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+            public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
                 Task newTask = listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition);
                 Toast.makeText(getActivity(), listDataHeader.get(groupPosition) + " : " + newTask.toString(), Toast.LENGTH_SHORT).show();
                 if (groupPosition == 0) {
@@ -92,6 +120,25 @@ public class ClientFragment extends Fragment {
                     startActivityForResult(i, 2);
                 } else if (groupPosition == 1) {
                     loadUserList(newTask.getId(), groupPosition, childPosition);
+                } else if (groupPosition == 4){
+                    final AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+                    alertDialog.setTitle("Update task");
+                    alertDialog.setMessage("Are you sure, that you want to resume the task?");
+                    alertDialog.setCancelable(true);
+                    alertDialog.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            getBackFromDraft(groupPosition, childPosition);
+                        }
+                    });
+                    alertDialog.setNegativeButton("no", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    AlertDialog dialog = alertDialog.create();
+                    dialog.show();
                 }
                 return false;
             }
@@ -129,6 +176,44 @@ public class ClientFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void getBackFromDraft(int group, int child){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        query.whereEqualTo("clientId", ParseUser.getCurrentUser());
+        query.whereEqualTo("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
+        try {
+            List<ParseObject> objects = query.find();
+            for (ParseObject p : objects) {
+                ArrayList<Integer> duration = (ArrayList<Integer>)p.get("duration");
+                int day = duration.get(0);
+                int hour = duration.get(1);
+                int minutes = duration.get(2);
+                p.put("endTime", getEndDate(day, hour, minutes));
+                p.put("startTime", new Date());
+                p.put("statusId", ParseObject.createWithoutData("Status", "vVMYOEUIeY"));
+                p.saveEventually();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Task newTask = listDataChild.get(listDataHeader.get(group)).get(child);
+        listDataChild.get(listDataHeader.get(group)).remove(child);
+        inSearchList.add(newTask);
+        listDataChild.put(listDataHeader.get(0), inSearchList);
+        listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
+        expListView.setAdapter(listAdapter);
+    }
+
+    private Date getEndDate(int days, int hours, int min){
+        Date date = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, days);
+        c.add(Calendar.HOUR_OF_DAY, hours);
+        c.add(Calendar.MINUTE, min);
+        date = c.getTime();
+        return date;
     }
 
     private void loadUserList(final String task_id, final int group_id, final int child_id) {
@@ -176,6 +261,7 @@ public class ClientFragment extends Fragment {
         inWorkList = new ArrayList<>();
         arbitrageList = new ArrayList<>();
         finishedList = new ArrayList<>();
+        draftList = new ArrayList<>();
 
         initStatusList();
     }
@@ -190,13 +276,67 @@ public class ClientFragment extends Fragment {
             initSearchList();
             initWorkList();
             initFinishedList();
+            initDraftList();
             listDataChild.put(listDataHeader.get(0), inSearchList);
             listDataChild.put(listDataHeader.get(1), inWorkList);
             listDataChild.put(listDataHeader.get(2), arbitrageList);
             listDataChild.put(listDataHeader.get(3), finishedList);
+            listDataChild.put(listDataHeader.get(4), draftList);
+
 
             listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
             expListView.setAdapter(listAdapter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void checkTime(){
+        ArrayList<ParseObject> statusList = new ArrayList<>();
+        statusList.add(ParseObject.createWithoutData("Status", "vVMYOEUIeY"));
+        statusList.add(ParseObject.createWithoutData("Status", "j6hNwQ01bt"));
+        ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
+        queryParseQuery.whereEqualTo("clientId", ParseUser.getCurrentUser());
+        queryParseQuery.whereEqualTo("attach", null);
+        queryParseQuery.whereContainedIn("statusId",statusList);
+        try {
+            List<ParseObject> parseObjects = queryParseQuery.find();
+            for (ParseObject p : parseObjects) {
+                Date now = new Date();
+                Date end = p.getDate("endTime");
+                if (now.compareTo(end)>0){
+                    Log.d("HELlO", now.toString() + ",  " + end.toString());
+                    p.put("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
+                    p.saveEventually();
+                }
+                Log.d("HELlO 2", now.toString() + ",  " + end.toString());
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void initDraftList(){
+        ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
+        queryParseQuery.whereEqualTo("clientId", ParseUser.getCurrentUser());
+        queryParseQuery.whereEqualTo("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
+        try {
+            List<ParseObject> list = queryParseQuery.find();
+            for (ParseObject o : list) {
+                Task task = new Task();
+                task.setId(o.getObjectId());
+                task.setTitle(o.getString("name"));
+                task.setDesc(o.getString("description"));
+                task.setDuration(o.getString("duration"));
+                task.setStartTime(o.getDate("startTime"));
+                task.setEndTime(o.getDate("endTime"));
+                task.setCatId(o.getString("catId"));
+                ParseFile image = (ParseFile) o.get("img");
+                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
+                task.setImage(bmp);
+                draftList.add(task);
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -374,6 +514,7 @@ public class ClientFragment extends Fragment {
 
         }
     }
+
 
     private void moveToFinishedStatus(String id) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");

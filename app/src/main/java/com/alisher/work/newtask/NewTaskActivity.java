@@ -18,7 +18,9 @@ import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -44,11 +46,11 @@ public class NewTaskActivity extends progressMobileStepper {
         android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(
                 NewTaskActivity.this);
 
-        alertDialogBuilder.setTitle("Разместить объявление");
+        alertDialogBuilder.setTitle("Post task");
         alertDialogBuilder
-                .setMessage("Вы уверены?")
+                .setMessage("Are you sure?")
                 .setCancelable(true)
-                .setPositiveButton("Разместить", new DialogInterface.OnClickListener() {
+                .setPositiveButton("post", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         priceText = (EditText) findViewById(R.id.new_price);
 
@@ -79,7 +81,7 @@ public class NewTaskActivity extends progressMobileStepper {
                         task.put("clientId", ParseObject.createWithoutData(ParseUser.class, ParseUser.getCurrentUser().getObjectId()));
                         task.put("description", desc);
                         task.put("statusId", ParseObject.createWithoutData("Status", "vVMYOEUIeY"));
-                        task.put("duration", time);
+                        task.put("duration", Arrays.asList(DataHolder.getInstance().getDay(), DataHolder.getInstance().getHours(), DataHolder.getInstance().getMinutes()));
                         task.put("startTime", new Date());
                         task.put("endTime", endTime);
                         task.saveInBackground();

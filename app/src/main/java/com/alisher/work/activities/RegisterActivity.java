@@ -28,6 +28,9 @@ public class RegisterActivity  extends AppCompatActivity {
     private EditText inputEmail;
     private EditText inputPassword;
     private ProgressDialog pDialog;
+    private EditText inputCountry;
+    private EditText inputStreet;
+    private EditText inputCity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,9 @@ public class RegisterActivity  extends AppCompatActivity {
         inputFirstName = (EditText) findViewById(R.id.first_name);
         inputLastName = (EditText) findViewById(R.id.last_name);
         inputEmail = (EditText) findViewById(R.id.email);
+        inputCountry = (EditText) findViewById(R.id.country);
+        inputStreet = (EditText) findViewById(R.id.street);
+        inputCity = (EditText) findViewById(R.id.city);
         inputPassword = (EditText) findViewById(R.id.password);
         btnRegister = (Button) findViewById(R.id.btnRegister);
         btnLinkToLogin = (Button) findViewById(R.id.btnLinkToLoginScreen);
@@ -61,9 +67,12 @@ public class RegisterActivity  extends AppCompatActivity {
                 String last_name = inputLastName.getText().toString().trim();
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
+                String country = inputCountry.getText().toString().trim();
+                String city = inputCity.getText().toString().trim();
+                String street = inputStreet.getText().toString().trim();
 
-                if (!first_name.isEmpty() && !last_name.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
-                    registerUser(first_name, last_name, email, password);
+                if (!first_name.isEmpty() && !last_name.isEmpty() && !email.isEmpty() && !password.isEmpty() && !country.isEmpty() && !city.isEmpty() && !street.isEmpty()) {
+                    registerUser(first_name, last_name, email, password, country, city, street);
                 } else {
                     Toast.makeText(getApplicationContext(), "Please enter your details!", Toast.LENGTH_LONG).show();
                 }
@@ -71,16 +80,20 @@ public class RegisterActivity  extends AppCompatActivity {
         });
     }
 
-    private void registerUser(String firstName, String lastName, String email, String password) {
+    private void registerUser(String firstName, String lastName, String email, String password, String country, String city, String street) {
         pDialog.setMessage("Registering ...");
         showDialog();
         ParseUser user = new ParseUser();
         user.setUsername(email);
         user.setPassword(password);
+        user.setEmail(email);
         user.put("firstName", firstName);
         user.put("lastName", lastName);
         user.put("clientRating", 0);
         user.put("performerRating", 0);
+        user.put("country", country);
+        user.put("city", city);
+        user.put("street", street);
         user.signUpInBackground(new SignUpCallback() {
             @Override
             public void done(ParseException e) {

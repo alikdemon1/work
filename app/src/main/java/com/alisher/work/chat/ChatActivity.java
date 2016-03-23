@@ -4,8 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
@@ -22,8 +26,10 @@ import android.widget.Toast;
 import com.alisher.work.R;
 import com.alisher.work.activities.LoginActivity;
 import com.alisher.work.chat.utils.Const;
+import com.alisher.work.chat.utils.IOUtil;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParsePush;
@@ -35,13 +41,16 @@ import com.parse.SaveCallback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class ChatActivity extends BaseActivity {
-
-    private static final String BUDDY_CHAT_PUSH_ACTION = "com.toprecur.android.buddychat.UPDATE_STATUS";
     /**
      * The Conversation list.
      */
@@ -124,9 +133,7 @@ public class ChatActivity extends BaseActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.arbitration) {
-            Intent i = getIntent();
             Toast.makeText(ChatActivity.this, "Arbitration coming soon...", Toast.LENGTH_SHORT).show();
-            setIntent(i, "arbitrator");
             return true;
         } else if (id == R.id.finished) {
             Intent i = getIntent();
@@ -186,31 +193,57 @@ public class ChatActivity extends BaseActivity {
     }
 
     private void sendAttach() {
-        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-        i.setType("*/*");
-        startActivityForResult(i, 1);
+        Intent intent = new Intent();
+        intent.setType("*/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), 1);
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        String Fpath = data.getDataString();
-//        Log.d("FILEPATH", Fpath);
-//        File dir = Environment.getExternalStorageDirectory();
-//        File file = new File(Fpath);
-//        try {
-//            byte[] videoUp = IOUtil.readFile(file);
-//            ParseObject obj = new ParseObject("Task");
-//            ParseFile fileTest = new ParseFile("testEpta", videoUp);
-//            fileTest.saveInBackground();
-//            obj.put("attach", fileTest);
-//            obj.saveEventually();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == 1) {
+                Uri currImageURI = data.getData();
+                Log.d("URI", currImageURI.toString());
+
+                File file = new File(getRealPathFromURI(currImageURI));
+
+                if (file.exists()) {
+                    String filepath=file.getAbsolutePath();
+                    try {
+                        File newFile = new File(filepath);
+                        byte[] image = IOUtil.readFile(newFile);
+                        ParseFile fileparse = new ParseFile("example", image);
+                        fileparse.saveInBackground();
+                        ParseObject parseObject = new ParseObject("Task");
+                        parseObject.put("attach", fileparse);
+                        parseObject.saveInBackground();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Log.d("filepath", filepath);
+                }
+                else
+                {
+                    System.out.println("File Not Found");
+                }
+            }
+        }
+    }
+
+    public String getRealPathFromURI(Uri contentUri)
+    {
+        // can post image
+        String [] proj={MediaStore.Images.Media.DATA};
+        Cursor cursor = managedQuery( contentUri,
+                proj, // Which columns to return
+                null, // WHERE clause; which rows to return (all rows)
+                null, // WHERE clause selection arguments (none)
+                null); // Order-by clause (ascending by name)
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
 
 
     /**

@@ -20,7 +20,7 @@
             android:textColor="#000000"
             android:textSize="20sp"
             android:layout_marginBottom="20dp"
-            android:text="Вам необходимо указать конкретную стоимость, чтобы исполнители оценили выгодность проекта."/>
+            android:text="You need to specify a particular cost to the performers to evaluate the profitability of the project."/>
 
         <EditText
             android:id="@+id/new_price"

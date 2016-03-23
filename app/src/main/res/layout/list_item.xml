@@ -3,22 +3,48 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorWhite"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/client_image"
-            android:layout_width="35dp"
-            android:layout_height="30dp"
-            android:layout_marginRight="16dp" />
+    <ImageView
+        android:id="@+id/client_image"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
+        android:layout_marginRight="16dp" />
 
-        <TextView
-            android:id="@+id/client_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/client_image"
-            android:paddingTop="5dp"
-            android:text="Title"
-            android:textSize="15sp" />
+    <TextView
+        android:id="@+id/client_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/client_image"
+        android:paddingTop="5dp"
+        android:text="Title"
+        android:textSize="15sp" />
+
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
+
+    <ImageButton
+        android:id="@+id/client_descBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/plus"/>
+
+    <ImageButton
+        android:id="@+id/client_chatBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/plus"/>
+
+    <ImageButton
+        android:id="@+id/client_attachBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/plus"/>
 
 </LinearLayout>
