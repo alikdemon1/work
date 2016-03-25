@@ -1,11 +1,15 @@
 package com.alisher.work.chat;
 
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -27,6 +31,7 @@ import com.alisher.work.R;
 import com.alisher.work.activities.LoginActivity;
 import com.alisher.work.chat.utils.Const;
 import com.alisher.work.chat.utils.IOUtil;
+import com.alisher.work.models.Task;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -143,7 +148,7 @@ public class ChatActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void setIntent(Intent i, String s){
+    public void setIntent(Intent i, String s) {
         i.putExtra("child", i.getIntExtra("child", 0));
         i.putExtra("group", i.getIntExtra("group", 0));
         i.putExtra("flag", s);
@@ -151,7 +156,7 @@ public class ChatActivity extends BaseActivity {
         finish();
     }
 
-    public void deleteFinishedTask(String task_id){
+    public void deleteFinishedTask(String task_id) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
         query.whereEqualTo("taskId", task_id);
         query.findInBackground(new FindCallback<ParseObject>() {
@@ -193,10 +198,9 @@ public class ChatActivity extends BaseActivity {
     }
 
     private void sendAttach() {
-        Intent intent = new Intent();
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), 1);
+        startActivityForResult(intent, 1);
     }
 
     @Override
@@ -209,11 +213,11 @@ public class ChatActivity extends BaseActivity {
                 File file = new File(getRealPathFromURI(currImageURI));
 
                 if (file.exists()) {
-                    String filepath=file.getAbsolutePath();
+                    String filepath = file.getAbsolutePath();
                     try {
                         File newFile = new File(filepath);
                         byte[] image = IOUtil.readFile(newFile);
-                        ParseFile fileparse = new ParseFile("example", image);
+                        ParseFile fileparse = new ParseFile(newFile.getName(), image);
                         fileparse.saveInBackground();
                         ParseObject parseObject = new ParseObject("Task");
                         parseObject.put("attach", fileparse);
@@ -222,20 +226,33 @@ public class ChatActivity extends BaseActivity {
                         e.printStackTrace();
                     }
                     Log.d("filepath", filepath);
-                }
-                else
-                {
+                    getFileURL();
+                } else {
                     System.out.println("File Not Found");
                 }
             }
         }
     }
 
-    public String getRealPathFromURI(Uri contentUri)
-    {
+    public void getFileURL(){
+        ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
+        queryParseQuery.whereEqualTo("objectId", "l3SCbEK17E");
+        try {
+            List<ParseObject> list = queryParseQuery.find();
+            for (ParseObject o : list) {
+                ParseFile image = (ParseFile) o.get("attach");
+                Log.d("URL", image.getUrl());
+                etxtMessage.setText(image.getName()+ "" +image.getUrl());
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getRealPathFromURI(Uri contentUri) {
         // can post image
-        String [] proj={MediaStore.Images.Media.DATA};
-        Cursor cursor = managedQuery( contentUri,
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = managedQuery(contentUri,
                 proj, // Which columns to return
                 null, // WHERE clause; which rows to return (all rows)
                 null, // WHERE clause selection arguments (none)

@@ -28,6 +28,7 @@ dependencies {
     compile 'com.android.support:cardview-v7:23.1.1'
     compile 'com.android.support:recyclerview-v7:23.1.1'
     compile 'ivb.com.materialstepper:material-stepper:0.0.2'
+    compile 'com.google.android.gms:play-services:8.3.0'
     compile files('libs/Parse-1.10.3.jar')
     compile files('libs/bolts-android-1.2.1.jar')
     compile files('libs/sinch-android-rtc-3.9.3.jar')

@@ -1,7 +1,13 @@
 package com.alisher.work.adapters;
 
+import android.app.ProgressDialog;
+import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.provider.Browser;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +19,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.alisher.work.activities.AttachActivity;
+import com.alisher.work.activities.ClientDescriptionActivity;
+import com.alisher.work.activities.TaskDescriptionActivity;
+import com.alisher.work.chat.ChatActivity;
+import com.alisher.work.chat.utils.Const;
+import com.alisher.work.chat.utils.Utils;
 import com.alisher.work.models.Task;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.HashMap;
 import java.util.List;
@@ -63,9 +80,101 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         ImageView image = (ImageView) convertView
                 .findViewById(R.id.client_image);
 
+        ImageButton desc = (ImageButton) convertView.findViewById(R.id.client_descBtn);
+        ImageButton chat = (ImageButton) convertView.findViewById(R.id.client_chatBtn);
+        ImageButton attach = (ImageButton) convertView.findViewById(R.id.client_attachBtn);
+        if (groupPosition == 0) {
+            desc.setEnabled(true);
+            chat.setEnabled(false);
+            attach.setEnabled(false);
+        } else if (groupPosition == 1) {
+            desc.setEnabled(true);
+            chat.setEnabled(true);
+            attach.setEnabled(true);
+        } else if (groupPosition == 4) {
+            desc.setEnabled(false);
+            chat.setEnabled(false);
+            attach.setEnabled(false);
+        }
+
+
+        if (desc.isEnabled()){
+            desc.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(v.getContext(), ClientDescriptionActivity.class);
+                    i.putExtra("newTaskTitle", childText.getTitle() + "");
+                    i.putExtra("newTaskDesc", childText.getDesc() + "");
+                    i.putExtra("newTaskId", childText.getId() + "");
+                    i.putExtra("newTaskImage",childText.getImage());
+                    i.putExtra("newTaskCost",String.valueOf(childText.getPrice()));
+                    i.putExtra("newTaskDuration", childText.getEndTime().getTime());
+                    v.getContext().startActivity(i);
+                }
+            });
+        }
+
+        if (chat.isEnabled()){
+            chat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                }
+            });
+        }
+
+        if (attach.isEnabled()){
+            attach.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(v.getContext(), AttachActivity.class);
+                    i.putExtra("task_id", childText.getId());
+                    v.getContext().startActivity(i);
+                }
+            });
+        }
         txtListChild.setText(childText.getTitle());
         image.setImageBitmap(childText.getImage());
         return convertView;
+    }
+
+    private void loadUserList(final String task_id, final int group_id, final int child_id, final View v) {
+        final ProgressDialog dia = ProgressDialog.show(v.getContext(), null, v.getContext().getString(R.string.alert_loading));
+        ParseQuery<ParseObject> decQuery = ParseQuery.getQuery("Decision");
+        decQuery.whereEqualTo("taskId", task_id);
+        decQuery.whereEqualTo("clientDec", true);
+        decQuery.whereEqualTo("perfDec", true);
+        List<ParseObject> parseObjects = null;
+        try {
+            parseObjects = decQuery.find();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        for (ParseObject obj : parseObjects) {
+            ParseQuery<ParseUser> userParseQuery = ParseUser.getQuery();
+            userParseQuery.whereEqualTo("objectId", obj.getString("perfId"));
+            userParseQuery.findInBackground(new FindCallback<ParseUser>() {
+                @Override
+                public void done(List<ParseUser> list, ParseException e) {
+                    dia.dismiss();
+                    if (e == null) {
+                        if (list.size() == 0)
+                            Toast.makeText(v.getContext(), R.string.msg_no_user_found, Toast.LENGTH_SHORT).show();
+                        Intent i = new Intent(v.getContext(), ChatActivity.class);
+                        i.putExtra(Const.EXTRA_DATA, list.get(0).getUsername());
+                        i.putExtra("task_id", task_id);
+                        i.putExtra("group", group_id);
+                        i.putExtra("child", child_id);
+                        v.getContext().startActivity(i);
+                    } else {
+                        Utils.showDialog(
+                                v.getContext(),
+                                v.getContext().getString(R.string.err_users) + " "
+                                        + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
     }
 
     @Override

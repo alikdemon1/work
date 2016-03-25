@@ -2,6 +2,7 @@ package com.alisher.work.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,8 +12,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
@@ -20,7 +27,8 @@ import com.parse.SignUpCallback;
 /**
  * Created by Alisher on 3/2/2016.
  */
-public class RegisterActivity  extends AppCompatActivity {
+public class RegisterActivity  extends AppCompatActivity  implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, LocationListener{
     private Button btnRegister;
     private Button btnLinkToLogin;
     private EditText inputFirstName;
@@ -31,11 +39,16 @@ public class RegisterActivity  extends AppCompatActivity {
     private EditText inputCountry;
     private EditText inputStreet;
     private EditText inputCity;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private LocationRequest mLocationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        createLocationRequest();
+        buildGoogleApiClient();
 
         inputFirstName = (EditText) findViewById(R.id.first_name);
         inputLastName = (EditText) findViewById(R.id.last_name);
@@ -80,6 +93,14 @@ public class RegisterActivity  extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
     private void registerUser(String firstName, String lastName, String email, String password, String country, String city, String street) {
         pDialog.setMessage("Registering ...");
         showDialog();
@@ -94,6 +115,7 @@ public class RegisterActivity  extends AppCompatActivity {
         user.put("country", country);
         user.put("city", city);
         user.put("street", street);
+        user.put("lat", new ParseGeoPoint(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
         user.signUpInBackground(new SignUpCallback() {
             @Override
             public void done(ParseException e) {
@@ -123,8 +145,55 @@ public class RegisterActivity  extends AppCompatActivity {
             pDialog.show();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        buildGoogleApiClient();
+        mGoogleApiClient.connect();
+        Log.d("RESUME", "ASd");
+    }
+
     private void hideDialog() {
         if (pDialog.isShowing())
             pDialog.dismiss();
+    }
+
+    private synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+    }
+
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient,
+                mLocationRequest,
+                this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+        Log.d("LOCATION", mLastLocation.getLatitude()+"");
     }
 }

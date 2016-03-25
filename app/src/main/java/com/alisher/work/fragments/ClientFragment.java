@@ -120,7 +120,7 @@ public class ClientFragment extends Fragment {
                     startActivityForResult(i, 2);
                 } else if (groupPosition == 1) {
                     loadUserList(newTask.getId(), groupPosition, childPosition);
-                } else if (groupPosition == 4){
+                } else if (groupPosition == 4) {
                     final AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
                     alertDialog.setTitle("Update task");
                     alertDialog.setMessage("Are you sure, that you want to resume the task?");
@@ -178,14 +178,14 @@ public class ClientFragment extends Fragment {
         return view;
     }
 
-    private void getBackFromDraft(int group, int child){
+    private void getBackFromDraft(int group, int child) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
         query.whereEqualTo("clientId", ParseUser.getCurrentUser());
         query.whereEqualTo("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
         try {
             List<ParseObject> objects = query.find();
             for (ParseObject p : objects) {
-                ArrayList<Integer> duration = (ArrayList<Integer>)p.get("duration");
+                ArrayList<Integer> duration = (ArrayList<Integer>) p.get("duration");
                 int day = duration.get(0);
                 int hour = duration.get(1);
                 int minutes = duration.get(2);
@@ -205,7 +205,7 @@ public class ClientFragment extends Fragment {
         expListView.setAdapter(listAdapter);
     }
 
-    private Date getEndDate(int days, int hours, int min){
+    private Date getEndDate(int days, int hours, int min) {
         Date date = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(date);
@@ -238,9 +238,12 @@ public class ClientFragment extends Fragment {
                     if (e == null) {
                         if (list.size() == 0)
                             Toast.makeText(getActivity(), R.string.msg_no_user_found, Toast.LENGTH_SHORT).show();
-                                startActivityForResult(new Intent(getActivity(),
-                                        ChatActivity.class).putExtra(
-                                        Const.EXTRA_DATA, list.get(0).getUsername()).putExtra("task_id", task_id).putExtra("group",group_id).putExtra("child", child_id), 3);
+                        Intent i = new Intent(getActivity(), ChatActivity.class);
+                        i.putExtra(Const.EXTRA_DATA, list.get(0).getUsername());
+                        i.putExtra("task_id", task_id);
+                        i.putExtra("group", group_id);
+                        i.putExtra("child", child_id);
+                        startActivityForResult(i, 3);
                     } else {
                         Utils.showDialog(
                                 getActivity(),
@@ -252,7 +255,6 @@ public class ClientFragment extends Fragment {
             });
         }
     }
-
 
     private void prepareListData() {
         listDataHeader = new ArrayList<String>();
@@ -291,20 +293,20 @@ public class ClientFragment extends Fragment {
         }
     }
 
-    private void checkTime(){
+    private void checkTime() {
         ArrayList<ParseObject> statusList = new ArrayList<>();
         statusList.add(ParseObject.createWithoutData("Status", "vVMYOEUIeY"));
         statusList.add(ParseObject.createWithoutData("Status", "j6hNwQ01bt"));
         ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
         queryParseQuery.whereEqualTo("clientId", ParseUser.getCurrentUser());
         queryParseQuery.whereEqualTo("attach", null);
-        queryParseQuery.whereContainedIn("statusId",statusList);
+        queryParseQuery.whereContainedIn("statusId", statusList);
         try {
             List<ParseObject> parseObjects = queryParseQuery.find();
             for (ParseObject p : parseObjects) {
                 Date now = new Date();
                 Date end = p.getDate("endTime");
-                if (now.compareTo(end)>0){
+                if (now.compareTo(end) > 0) {
                     Log.d("HELlO", now.toString() + ",  " + end.toString());
                     p.put("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
                     p.saveEventually();
@@ -314,10 +316,9 @@ public class ClientFragment extends Fragment {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
     }
 
-    private void initDraftList(){
+    private void initDraftList() {
         ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
         queryParseQuery.whereEqualTo("clientId", ParseUser.getCurrentUser());
         queryParseQuery.whereEqualTo("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
@@ -496,15 +497,14 @@ public class ClientFragment extends Fragment {
             listDataChild.put(listDataHeader.get(1), inWorkList);
             listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
             expListView.setAdapter(listAdapter);
-            Log.d("NEW_TASK", newTask.toString());
-        } else if (requestCode == 3 && resultCode == Activity.RESULT_OK){
+        } else if (requestCode == 3 && resultCode == Activity.RESULT_OK) {
             int child = data.getIntExtra("child", 0);
             int group = data.getIntExtra("group", 0);
             Task newTask = listDataChild.get(listDataHeader.get(group)).get(child);
             listDataChild.get(listDataHeader.get(group)).remove(child);
-            if (data.getStringExtra("flag").equals("arbitrator")){
+            if (data.getStringExtra("flag").equals("arbitrator")) {
 
-            } else if (data.getStringExtra("flag").equals("finished")){
+            } else if (data.getStringExtra("flag").equals("finished")) {
                 moveToFinishedStatus(newTask.getId());
                 finishedList.add(newTask);
                 listDataChild.put(listDataHeader.get(3), finishedList);

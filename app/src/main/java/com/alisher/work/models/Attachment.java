@@ -1,0 +1,46 @@
+package com.alisher.work.models;
+
+import java.util.Date;
+
+/**
+ * Created by Alisher Kozhabay on 3/24/2016.
+ */
+public class Attachment {
+    private String id;
+    private String name;
+    private String url;
+    private Date createdAt;
+
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+}

@@ -83,14 +83,14 @@ public class LoginActivity extends AppCompatActivity{
             public void done(ParseUser parseUser, ParseException e) {
                 if (e == null) {
                     hideDialog();
-                    if (parseUser.getBoolean("emailVerified")){
+//                    if (parseUser.getBoolean("emailVerified")){
                         Intent i = new Intent(LoginActivity.this, MainActivity.class);
                         UserListActivity.user = parseUser;
                         startActivity(i);
                         finish();
-                    } else {
-                        Toast.makeText(LoginActivity.this, "Please confirm the e-mail address", Toast.LENGTH_SHORT).show();
-                    }
+//                    } else {
+//                        Toast.makeText(LoginActivity.this, "Please confirm the e-mail address", Toast.LENGTH_SHORT).show();
+//                    }
                 } else {
                    hideDialog();
                     Toast.makeText(getApplicationContext(),"Incorrect login or password", Toast.LENGTH_LONG).show();

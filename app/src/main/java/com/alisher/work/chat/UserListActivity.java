@@ -154,8 +154,6 @@ public class UserListActivity extends BaseActivity {
             ParseUser c = getItem(pos);
             TextView lbl = (TextView) v;
             lbl.setText(c.getUsername());
-            lbl.setCompoundDrawablesWithIntrinsicBounds(
-                    c.getBoolean("online") ? R.mipmap.ic_online : R.mipmap.ic_offline, 0, R.mipmap.arrow, 0);
 
             return v;
         }
