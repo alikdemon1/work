@@ -2,6 +2,7 @@ package com.alisher.work.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +45,11 @@ public class AttachAdapter extends RecyclerView.Adapter<AttachAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
         Attachment nature = mItems.get(i);
-        viewHolder.title.setText(nature.getName());
+        String result = nature.getName().substring(nature.getName().lastIndexOf('-') + 1).trim();
+        viewHolder.title.setText(result);
+        viewHolder.createdAt.setText(DateUtils.getRelativeDateTimeString(ctx, nature
+                        .getCreatedAt().getTime(), DateUtils.SECOND_IN_MILLIS,
+                DateUtils.DAY_IN_MILLIS, 0));
     }
 
     @Override
@@ -55,10 +60,12 @@ public class AttachAdapter extends RecyclerView.Adapter<AttachAdapter.ViewHolder
     class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView title;
+        public TextView createdAt;
 
         public ViewHolder(View itemView) {
             super(itemView);
             title = (TextView) itemView.findViewById(R.id.name_attach);
+            createdAt = (TextView) itemView.findViewById(R.id.createdAt_attach);
         }
     }
 }

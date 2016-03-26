@@ -22,9 +22,11 @@
         <Button
             android:id="@+id/attach_btn"
             style="@style/btn"
+            android:background="@color/colorPrimary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ADD"/>
+            android:textColor="@color/white"
+            android:text="Attach file"/>
 
     </LinearLayout>
 

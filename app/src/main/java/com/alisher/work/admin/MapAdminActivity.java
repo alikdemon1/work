@@ -1,9 +1,10 @@
-package com.alisher.work.activities;
+package com.alisher.work.admin;
 
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -38,7 +39,7 @@ import java.util.List;
 /**
  * Created by Alisher Kozhabay on 3/23/2016.
  */
-public class AdminActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
 
@@ -53,7 +54,7 @@ public class AdminActivity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin);
+        setContentView(R.layout.activity_admin_map);
         if (checkPlayServices()) {
             buildGoogleApiClient();
         }
@@ -151,11 +152,20 @@ public class AdminActivity extends AppCompatActivity implements OnMapReadyCallba
         });
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                setResult(RESULT_CANCELED);
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void plotMarkers(ArrayList<MyMarker> markers) {
-        if(markers.size() > 0)
-        {
-            for (MyMarker myMarker : markers)
-            {
+        if (markers.size() > 0) {
+            for (MyMarker myMarker : markers) {
 
                 // Create user marker with custom icon and other options
                 MarkerOptions markerOption = new MarkerOptions().position(new LatLng(myMarker.getmLatitude(), myMarker.getmLongitude()));
@@ -169,27 +179,23 @@ public class AdminActivity extends AppCompatActivity implements OnMapReadyCallba
         }
     }
 
-    public class MarkerInfoWindowAdapter implements GoogleMap.InfoWindowAdapter
-    {
-        public MarkerInfoWindowAdapter()
-        {
+    public class MarkerInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
+        public MarkerInfoWindowAdapter() {
         }
 
         @Override
-        public View getInfoWindow(Marker marker)
-        {
+        public View getInfoWindow(Marker marker) {
             return null;
         }
 
         @Override
-        public View getInfoContents(Marker marker)
-        {
-            View v  = getLayoutInflater().inflate(R.layout.infomarker_admin, null);
+        public View getInfoContents(Marker marker) {
+            View v = getLayoutInflater().inflate(R.layout.infomarker_admin, null);
 
             MyMarker myMarker = mMarkersHashMap.get(marker);
 
             ImageView markerIcon = (ImageView) v.findViewById(R.id.admin_image);
-            TextView markerLabel = (TextView)v.findViewById(R.id.admin_title);
+            TextView markerLabel = (TextView) v.findViewById(R.id.admin_title);
             RatingBar ratingbar = (RatingBar) v.findViewById(R.id.admin_rating);
 
             markerIcon.setImageResource(R.drawable.ava);

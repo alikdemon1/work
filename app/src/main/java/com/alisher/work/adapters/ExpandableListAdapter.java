@@ -109,6 +109,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                     i.putExtra("newTaskImage",childText.getImage());
                     i.putExtra("newTaskCost",String.valueOf(childText.getPrice()));
                     i.putExtra("newTaskDuration", childText.getEndTime().getTime());
+
+                    i.putExtra("child", childPosition);
+                    i.putExtra("group", groupPosition);
+                    i.putExtra("isEnabled", true);
                     v.getContext().startActivity(i);
                 }
             });
@@ -128,6 +132,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 public void onClick(View v) {
                     Intent i = new Intent(v.getContext(), AttachActivity.class);
                     i.putExtra("task_id", childText.getId());
+                    i.putExtra("isVisible", false);
                     v.getContext().startActivity(i);
                 }
             });

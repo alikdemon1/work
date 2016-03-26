@@ -4,12 +4,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -40,8 +40,6 @@ public class AttachActivity extends AppCompatActivity {
     AttachAdapter mAdapter;
     private ArrayList<Attachment> attachments;
     private Button addAttachBtn;
-    private Handler handler;
-    private boolean isRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +47,15 @@ public class AttachActivity extends AppCompatActivity {
         setContentView(R.layout.activity_attach);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Attachments");
 
+        boolean isVisible = getIntent().getBooleanExtra("isVisible", false);
         addAttachBtn = (Button) findViewById(R.id.attach_btn);
+
+        if (!isVisible){
+            addAttachBtn.setEnabled(false);
+            addAttachBtn.setVisibility(View.INVISIBLE);
+        }
 
         addAttachBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,7 +81,6 @@ public class AttachActivity extends AppCompatActivity {
                 startActivity(browseIntent);
             }
         }));
-        handler = new Handler();
     }
 
     @Override
@@ -113,7 +117,6 @@ public class AttachActivity extends AppCompatActivity {
     }
 
     public String getRealPathFromURI(Uri contentUri) {
-        // can post image
         String[] proj = {MediaStore.Images.Media.DATA};
         Cursor cursor = managedQuery(contentUri,
                 proj, // Which columns to return
@@ -123,12 +126,6 @@ public class AttachActivity extends AppCompatActivity {
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         return cursor.getString(column_index);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        isRunning = false;
     }
 
     public void initializeData() {
@@ -146,6 +143,7 @@ public class AttachActivity extends AppCompatActivity {
                         ParseFile file = (ParseFile) o.get("attach");
                         aItem.setName(file.getName());
                         aItem.setUrl(file.getUrl());
+                        aItem.setCreatedAt(o.getCreatedAt());
                         attachments.add(aItem);
                         mAdapter.notifyDataSetChanged();
                     }
@@ -154,5 +152,16 @@ public class AttachActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                setResult(RESULT_CANCELED);
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -1,20 +1,12 @@
 package com.alisher.work.chat;
 
-import android.annotation.TargetApi;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
@@ -31,7 +23,7 @@ import com.alisher.work.R;
 import com.alisher.work.activities.LoginActivity;
 import com.alisher.work.chat.utils.Const;
 import com.alisher.work.chat.utils.IOUtil;
-import com.alisher.work.models.Task;
+import com.alisher.work.chat.utils.ParseUtils;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -40,17 +32,13 @@ import com.parse.ParseObject;
 import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
-import com.parse.PushService;
 import com.parse.SaveCallback;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -116,6 +104,7 @@ public class ChatActivity extends BaseActivity {
         buddy = getIntent().getStringExtra(Const.EXTRA_DATA);
         tvname = (TextView) findViewById(R.id.tvName);
         tvname.setText(buddy);
+        ParseUtils.subscribeWithEmail(ParseUser.getCurrentUser().getUsername());
         handler = new Handler();
     }
 
@@ -140,37 +129,8 @@ public class ChatActivity extends BaseActivity {
         if (id == R.id.arbitration) {
             Toast.makeText(ChatActivity.this, "Arbitration coming soon...", Toast.LENGTH_SHORT).show();
             return true;
-        } else if (id == R.id.finished) {
-            Intent i = getIntent();
-            setIntent(i, "finished");
-            deleteFinishedTask(i.getStringExtra("task_id"));
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public void setIntent(Intent i, String s) {
-        i.putExtra("child", i.getIntExtra("child", 0));
-        i.putExtra("group", i.getIntExtra("group", 0));
-        i.putExtra("flag", s);
-        setResult(RESULT_OK, i);
-        finish();
-    }
-
-    public void deleteFinishedTask(String task_id) {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
-        query.whereEqualTo("taskId", task_id);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null) {
-                    for (ParseObject o : list) {
-                        o.deleteEventually();
-                    }
-                } else {
-
-                }
-            }
-        });
     }
 
     @Override
@@ -234,7 +194,7 @@ public class ChatActivity extends BaseActivity {
         }
     }
 
-    public void getFileURL(){
+    public void getFileURL() {
         ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
         queryParseQuery.whereEqualTo("objectId", "l3SCbEK17E");
         try {
@@ -242,7 +202,7 @@ public class ChatActivity extends BaseActivity {
             for (ParseObject o : list) {
                 ParseFile image = (ParseFile) o.get("attach");
                 Log.d("URL", image.getUrl());
-                etxtMessage.setText(image.getName()+ "" +image.getUrl());
+                etxtMessage.setText(image.getName() + "" + image.getUrl());
             }
         } catch (ParseException e) {
             e.printStackTrace();
@@ -300,6 +260,32 @@ public class ChatActivity extends BaseActivity {
                 mChatAdapter.notifyDataSetChanged();
             }
         });
+        sendNotification(s, ParseUser.getCurrentUser().getString("firstName"), buddy);
+    }
+
+    private void sendNotification(String message, String title, String email) {
+        ParseQuery pushQuery = ParseInstallation.getQuery();
+        pushQuery.whereEqualTo("email", email);
+
+        JSONObject data = null;
+        JSONObject main = null;
+        try {
+            data = new JSONObject();
+            main = new JSONObject();
+            data.put("message", message);
+            data.put("title", title);
+            main.put("data", data);
+            main.put("is_background", false);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.d("JSON", main.toString());
+
+        ParsePush push = new ParsePush();
+        push.setQuery(pushQuery);
+        push.setData(main);
+        push.sendInBackground();
     }
 
     /**

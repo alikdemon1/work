@@ -4,20 +4,42 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
+    <android.support.v7.widget.CardView
+        android:id="@+id/cv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp">
 
+            <ImageView
+                android:id="@+id/download"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/attach_download" />
+
             <TextView
                 android:id="@+id/name_attach"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:textSize="20sp"
-                android:text="HERE WILL BE URL"/>
+                android:layout_marginLeft="4dp"
+                android:layout_marginTop="4dp"
+                android:layout_toRightOf="@+id/download"
+                android:text="HERE WILL BE URL"
+                android:textSize="15sp" />
 
-
+            <TextView
+                android:id="@+id/createdAt_attach"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="22dp"
+                android:text="TextView"
+                android:layout_alignParentRight="true"
+                android:textColor="@color/main_color_gray_dk"
+                android:textSize="10sp" />
         </RelativeLayout>
+    </android.support.v7.widget.CardView>
 
 </LinearLayout>

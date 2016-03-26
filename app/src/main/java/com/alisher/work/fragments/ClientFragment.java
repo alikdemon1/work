@@ -17,21 +17,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ExpandableListView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.activities.PerformsForEachTaskActivity;
 import com.alisher.work.adapters.ExpandableListAdapter;
 import com.alisher.work.chat.ChatActivity;
-import com.alisher.work.chat.UserListActivity;
 import com.alisher.work.chat.utils.Const;
 import com.alisher.work.chat.utils.Utils;
 import com.alisher.work.models.Task;
 import com.alisher.work.newtask.CategoryActivity;
-import com.alisher.work.newtask.DataHolder;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -80,33 +76,11 @@ public class ClientFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_client, container, false);
         addTask(view);
-        // get the listview
         expListView = (ExpandableListView) view.findViewById(R.id.lvExp);
-
-        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefresherClient);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                swipeRefreshLayout.setRefreshing(true);
-                checkTime();
-                inSearchList.clear();
-                inWorkList.clear();
-                finishedList.clear();
-                draftList.clear();
-                initSearchList();
-                initWorkList();
-                initFinishedList();
-                initDraftList();
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        });
-        // preparing list data
+        refreshDaa(view);
         prepareListData();
         listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
         expListView.setAdapter(listAdapter);
-
-        checkTime();
-
         expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
@@ -119,7 +93,7 @@ public class ClientFragment extends Fragment {
                     i.putExtra("child_position", childPosition);
                     startActivityForResult(i, 2);
                 } else if (groupPosition == 1) {
-                    loadUserList(newTask.getId(), groupPosition, childPosition);
+                    openChatActivity(newTask.getId(), groupPosition, childPosition);
                 } else if (groupPosition == 4) {
                     final AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
                     alertDialog.setTitle("Update task");
@@ -178,6 +152,63 @@ public class ClientFragment extends Fragment {
         return view;
     }
 
+    private void refreshDaa(View view) {
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefresherClient);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swipeRefreshLayout.setRefreshing(true);
+                checkDateExpiration();
+                inSearchList.clear();
+                inWorkList.clear();
+                finishedList.clear();
+                draftList.clear();
+                initSearchList();
+                initWorkList();
+                initFinishedList();
+                initDraftList();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+    }
+
+    private void prepareListData() {
+        listDataHeader = new ArrayList<String>();
+        listDataChild = new HashMap<String, List<Task>>();
+        inSearchList = new ArrayList<>();
+        inWorkList = new ArrayList<>();
+        arbitrageList = new ArrayList<>();
+        finishedList = new ArrayList<>();
+        draftList = new ArrayList<>();
+
+        initStatusList();
+    }
+
+    private void checkDateExpiration() {
+        ArrayList<ParseObject> statusList = new ArrayList<>();
+        statusList.add(ParseObject.createWithoutData("Status", "vVMYOEUIeY"));
+        statusList.add(ParseObject.createWithoutData("Status", "j6hNwQ01bt"));
+        ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
+        queryParseQuery.whereEqualTo("clientId", ParseUser.getCurrentUser());
+        queryParseQuery.whereEqualTo("attach", null);
+        queryParseQuery.whereContainedIn("statusId", statusList);
+        try {
+            List<ParseObject> parseObjects = queryParseQuery.find();
+            for (ParseObject p : parseObjects) {
+                Date now = new Date();
+                Date end = p.getDate("endTime");
+                if (now.compareTo(end) > 0) {
+                    Log.d("HELlO", now.toString() + ",  " + end.toString());
+                    p.put("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
+                    p.saveEventually();
+                }
+                Log.d("HELlO 2", now.toString() + ",  " + end.toString());
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void getBackFromDraft(int group, int child) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
         query.whereEqualTo("clientId", ParseUser.getCurrentUser());
@@ -216,7 +247,204 @@ public class ClientFragment extends Fragment {
         return date;
     }
 
-    private void loadUserList(final String task_id, final int group_id, final int child_id) {
+    // Init list methods
+    private void initSearchList() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        ParseObject obj = ParseObject.createWithoutData("Status", "vVMYOEUIeY");
+        query.whereEqualTo("clientId", ParseUser.getCurrentUser());
+        query.whereEqualTo("statusId", obj);
+        try {
+            List<ParseObject> list = query.find();
+            for (ParseObject o : list) {
+                Task task = new Task();
+                task.setId(o.getObjectId());
+                task.setTitle(o.getString("name"));
+                task.setDesc(o.getString("description"));
+                task.setDuration(o.getString("duration"));
+                task.setStartTime(o.getDate("startTime"));
+                task.setEndTime(o.getDate("endTime"));
+                task.setCatId(o.getString("catId"));
+                ParseFile image = (ParseFile) o.get("img");
+                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
+                task.setImage(bmp);
+                inSearchList.add(task);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initStatusList() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Status");
+        try {
+            List<ParseObject> statusList = query.find();
+            for (ParseObject obj : statusList) {
+                listDataHeader.add(obj.getString("name"));
+            }
+            initSearchList();
+            initWorkList();
+            initFinishedList();
+            initDraftList();
+            listDataChild.put(listDataHeader.get(0), inSearchList);
+            listDataChild.put(listDataHeader.get(1), inWorkList);
+            listDataChild.put(listDataHeader.get(2), arbitrageList);
+            listDataChild.put(listDataHeader.get(3), finishedList);
+            listDataChild.put(listDataHeader.get(4), draftList);
+
+            listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
+            expListView.setAdapter(listAdapter);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initDraftList() {
+        ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
+        queryParseQuery.whereEqualTo("clientId", ParseUser.getCurrentUser());
+        queryParseQuery.whereEqualTo("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
+        try {
+            List<ParseObject> list = queryParseQuery.find();
+            for (ParseObject o : list) {
+                Task task = new Task();
+                task.setId(o.getObjectId());
+                task.setTitle(o.getString("name"));
+                task.setDesc(o.getString("description"));
+                task.setDuration(o.getString("duration"));
+                task.setStartTime(o.getDate("startTime"));
+                task.setEndTime(o.getDate("endTime"));
+                task.setCatId(o.getString("catId"));
+                ParseFile image = (ParseFile) o.get("img");
+                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
+                task.setImage(bmp);
+                draftList.add(task);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initWorkList() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        ParseObject obj = ParseObject.createWithoutData("Status", "j6hNwQ01bt");
+        query.whereEqualTo("clientId", ParseUser.getCurrentUser());
+        query.whereEqualTo("statusId", obj);
+        try {
+            List<ParseObject> list = query.find();
+            for (ParseObject o : list) {
+                Task task = new Task();
+                task.setId(o.getObjectId());
+                task.setTitle(o.getString("name"));
+                task.setDesc(o.getString("description"));
+                task.setDuration(o.getString("duration"));
+                task.setStartTime(o.getDate("startTime"));
+                task.setEndTime(o.getDate("endTime"));
+                task.setCatId(o.getString("catId"));
+                ParseFile image = (ParseFile) o.get("img");
+                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
+                task.setImage(bmp);
+                inWorkList.add(task);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initFinishedList() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        ParseObject obj = ParseObject.createWithoutData("Status", "FskciSuqTW");
+        query.whereEqualTo("clientId", ParseUser.getCurrentUser());
+        query.whereEqualTo("statusId", obj);
+        try {
+            List<ParseObject> list = query.find();
+            for (ParseObject o : list) {
+                Task task = new Task();
+                task.setId(o.getObjectId());
+                task.setTitle(o.getString("name"));
+                task.setDesc(o.getString("description"));
+                task.setDuration(o.getString("duration"));
+                task.setStartTime(o.getDate("startTime"));
+                task.setEndTime(o.getDate("endTime"));
+                task.setCatId(o.getString("catId"));
+                ParseFile image = (ParseFile) o.get("img");
+                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
+                task.setImage(bmp);
+                finishedList.add(task);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // Add new Task
+    private void addTask(View view) {
+        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.addTask);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), CategoryActivity.class);
+                startActivityForResult(intent, 1);
+            }
+        });
+    }
+
+    // Change status methods
+    public void moveToWorkStatus(String id) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        query.whereEqualTo("objectId", id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.put("statusId", ParseObject.createWithoutData("Status", "j6hNwQ01bt"));
+                        o.saveEventually();
+                    }
+                } else {
+                    Log.d("MOVE TO WORK STATUS", e.getMessage());
+                }
+            }
+        });
+    }
+
+    public void moveToArbiterStatus(String id) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        query.whereEqualTo("objectId", id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.put("statusId", ParseObject.createWithoutData("Status", "Y5lhU6qfgB"));
+                        o.saveEventually();
+                    }
+                } else {
+                    Log.d("MOVETARBITRATION STATUS", e.getMessage());
+                }
+            }
+        });
+    }
+
+    private void moveToFinishedStatus(String id) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        query.whereEqualTo("objectId", id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.put("statusId", ParseObject.createWithoutData("Status", "FskciSuqTW"));
+                        o.saveEventually();
+                    }
+                } else {
+                    Log.d("MOVE TO FINISHED STATUS", e.getMessage());
+                }
+            }
+        });
+    }
+
+
+    private void openChatActivity(final String task_id, final int group_id, final int child_id) {
         final ProgressDialog dia = ProgressDialog.show(getActivity(), null, getString(R.string.alert_loading));
         ParseQuery<ParseObject> decQuery = ParseQuery.getQuery("Decision");
         decQuery.whereEqualTo("taskId", task_id);
@@ -256,219 +484,6 @@ public class ClientFragment extends Fragment {
         }
     }
 
-    private void prepareListData() {
-        listDataHeader = new ArrayList<String>();
-        listDataChild = new HashMap<String, List<Task>>();
-        inSearchList = new ArrayList<>();
-        inWorkList = new ArrayList<>();
-        arbitrageList = new ArrayList<>();
-        finishedList = new ArrayList<>();
-        draftList = new ArrayList<>();
-
-        initStatusList();
-    }
-
-    private void initStatusList() {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Status");
-        try {
-            List<ParseObject> statusList = query.find();
-            for (ParseObject obj : statusList) {
-                listDataHeader.add(obj.getString("name"));
-            }
-            initSearchList();
-            initWorkList();
-            initFinishedList();
-            initDraftList();
-            listDataChild.put(listDataHeader.get(0), inSearchList);
-            listDataChild.put(listDataHeader.get(1), inWorkList);
-            listDataChild.put(listDataHeader.get(2), arbitrageList);
-            listDataChild.put(listDataHeader.get(3), finishedList);
-            listDataChild.put(listDataHeader.get(4), draftList);
-
-
-            listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
-            expListView.setAdapter(listAdapter);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void checkTime() {
-        ArrayList<ParseObject> statusList = new ArrayList<>();
-        statusList.add(ParseObject.createWithoutData("Status", "vVMYOEUIeY"));
-        statusList.add(ParseObject.createWithoutData("Status", "j6hNwQ01bt"));
-        ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
-        queryParseQuery.whereEqualTo("clientId", ParseUser.getCurrentUser());
-        queryParseQuery.whereEqualTo("attach", null);
-        queryParseQuery.whereContainedIn("statusId", statusList);
-        try {
-            List<ParseObject> parseObjects = queryParseQuery.find();
-            for (ParseObject p : parseObjects) {
-                Date now = new Date();
-                Date end = p.getDate("endTime");
-                if (now.compareTo(end) > 0) {
-                    Log.d("HELlO", now.toString() + ",  " + end.toString());
-                    p.put("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
-                    p.saveEventually();
-                }
-                Log.d("HELlO 2", now.toString() + ",  " + end.toString());
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void initDraftList() {
-        ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
-        queryParseQuery.whereEqualTo("clientId", ParseUser.getCurrentUser());
-        queryParseQuery.whereEqualTo("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
-        try {
-            List<ParseObject> list = queryParseQuery.find();
-            for (ParseObject o : list) {
-                Task task = new Task();
-                task.setId(o.getObjectId());
-                task.setTitle(o.getString("name"));
-                task.setDesc(o.getString("description"));
-                task.setDuration(o.getString("duration"));
-                task.setStartTime(o.getDate("startTime"));
-                task.setEndTime(o.getDate("endTime"));
-                task.setCatId(o.getString("catId"));
-                ParseFile image = (ParseFile) o.get("img");
-                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
-                task.setImage(bmp);
-                draftList.add(task);
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void initSearchList() {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-        ParseObject obj = ParseObject.createWithoutData("Status", "vVMYOEUIeY");
-        query.whereEqualTo("clientId", ParseUser.getCurrentUser());
-        query.whereEqualTo("statusId", obj);
-        try {
-            List<ParseObject> list = query.find();
-            for (ParseObject o : list) {
-                Task task = new Task();
-                task.setId(o.getObjectId());
-                task.setTitle(o.getString("name"));
-                task.setDesc(o.getString("description"));
-                task.setDuration(o.getString("duration"));
-                task.setStartTime(o.getDate("startTime"));
-                task.setEndTime(o.getDate("endTime"));
-                task.setCatId(o.getString("catId"));
-                ParseFile image = (ParseFile) o.get("img");
-                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
-                task.setImage(bmp);
-                inSearchList.add(task);
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void initWorkList() {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-        ParseObject obj = ParseObject.createWithoutData("Status", "j6hNwQ01bt");
-        query.whereEqualTo("clientId", ParseUser.getCurrentUser());
-        query.whereEqualTo("statusId", obj);
-        try {
-            List<ParseObject> list = query.find();
-            for (ParseObject o : list) {
-                Task task = new Task();
-                task.setId(o.getObjectId());
-                task.setTitle(o.getString("name"));
-                task.setDesc(o.getString("description"));
-                task.setDuration(o.getString("duration"));
-                task.setStartTime(o.getDate("startTime"));
-                task.setEndTime(o.getDate("endTime"));
-                task.setCatId(o.getString("catId"));
-                ParseFile image = (ParseFile) o.get("img");
-                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
-                task.setImage(bmp);
-                inWorkList.add(task);
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    private void initFinishedList() {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-        ParseObject obj = ParseObject.createWithoutData("Status", "FskciSuqTW");
-        query.whereEqualTo("clientId", ParseUser.getCurrentUser());
-        query.whereEqualTo("statusId", obj);
-        try {
-            List<ParseObject> list = query.find();
-            for (ParseObject o : list) {
-                Task task = new Task();
-                task.setId(o.getObjectId());
-                task.setTitle(o.getString("name"));
-                task.setDesc(o.getString("description"));
-                task.setDuration(o.getString("duration"));
-                task.setStartTime(o.getDate("startTime"));
-                task.setEndTime(o.getDate("endTime"));
-                task.setCatId(o.getString("catId"));
-                ParseFile image = (ParseFile) o.get("img");
-                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
-                task.setImage(bmp);
-                finishedList.add(task);
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void addTask(View view) {
-        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.addTask);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), CategoryActivity.class);
-                startActivityForResult(intent, 1);
-            }
-        });
-    }
-
-    public void moveToWorkStatus(String id) {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-        query.whereEqualTo("objectId", id);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null) {
-                    for (ParseObject o : list) {
-                        o.put("statusId", ParseObject.createWithoutData("Status", "j6hNwQ01bt"));
-                        o.saveEventually();
-                    }
-                } else {
-                    Log.d("MOVE TO WORK STATUS", e.getMessage());
-                }
-            }
-        });
-    }
-
-    public void moveToArbitratorStatus(String id) {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-        query.whereEqualTo("objectId", id);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null) {
-                    for (ParseObject o : list) {
-                        o.put("statusId", ParseObject.createWithoutData("Status", "Y5lhU6qfgB"));
-                        o.saveEventually();
-                    }
-                } else {
-                    Log.d("MOVETARBITRATION STATUS", e.getMessage());
-                }
-            }
-        });
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -502,35 +517,17 @@ public class ClientFragment extends Fragment {
             int group = data.getIntExtra("group", 0);
             Task newTask = listDataChild.get(listDataHeader.get(group)).get(child);
             listDataChild.get(listDataHeader.get(group)).remove(child);
-            if (data.getStringExtra("flag").equals("arbitrator")) {
-
-            } else if (data.getStringExtra("flag").equals("finished")) {
-                moveToFinishedStatus(newTask.getId());
-                finishedList.add(newTask);
-                listDataChild.put(listDataHeader.get(3), finishedList);
-                listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
-                expListView.setAdapter(listAdapter);
-            }
-
+            moveToFinishedStatus(newTask.getId());
+            finishedList.add(newTask);
+            listDataChild.put(listDataHeader.get(3), finishedList);
+            listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
+            expListView.setAdapter(listAdapter);
         }
     }
 
-
-    private void moveToFinishedStatus(String id) {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-        query.whereEqualTo("objectId", id);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null) {
-                    for (ParseObject o : list) {
-                        o.put("statusId", ParseObject.createWithoutData("Status", "FskciSuqTW"));
-                        o.saveEventually();
-                    }
-                } else {
-                    Log.d("MOVE TO FINISHED STATUS", e.getMessage());
-                }
-            }
-        });
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkDateExpiration();
     }
 }
