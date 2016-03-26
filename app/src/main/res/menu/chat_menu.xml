@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <item
-        android:id="@+id/arbitration"
+        android:id="@+id/deny"
         android:orderInCategory="100"
-        android:icon="@drawable/arbitrator"
+        android:icon="@android:drawable/ic_delete"
         android:title="@string/action_settings"
         app:showAsAction="always" />
 </menu>

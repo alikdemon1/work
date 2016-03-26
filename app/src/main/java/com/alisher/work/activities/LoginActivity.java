@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.alisher.work.arbitor.ListArbitorActivity;
 import com.alisher.work.chat.BaseActivity;
 import com.alisher.work.chat.UserListActivity;
 import com.parse.LogInCallback;
@@ -84,7 +85,7 @@ public class LoginActivity extends AppCompatActivity{
                 if (e == null) {
                     hideDialog();
 //                    if (parseUser.getBoolean("emailVerified")){
-                        Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                        Intent i = new Intent(LoginActivity.this, ListArbitorActivity.class);
                         UserListActivity.user = parseUser;
                         startActivity(i);
                         finish();

@@ -17,17 +17,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ExpandableListView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.activities.PerformsForEachTaskActivity;
 import com.alisher.work.adapters.ExpandableListAdapter;
 import com.alisher.work.chat.ChatActivity;
+import com.alisher.work.chat.UserListActivity;
 import com.alisher.work.chat.utils.Const;
 import com.alisher.work.chat.utils.Utils;
 import com.alisher.work.models.Task;
 import com.alisher.work.newtask.CategoryActivity;
+import com.alisher.work.newtask.DataHolder;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -76,11 +80,15 @@ public class ClientFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_client, container, false);
         addTask(view);
+        // get the listview
         expListView = (ExpandableListView) view.findViewById(R.id.lvExp);
         refreshDaa(view);
         prepareListData();
         listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
         expListView.setAdapter(listAdapter);
+
+
+
         expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
@@ -274,6 +282,7 @@ public class ClientFragment extends Fragment {
         }
     }
 
+
     private void initStatusList() {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Status");
         try {
@@ -291,6 +300,7 @@ public class ClientFragment extends Fragment {
             listDataChild.put(listDataHeader.get(3), finishedList);
             listDataChild.put(listDataHeader.get(4), draftList);
 
+
             listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
             expListView.setAdapter(listAdapter);
         } catch (ParseException e) {
@@ -298,7 +308,9 @@ public class ClientFragment extends Fragment {
         }
     }
 
-    private void initDraftList() {
+
+
+    private void initDraftList(){
         ParseQuery<ParseObject> queryParseQuery = ParseQuery.getQuery("Task");
         queryParseQuery.whereEqualTo("clientId", ParseUser.getCurrentUser());
         queryParseQuery.whereEqualTo("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
@@ -348,6 +360,7 @@ public class ClientFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
 
     private void initFinishedList() {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");

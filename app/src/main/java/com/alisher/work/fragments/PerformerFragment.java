@@ -176,6 +176,7 @@ public class PerformerFragment extends Fragment {
         taskIdOnWorkList = new ArrayList<String>();
         initStatusList();
         initAvailibleList();
+        initFinishedList();
 /*
         listDataHeader.add("Availible");
         listDataHeader.add("In the work");
@@ -194,8 +195,35 @@ public class PerformerFragment extends Fragment {
         listDataChild.put(listDataHeader.get(6), finishedList);*/
     }
 
+    private void initFinishedList() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        ParseObject obj = ParseObject.createWithoutData("Status", "FskciSuqTW");
+        query.whereEqualTo("clientId", ParseUser.getCurrentUser());
+        query.whereEqualTo("statusId", obj);
+        try {
+            List<ParseObject> list = query.find();
+            for (ParseObject o : list) {
+                Task task = new Task();
+                task.setId(o.getObjectId());
+                task.setTitle(o.getString("name"));
+                task.setDesc(o.getString("description"));
+                task.setDuration(o.getString("duration"));
+                task.setStartTime(o.getDate("startTime"));
+                task.setEndTime(o.getDate("endTime"));
+                task.setCatId(o.getString("catId"));
+                ParseFile image = (ParseFile) o.get("img");
+                bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
+                task.setImage(bmp);
+                finishedList.add(task);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void initStatusList() {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Status");
+        query.setLimit(4);
         try {
             List<ParseObject> statusList = query.find();
             for (ParseObject obj : statusList) {
@@ -338,7 +366,7 @@ public class PerformerFragment extends Fragment {
         }
     }
 
-    private void loadUserList(String task_id) {
+    private void loadUserList(final String task_id) {
         final ProgressDialog dia = ProgressDialog.show(getActivity(), null, getString(R.string.alert_loading));
         ParseQuery<ParseObject> decQuery = ParseQuery.getQuery("Task");
         decQuery.whereEqualTo("objectId", task_id);
@@ -352,7 +380,7 @@ public class PerformerFragment extends Fragment {
                     ParseUser user = (ParseUser) list.get(0).getParseObject("clientId");
                     startActivity(new Intent(getActivity(),
                             ChatActivity.class).putExtra(
-                            Const.EXTRA_DATA, user.getUsername()));
+                            Const.EXTRA_DATA, user.getUsername()).putExtra("columnName","perfId").putExtra("task_id",task_id));
                 } else {
                     Utils.showDialog(
                             getActivity(),

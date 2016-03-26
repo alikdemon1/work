@@ -6,10 +6,10 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-        <!-- Menu -->
+    <!-- Menu -->
     <string name="action_settings">Settings</string>
 
-        <!-- Register and Login -->
+    <!-- Register and Login -->
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="hint_name">Fullname</string>
@@ -22,7 +22,7 @@
     <string name="name">Fullname</string>
 
 
-        <!-- New Task -->
+    <!-- New Task -->
     <string name="hint_desc">Please describe the job as much detail. So you can choose a suitable singer faster.</string>
     <string name="hint_title">Title task</string>
     <string name="new_apply">Apply</string>
