@@ -83,6 +83,14 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                         Intent i = getIntent();
                         i.putExtra("child", i.getIntExtra("child_position", 0));
                         i.putExtra("group", i.getIntExtra("group_position", 0));
+                        ParseUser user = ParseUser.getCurrentUser();
+                        int price = i.getIntExtra("taskPriceForBalance", 0);
+                        int bal=user.getInt("balance")- price;
+                        int fbal=user.getInt("frozenBalance")+ price;
+                        Log.d("price",price+"$");
+                        user.put("balance", bal);
+                        user.put("frozenBalance", fbal);
+                        user.saveEventually();
                         setResult(RESULT_OK, i);
                         finish();
                     }

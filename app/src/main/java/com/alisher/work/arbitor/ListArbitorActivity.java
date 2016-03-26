@@ -58,6 +58,7 @@ public class ListArbitorActivity extends AppCompatActivity {
                 i.putExtra("newTaskDesc", newTask.getDesc() + "");
                 i.putExtra("newTaskId", newTask.getId() + "");
                 i.putExtra("newTaskImage",newTask.getImage());
+                i.putExtra("newTaskClientId",newTask.getCatId());
                 i.putExtra("newTaskCost",String.valueOf(newTask.getPrice()));
                 long mili = newTask.getEndTime().getTime();
                 i.putExtra("newTaskEndtime",mili);
@@ -91,6 +92,7 @@ public class ListArbitorActivity extends AppCompatActivity {
                         taskItem.setEndTime(o.getDate("endTime"));
                         taskItem.setCatId(o.getString("catId"));
                         taskItem.setPrice(o.getInt("cost"));
+                        taskItem.setClientId(o.getString("clientId"));
 
                         ParseFile image = (ParseFile) o.get("img");
                         try {

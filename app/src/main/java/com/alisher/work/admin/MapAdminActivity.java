@@ -123,7 +123,7 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
                 if (e == null) {
                     for (ParseUser p : list) {
                         String fName = p.getString("firstName");
-                        String lName = p.getString("lastname");
+                        String lName = p.getString("lastName");
                         double rating = p.getDouble("performerRating");
                         double latitude = p.getParseGeoPoint("lat").getLatitude();
                         double longtitude = p.getParseGeoPoint("lat").getLongitude();

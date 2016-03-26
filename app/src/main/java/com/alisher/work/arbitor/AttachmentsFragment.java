@@ -92,6 +92,7 @@ public class AttachmentsFragment extends Fragment {
                         ParseFile file = (ParseFile) o.get("attach");
                         aItem.setName(file.getName());
                         aItem.setUrl(file.getUrl());
+                        aItem.setCreatedAt(o.getCreatedAt());
                         attachments.add(aItem);
                         mAdapter.notifyDataSetChanged();
                     }

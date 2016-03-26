@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity
     private TextView emailText;
     private NavigationView navigationView;
     private ParseUser currentUser = ParseUser.getCurrentUser();
-    private TextView nameText;
+    private TextView nameText,balanceText,frozenBalanceText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity
         View header = navigationView.getHeaderView(0);
         emailText = (TextView) header.findViewById(R.id.profile_email);
         nameText = (TextView) header.findViewById(R.id.profile_name);
+        balanceText = (TextView) header.findViewById(R.id.userBalance);
+        frozenBalanceText = (TextView) header.findViewById(R.id.userFrozenBalance);
         ParseQuery<ParseUser> query = ParseUser.getQuery();
         query.whereEqualTo("objectId", currentUser.getObjectId());
         query.findInBackground(new FindCallback<ParseUser>() {
@@ -69,8 +71,12 @@ public class MainActivity extends AppCompatActivity
                     for (ParseUser user : list) {
                         String name = user.getString("firstName") + " " + user.getString("lastName");
                         String email = user.getUsername();
+                        String bal=String.valueOf(user.getInt("balance"))+"$";
+                        String frozenBal=String.valueOf(user.getInt("frozenBalance"))+"$";
                         nameText.setText(name);
                         emailText.setText(email);
+                        balanceText.setText(bal+"$");
+                        frozenBalanceText.setText(frozenBal+"$");
                     }
                 } else {
                     Log.e("MainActivity", e.getMessage());

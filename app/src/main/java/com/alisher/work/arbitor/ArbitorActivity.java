@@ -45,6 +45,7 @@ public class ArbitorActivity extends AppCompatActivity {
         task.setImage((Bitmap) getIntent().getParcelableExtra("newTaskImage"));
         task.setPrice(Integer.valueOf(getIntent().getStringExtra("newTaskCost")));
         task.setEndTime(new Date(getIntent().getLongExtra("newTaskDeadline",0)));
+        task.setClientId(getIntent().getStringExtra("newTaskClientId"));
     }
     public Task getMyData(){
         return task;

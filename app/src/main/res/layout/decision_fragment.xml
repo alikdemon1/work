@@ -48,6 +48,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Share"
-        android:id="@+id/save_share"/>
+        android:id="@+id/save_share" />
 
 </LinearLayout>

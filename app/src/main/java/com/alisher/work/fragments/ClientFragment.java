@@ -99,6 +99,8 @@ public class ClientFragment extends Fragment {
                     i.putExtra("group_position", groupPosition);
                     i.putExtra("taskId", newTask.getId());
                     i.putExtra("child_position", childPosition);
+                    i.putExtra("taskPriceForBalance",newTask.getPrice());
+                    Log.d("taskPriceForBalance", newTask.getPrice() + "");
                     startActivityForResult(i, 2);
                 } else if (groupPosition == 1) {
                     openChatActivity(newTask.getId(), groupPosition, childPosition);
@@ -270,6 +272,7 @@ public class ClientFragment extends Fragment {
                 task.setDesc(o.getString("description"));
                 task.setDuration(o.getString("duration"));
                 task.setStartTime(o.getDate("startTime"));
+                task.setPrice(o.getInt("cost"));
                 task.setEndTime(o.getDate("endTime"));
                 task.setCatId(o.getString("catId"));
                 ParseFile image = (ParseFile) o.get("img");
@@ -324,6 +327,7 @@ public class ClientFragment extends Fragment {
                 task.setDuration(o.getString("duration"));
                 task.setStartTime(o.getDate("startTime"));
                 task.setEndTime(o.getDate("endTime"));
+                task.setPrice(o.getInt("cost"));
                 task.setCatId(o.getString("catId"));
                 ParseFile image = (ParseFile) o.get("img");
                 bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
@@ -351,6 +355,7 @@ public class ClientFragment extends Fragment {
                 task.setStartTime(o.getDate("startTime"));
                 task.setEndTime(o.getDate("endTime"));
                 task.setCatId(o.getString("catId"));
+                task.setPrice(o.getInt("cost"));
                 ParseFile image = (ParseFile) o.get("img");
                 bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
                 task.setImage(bmp);

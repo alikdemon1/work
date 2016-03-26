@@ -94,6 +94,7 @@ public class NewTaskActivity extends progressMobileStepper {
                         intent.putExtra("image_category", image_category);
                         intent.putExtra("price", price);
                         intent.putExtra("desc", desc);
+
                         setResult(RESULT_OK, intent);
                         finish();
                     }

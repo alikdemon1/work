@@ -127,6 +127,16 @@
             android:windowSoftInputMode="adjustPan" />
 
         <activity
+            android:name=".arbitor.ListArbitorActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".arbitor.ArbitorActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
             android:name=".admin.AdminActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" />

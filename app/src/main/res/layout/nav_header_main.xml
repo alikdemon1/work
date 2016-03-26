@@ -26,10 +26,29 @@
         android:text="Here will be name"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-    <TextView
-        android:id="@+id/profile_email"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="android@gmail.com" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
+        <TextView
+            android:id="@+id/profile_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="android@gmail.com" />
+
+        <TextView
+            android:id="@+id/userBalance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0$"
+            android:layout_toLeftOf="@+id/userFrozenBalance"
+            android:layout_toStartOf="@+id/userFrozenBalance"
+            android:layout_marginRight="30dp"/>
+        <TextView
+            android:id="@+id/userFrozenBalance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0$"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
 </LinearLayout>

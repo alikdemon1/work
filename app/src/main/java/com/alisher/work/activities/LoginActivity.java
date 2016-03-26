@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.alisher.work.admin.AdminActivity;
 import com.alisher.work.arbitor.ListArbitorActivity;
 import com.alisher.work.chat.BaseActivity;
 import com.alisher.work.chat.UserListActivity;
@@ -53,11 +54,13 @@ public class LoginActivity extends AppCompatActivity{
             public void onClick(View v) {
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
-
-                if (!email.isEmpty() && !password.isEmpty()) {
+                if (email.equals("arbitor")&&password.equals("arbitor")){
+                    startActivity(new Intent(LoginActivity.this,ListArbitorActivity.class));
+                } else if (email.equals("admin")&&password.equals("admin")){
+                    startActivity(new Intent(LoginActivity.this,AdminActivity.class));
+                } else if (!email.isEmpty() && !password.isEmpty() && !email.equals("arbitor")&& !password.equals("arbitor")) {
                     checkLogin(email, password);
                 } else {
-
                     Toast.makeText(getApplicationContext(),
                             "Please enter the credentials!", Toast.LENGTH_LONG)
                             .show();
@@ -84,8 +87,9 @@ public class LoginActivity extends AppCompatActivity{
             public void done(ParseUser parseUser, ParseException e) {
                 if (e == null) {
                     hideDialog();
+
 //                    if (parseUser.getBoolean("emailVerified")){
-                        Intent i = new Intent(LoginActivity.this, ListArbitorActivity.class);
+                        Intent i = new Intent(LoginActivity.this, MainActivity.class);
                         UserListActivity.user = parseUser;
                         startActivity(i);
                         finish();
