@@ -26,16 +26,9 @@ import java.util.List;
 
 
 public class UserListActivity extends BaseActivity {
-
-    /**
-     * The ChatActivity list.
-     */
+    
     private ArrayList<ParseUser> uList;
     private TextView textName;
-
-    /**
-     * The user.
-     */
     public static ParseUser user;
 
 

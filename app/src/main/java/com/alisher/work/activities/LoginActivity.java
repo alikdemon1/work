@@ -85,7 +85,7 @@ public class LoginActivity extends AppCompatActivity{
                 if (e == null) {
                     hideDialog();
 //                    if (parseUser.getBoolean("emailVerified")){
-                        Intent i = new Intent(LoginActivity.this, ListArbitorActivity.class);
+                        Intent i = new Intent(LoginActivity.this, MainActivity.class);
                         UserListActivity.user = parseUser;
                         startActivity(i);
                         finish();

@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -52,7 +53,7 @@ public class AttachActivity extends AppCompatActivity {
         boolean isVisible = getIntent().getBooleanExtra("isVisible", false);
         addAttachBtn = (Button) findViewById(R.id.attach_btn);
 
-        if (!isVisible){
+        if (isVisible){
             addAttachBtn.setEnabled(false);
             addAttachBtn.setVisibility(View.INVISIBLE);
         }
@@ -154,13 +155,60 @@ public class AttachActivity extends AppCompatActivity {
         });
     }
 
+    public void moveToArbiterStatus(String id) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        query.whereEqualTo("objectId", id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.put("statusId", ParseObject.createWithoutData("Status", "Y5lhU6qfgB"));
+                        o.saveEventually();
+                    }
+                } else {
+                    Log.d("MOVETARBITRATION STATUS", e.getMessage());
+                }
+            }
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.arbiter_menu, menu);
+        return true;
+    }
+
+    public void setIntent(Intent i) {
+        setResult(RESULT_OK, i);
+        finish();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.arbitration_menu);
+        boolean isEnabled = getIntent().getBooleanExtra("isVisible", false);
+        int position = getIntent().getIntExtra("group", 0);
+        if (isEnabled && position == 1) {
+            item.setEnabled(true);
+            item.getIcon().setAlpha(255);
+        } else { 
+            item.setEnabled(false);
+            item.getIcon().setAlpha(130);
+        }
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case android.R.id.home:
-                setResult(RESULT_CANCELED);
-                finish();
-                break;
+        int id = item.getItemId();
+        if (id == R.id.arbitration_menu) {
+            moveToArbiterStatus(getIntent().getStringExtra("task_id"));
+            setIntent(getIntent());
+        } else if (id == R.id.home) {
+            setResult(RESULT_CANCELED);
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }

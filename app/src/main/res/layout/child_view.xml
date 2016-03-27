@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorWhite"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:descendantFocusability="blocksDescendants">
 
     <ImageView
         android:id="@+id/perf_image"
@@ -20,5 +21,35 @@
         android:paddingTop="5dp"
         android:text="Title"
         android:textSize="15sp" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
+
+    <ImageButton
+        android:id="@+id/perf_descBtn"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
+        android:background="@color/colorWhite"
+        android:src="@drawable/desc_selector"
+        android:clickable="false"/>
+
+    <ImageButton
+        android:id="@+id/perf_chatBtn"
+        android:background="@color/colorWhite"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
+        android:src="@drawable/chat_selector"
+        android:clickable="false"/>
+
+    <ImageButton
+        android:id="@+id/perf_attachBtn"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
+        android:background="@color/colorWhite"
+        android:src="@drawable/attach_selector"
+        android:clickable="false"/>
 
 </LinearLayout>

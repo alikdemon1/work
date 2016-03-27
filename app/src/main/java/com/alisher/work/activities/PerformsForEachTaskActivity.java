@@ -81,6 +81,7 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         choosedPerformer(perform.getId());
                         Intent i = getIntent();
+                        moveToWorkStatus(i.getStringExtra("taskId"));
                         i.putExtra("child", i.getIntExtra("child_position", 0));
                         i.putExtra("group", i.getIntExtra("group_position", 0));
                         setResult(RESULT_OK, i);
@@ -106,6 +107,24 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                     }
                 } else {
                     Log.d("CHOOSED PERFORMER", e.getMessage());
+                }
+            }
+        });
+    }
+
+    public void moveToWorkStatus(String id) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        query.whereEqualTo("objectId", id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.put("statusId", ParseObject.createWithoutData("Status", "j6hNwQ01bt"));
+                        o.saveEventually();
+                    }
+                } else {
+                    Log.d("MOVE TO WORK STATUS", e.getMessage());
                 }
             }
         });
