@@ -83,11 +83,56 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.finished) {
             vote();
+            ParseQuery<ParseUser> clientQuery = ParseUser.getQuery();
+            clientQuery.whereEqualTo("objectId", ParseUser.getCurrentUser().getObjectId());
+            clientQuery.findInBackground(new FindCallback<ParseUser>() {
+                @Override
+                public void done(List<ParseUser> list, ParseException e) {
+                    for (ParseObject o : list) {
+                        int res =o.getInt("frozenBalance") - Integer.valueOf(getIntent().getStringExtra("newTaskCost"));
+                        o.put("frozenBalance", res);
+                        Log.d("forzenResClient",res+" " + Integer.valueOf(getIntent().getStringExtra("newTaskCost")));
+                        o.saveInBackground();
+                    }
+                }
+            });
+            addBalanceForPerf();
         } else if (id == R.id.home) {
             setResult(RESULT_CANCELED);
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void addBalanceForPerf() {
+        ParseQuery<ParseObject> queryPerfId = ParseQuery.getQuery("Decision");
+        queryPerfId.whereEqualTo("taskId", getIntent().getStringExtra("newTaskId"));
+        queryPerfId.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        String perfId = o.getString("perfId");
+                        Log.d("perfId", perfId);
+                        ParseQuery<ParseUser> perfQuery = ParseUser.getQuery();
+                        perfQuery.whereEqualTo("objectId", perfId);
+                        perfQuery.findInBackground(new FindCallback<ParseUser>() {
+                            @Override
+                            public void done(List<ParseUser> list, ParseException e) {
+                                for (ParseObject perfObj : list) {
+                                    int taskCost=Integer.valueOf(getIntent().getStringExtra("newTaskCost"));
+                                    int res=perfObj.getInt("balance") + taskCost;
+                                    Log.d("balance", taskCost+" "+perfObj.getInt("balance")+" " + res);
+                                    perfObj.put("balance", res);
+                                    perfObj.saveInBackground();
+
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 
     public void vote() {

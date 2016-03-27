@@ -16,7 +16,6 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mInstance = this;
-
         // register with parse
         ParseUtils.registerParse(this);
     }

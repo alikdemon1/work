@@ -54,8 +54,14 @@ public class DecisionFragment extends Fragment {
                     @Override
                     public void done(List<ParseUser> list, ParseException e) {
                         for (ParseObject o : list) {
-                            o.put("frozenBalance", (o.getInt("frozenBalance") - (listT.getMyData().getPrice() * Integer.valueOf(perfTxt.getText().toString()) / 100)));
-                            o.put("balance", o.getInt("balance") + listT.getMyData().getPrice() * Integer.valueOf(clientTxt.getText().toString()) / 100);
+                            Log.d("clientId", listT.getMyData().getClientId());
+                            Log.d("clinetFrozen", o.getInt("frozenBalance") + "");
+                            Log.d("clientBalance", o.getInt("balance") + " taskPrice:" + listT.getMyData().getPrice());
+                            int resClientFrozen=o.getInt("frozenBalance") - (listT.getMyData().getPrice() * Integer.valueOf(perfTxt.getText().toString()) / 100);
+                            o.put("frozenBalance", resClientFrozen);
+                            int resClientBalance=o.getInt("balance") + (listT.getMyData().getPrice() * Integer.valueOf(clientTxt.getText().toString()) / 100);
+                            o.put("balance", resClientBalance);
+                            Log.d("clientFrBl",resClientBalance+" fr:" +resClientFrozen);
                             o.saveInBackground();
                         }
                     }
@@ -67,16 +73,20 @@ public class DecisionFragment extends Fragment {
                     public void done(List<ParseObject> list, ParseException e) {
                         if (e == null) {
                             for (ParseObject o : list) {
-                                String perfId = o.getString("perfId");
+                                final String perfId = o.getString("perfId");
                                 ParseQuery<ParseUser> perfQuery = ParseUser.getQuery();
                                 perfQuery.whereEqualTo("objectId", perfId);
                                 perfQuery.findInBackground(new FindCallback<ParseUser>() {
                                     @Override
                                     public void done(List<ParseUser> list, ParseException e) {
-                                        for (ParseObject o : list) {
-                                            o.put("balance", (o.getInt("balance") + (listT.getMyData().getPrice() * Integer.valueOf(perfTxt.getText().toString()) / 100)));
-                                            o.saveInBackground();
-                                            Log.d("balance", (o.getInt("balance") + (listT.getMyData().getPrice() * Integer.valueOf(perfTxt.getText().toString()) / 100))+"");
+                                        for (ParseObject perfObj : list) {
+                                            Log.d("performerId",perfId);
+                                            Log.d("performerFrozen",perfObj.getInt("frozenBalance")+"");
+                                            Log.d("performerBalance", perfObj.getInt("balance") + " taskPrice:" + listT.getMyData().getPrice());
+                                            int resPerfBalance=perfObj.getInt("balance") + (listT.getMyData().getPrice() * Integer.valueOf(perfTxt.getText().toString()) / 100);
+                                            perfObj.put("balance",resPerfBalance );
+                                            perfObj.saveInBackground();
+                                            Log.d("resPerfBal", resPerfBalance+"");
                                         }
                                     }
                                 });

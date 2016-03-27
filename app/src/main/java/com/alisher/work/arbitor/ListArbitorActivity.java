@@ -58,7 +58,7 @@ public class ListArbitorActivity extends AppCompatActivity {
                 i.putExtra("newTaskDesc", newTask.getDesc() + "");
                 i.putExtra("newTaskId", newTask.getId() + "");
                 i.putExtra("newTaskImage",newTask.getImage());
-                i.putExtra("newTaskClientId",newTask.getCatId());
+                i.putExtra("newTaskClientId",newTask.getClientId());
                 i.putExtra("newTaskCost",String.valueOf(newTask.getPrice()));
                 long mili = newTask.getEndTime().getTime();
                 i.putExtra("newTaskEndtime",mili);

@@ -184,7 +184,7 @@ public class ClientFragment extends Fragment {
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if(paused) {
+                if (paused) {
                     Log.d("COUNTER", "counter++");
                     refreshData();
                 }
@@ -305,6 +305,7 @@ public class ClientFragment extends Fragment {
                         task.setStartTime(o.getDate("startTime"));
                         task.setEndTime(o.getDate("endTime"));
                         task.setCatId(o.getString("catId"));
+                        task.setPrice(o.getInt("cost"));
                         ParseFile image = (ParseFile) o.get("img");
                         try {
                             bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
@@ -357,6 +358,7 @@ public class ClientFragment extends Fragment {
                         task.setStartTime(o.getDate("startTime"));
                         task.setEndTime(o.getDate("endTime"));
                         task.setCatId(o.getString("catId"));
+                        task.setPrice(o.getInt("cost"));
                         ParseFile image = (ParseFile) o.get("img");
                         try {
                             bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
@@ -393,6 +395,7 @@ public class ClientFragment extends Fragment {
                         task.setStartTime(o.getDate("startTime"));
                         task.setEndTime(o.getDate("endTime"));
                         task.setCatId(o.getString("catId"));
+                        task.setPrice(o.getInt("cost"));
                         ParseFile image = (ParseFile) o.get("img");
                         try {
                             bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
@@ -429,6 +432,7 @@ public class ClientFragment extends Fragment {
                         task.setStartTime(o.getDate("startTime"));
                         task.setEndTime(o.getDate("endTime"));
                         task.setCatId(o.getString("catId"));
+                        task.setPrice(o.getInt("cost"));
                         ParseFile image = (ParseFile) o.get("img");
                         try {
                             bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
@@ -466,6 +470,7 @@ public class ClientFragment extends Fragment {
                         task.setStartTime(o.getDate("startTime"));
                         task.setEndTime(o.getDate("endTime"));
                         task.setCatId(o.getString("catId"));
+                        task.setPrice(o.getInt("cost"));
                         ParseFile image = (ParseFile) o.get("img");
                         try {
                             bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);

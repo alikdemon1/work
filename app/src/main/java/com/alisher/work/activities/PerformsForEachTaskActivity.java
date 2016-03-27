@@ -87,11 +87,12 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                         ParseUser user = ParseUser.getCurrentUser();
                         int price = i.getIntExtra("taskPriceForBalance", 0);
                         int bal=user.getInt("balance")- price;
+                        Log.d("frozenBalance",user.getInt("frozenBalance")+"");
                         int fbal=user.getInt("frozenBalance")+ price;
                         Log.d("price",price+"$");
                         user.put("balance", bal);
                         user.put("frozenBalance", fbal);
-                        user.saveEventually();
+                        user.saveInBackground();
                         setResult(RESULT_OK, i);
                         finish();
                     }
