@@ -98,7 +98,76 @@ public class ChatActivity extends BaseActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        if(id==R.id.deny){
+            String taskIdDeny =getIntent().getStringExtra("task_id");
+            String s = getIntent().getStringExtra("columnName");
+            Log.d("checkColumn",s+"----"+taskIdDeny);
+            denyMethod(taskIdDeny, s);
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void denyMethod(final String taskIdDeny, final String s) {
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Deny");
+        query.whereEqualTo("taskId",taskIdDeny);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+
+                if (!list.isEmpty()){
+                    for(ParseObject o:list){
+                        if(o.getString("clientId")==null){
+                            o.put("clientId",ParseUser.getCurrentUser().getObjectId());
+                            o.saveEventually();
+                        }
+                        if (o.getString("perfId")==null){
+                            o.put("perfId",ParseUser.getCurrentUser().getObjectId());
+                            o.saveEventually();
+                        }
+
+                        if(o.getString("clientId")!=null && o.getString("perfId")!=null){
+                            deleteFinishedTask(taskIdDeny);
+                            moveToFinishedStatus(taskIdDeny);
+                            Toast.makeText(getApplicationContext(), "Task finished", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "Waiting...", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } else {
+                    ParseObject p = new ParseObject("Deny");
+                    p.put(s, ParseUser.getCurrentUser().getObjectId());
+                    p.put("taskId", taskIdDeny);
+                    p.saveEventually();
+                }
+            }
+        });
+    }
+
+    public void setIntent(Intent i, String s){
+        i.putExtra("child", i.getIntExtra("child", 0));
+        i.putExtra("group", i.getIntExtra("group", 0));
+        i.putExtra("flag", s);
+        setResult(RESULT_OK, i);
+        finish();
+    }
+
+    public void deleteFinishedTask(String task_id){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
+        query.whereEqualTo("taskId", task_id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.deleteEventually();
+                    }
+                } else {
+
+                }
+            }
+        });
     }
 
     @Override
@@ -295,4 +364,25 @@ public class ChatActivity extends BaseActivity {
             }
         });
     }
+
+
+
+    private void moveToFinishedStatus(String id) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        query.whereEqualTo("objectId", id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.put("statusId", ParseObject.createWithoutData("Status", "FskciSuqTW"));
+                        o.saveEventually();
+                    }
+                } else {
+                    Log.d("MOVE TO FINISHED STATUS", e.getMessage());
+                }
+            }
+        });
+    }
+
 }
