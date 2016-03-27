@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.alisher.work.R;
 import com.alisher.work.activities.AttachActivity;
 import com.alisher.work.activities.ClientDescriptionActivity;
+import com.alisher.work.activities.MainActivity;
 import com.alisher.work.activities.TaskDescriptionActivity;
 import com.alisher.work.chat.ChatActivity;
 import com.alisher.work.chat.utils.Const;
@@ -66,6 +67,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public View getChildView(final int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
+        _context = parent.getContext();
         final Task childText = (Task) getChild(groupPosition, childPosition);
 
         if (convertView == null) {
@@ -102,7 +104,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             desc.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent i = new Intent(v.getContext(), ClientDescriptionActivity.class);
+                    Intent i = new Intent(_context, ClientDescriptionActivity.class);
                     i.putExtra("newTaskTitle", childText.getTitle() + "");
                     i.putExtra("newTaskDesc", childText.getDesc() + "");
                     i.putExtra("newTaskId", childText.getId() + "");
@@ -113,7 +115,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                     i.putExtra("child", childPosition);
                     i.putExtra("group", groupPosition);
                     i.putExtra("isEnabled", true);
-                    v.getContext().startActivity(i);
+                    ((MainActivity) _context).startActivityForResult(i, 3);
                 }
             });
         }
@@ -132,7 +134,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 public void onClick(View v) {
                     Intent i = new Intent(v.getContext(), AttachActivity.class);
                     i.putExtra("task_id", childText.getId());
-                    i.putExtra("isVisible", false);
+                    i.putExtra("group", groupPosition);
+                    i.putExtra("isVisible", true);
                     v.getContext().startActivity(i);
                 }
             });
@@ -169,7 +172,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         i.putExtra("task_id", task_id);
                         i.putExtra("group", group_id);
                         i.putExtra("child", child_id);
-                        v.getContext().startActivity(i);
+                        ((MainActivity)_context).startActivityForResult(i, 3);
                     } else {
                         Utils.showDialog(
                                 v.getContext(),

@@ -1,9 +1,5 @@
 package com.alisher.work.chat;
 
-/**
- * Created by Faheem on 09/11/15.
- */
-
 import android.content.Context;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -16,10 +12,7 @@ import com.alisher.work.R;
 
 import java.util.ArrayList;
 
-/**
- * The Class ChatAdapter is the adapter class for ChatActivity ListView. This
- * adapter shows the Sent or Receieved ChatActivity message in each list item.
- */
+
 public class ChatListAdapter extends BaseAdapter {
     private Context context;
     private String mUserId;

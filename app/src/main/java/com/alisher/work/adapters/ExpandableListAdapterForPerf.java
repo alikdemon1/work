@@ -1,15 +1,19 @@
 package com.alisher.work.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alisher.work.R;
+import com.alisher.work.activities.AttachActivity;
+import com.alisher.work.activities.ClientDescriptionActivity;
 import com.alisher.work.models.Task;
 
 import java.util.HashMap;
@@ -43,7 +47,7 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
     }
 
     @Override
-    public View getChildView(int groupPosition, final int childPosition,
+    public View getChildView(final int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
         final Task childText = (Task) getChild(groupPosition, childPosition);
@@ -58,6 +62,64 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
                 .findViewById(R.id.perf_title);
         ImageView image = (ImageView) convertView
                 .findViewById(R.id.perf_image);
+
+        ImageButton desc = (ImageButton) convertView.findViewById(R.id.perf_descBtn);
+        ImageButton chat = (ImageButton) convertView.findViewById(R.id.perf_chatBtn);
+        ImageButton attach = (ImageButton) convertView.findViewById(R.id.perf_attachBtn);
+        if (groupPosition == 0) {
+            desc.setEnabled(true);
+            chat.setEnabled(false);
+            attach.setEnabled(false);
+        } else if (groupPosition == 1) {
+            desc.setEnabled(true);
+            chat.setEnabled(true);
+            attach.setEnabled(true);
+        } else if (groupPosition == 4) {
+            desc.setEnabled(false);
+            chat.setEnabled(false);
+            attach.setEnabled(false);
+        }
+
+
+        if (desc.isEnabled()){
+            desc.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(v.getContext(), ClientDescriptionActivity.class);
+                    i.putExtra("newTaskTitle", childText.getTitle() + "");
+                    i.putExtra("newTaskDesc", childText.getDesc() + "");
+                    i.putExtra("newTaskId", childText.getId() + "");
+                    i.putExtra("newTaskImage",childText.getImage());
+                    i.putExtra("newTaskCost",String.valueOf(childText.getPrice()));
+                    i.putExtra("newTaskDuration", childText.getEndTime().getTime());
+
+                    i.putExtra("child", childPosition);
+                    i.putExtra("group", groupPosition);
+                    i.putExtra("isEnabled", false);
+                    v.getContext().startActivity(i);
+                }
+            });
+        }
+
+        if (chat.isEnabled()){
+            chat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                }
+            });
+        }
+
+        if (attach.isEnabled()){
+            attach.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(v.getContext(), AttachActivity.class);
+                    i.putExtra("task_id", childText.getId());
+                    i.putExtra("isVisible", false);
+                    v.getContext().startActivity(i);
+                }
+            });
+        }
 
         txtListChild.setText(childText.getTitle());
         image.setImageBitmap(childText.getImage());

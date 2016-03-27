@@ -1,16 +1,12 @@
 package com.alisher.work.chat;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
@@ -41,51 +37,21 @@ import com.parse.SaveCallback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class ChatActivity extends BaseActivity {
-    /**
-     * The Conversation list.
-     */
+
     private ArrayList<Conversation> convList;
-    //private ArrayList<ParseObject> msgList;
-
-    /**
-     * The chat_layout adapter.
-     */
     private ChatListAdapter mChatAdapter;
-
     private TextView tvname;
-    /**
-     * The Editext to compose the message.
-     */
     private EditText etxtMessage;
-
-    /**
-     * The user name of buddy.
-     */
     private String buddy;
-
-    /**
-     * The date of last message in conversation.
-     */
     private Date lastMsgDate;
-
-    /**
-     * Flag to hold if the activity is running or not.
-     */
     private boolean isRunning;
-
-    /**
-     * The handler.
-     */
     private static Handler handler;
 
     @Override
@@ -116,7 +82,6 @@ public class ChatActivity extends BaseActivity {
     }
 
     public void initToolbar() {
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarChat);
         getSupportActionBar();
     }
 
@@ -133,76 +98,7 @@ public class ChatActivity extends BaseActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if(id==R.id.deny){
-            String taskIdDeny =getIntent().getStringExtra("task_id");
-            String s = getIntent().getStringExtra("columnName");
-            Log.d("checkColumn",s+"----"+taskIdDeny);
-            denyMethod(taskIdDeny, s);
-        }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void denyMethod(final String taskIdDeny, final String s) {
-
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Deny");
-        query.whereEqualTo("taskId",taskIdDeny);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-
-                if (!list.isEmpty()){
-                    for(ParseObject o:list){
-                        if(o.getString("clientId")==null){
-                            o.put("clientId",ParseUser.getCurrentUser().getObjectId());
-                            o.saveEventually();
-                        }
-                        if (o.getString("perfId")==null){
-                            o.put("perfId",ParseUser.getCurrentUser().getObjectId());
-                            o.saveEventually();
-                        }
-
-                        if(o.getString("clientId")!=null && o.getString("perfId")!=null){
-                            deleteFinishedTask(taskIdDeny);
-                            moveToFinishedStatus(taskIdDeny);
-                            Toast.makeText(getApplicationContext(), "Task finished", Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            Toast.makeText(getApplicationContext(), "Waiting...", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                } else {
-                    ParseObject p = new ParseObject("Deny");
-                    p.put(s, ParseUser.getCurrentUser().getObjectId());
-                    p.put("taskId", taskIdDeny);
-                    p.saveEventually();
-                }
-            }
-        });
-    }
-
-    public void setIntent(Intent i, String s){
-        i.putExtra("child", i.getIntExtra("child", 0));
-        i.putExtra("group", i.getIntExtra("group", 0));
-        i.putExtra("flag", s);
-        setResult(RESULT_OK, i);
-        finish();
-    }
-
-    public void deleteFinishedTask(String task_id){
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
-        query.whereEqualTo("taskId", task_id);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null) {
-                    for (ParseObject o : list) {
-                        o.deleteEventually();
-                    }
-                } else {
-
-                }
-            }
-        });
     }
 
     @Override
@@ -295,11 +191,6 @@ public class ChatActivity extends BaseActivity {
     }
 
 
-    /**
-     * Call this method to Send message to opponent. It does nothing if the text
-     * is empty otherwise it creates a Parse object for ChatActivity message and send it
-     * to Parse server.
-     */
     private void sendMessage() {
         if (etxtMessage.length() == 0)
             return;
@@ -319,7 +210,6 @@ public class ChatActivity extends BaseActivity {
         ParseObject po = new ParseObject("ChatActivity");
         po.put("sender", UserListActivity.user.getUsername());
         po.put("receiver", buddy);
-        // po.put("createdAt", "");
         po.put("message", s);
         po.saveEventually(new SaveCallback() {
 
@@ -360,13 +250,7 @@ public class ChatActivity extends BaseActivity {
         push.sendInBackground();
     }
 
-    /**
-     * Load the conversation list from Parse server and save the date of last
-     * message that will be used to load only recent new messages
-     */
     private void loadConversationList() {
-        //	ParseQuery<ParseObject> senderquery = ParseQuery.getQuery("ChatActivity");
-        //	ParseQuery<ParseObject> receivequery = ParseQuery.getQuery("ChatActivity");
         ParseQuery<ParseObject> query = ParseQuery.getQuery("ChatActivity");
         if (convList.size() == 0) {
             // load all messages...
@@ -382,8 +266,6 @@ public class ChatActivity extends BaseActivity {
             query.whereEqualTo("sender", buddy);
             query.whereEqualTo("receiver", UserListActivity.user.getUsername());
         }
-        //	if (lastMsgDate != null)
-        //		query.whereGreaterThan("createdAt", lastMsgDate);
         query.orderByDescending("createdAt");
         query.setLimit(50);
 
@@ -392,15 +274,11 @@ public class ChatActivity extends BaseActivity {
             @Override
             public void done(List<ParseObject> li, ParseException e) {
                 if (li != null && li.size() > 0) {
-                    Log.d("Faheem", "li size" + li.size());
                     for (int i = li.size() - 1; i >= 0; i--) {
                         ParseObject po = li.get(i);
                         Conversation c = new Conversation(po.getString("message"), po.getCreatedAt(),
                                 po.getString("sender"));
                         convList.add(c);
-
-                        Log.d("Faheem", "li size" + po.getString("message") + " " + po.getString("sender") + "");
-
                         if (lastMsgDate == null || lastMsgDate.before(c.getDate()))
                             lastMsgDate = c.getDate();
                         mChatAdapter.notifyDataSetChanged();
@@ -416,33 +294,5 @@ public class ChatActivity extends BaseActivity {
                 }, 1000);
             }
         });
-
     }
-
-    private void moveToFinishedStatus(String id) {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-        query.whereEqualTo("objectId", id);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null) {
-                    for (ParseObject o : list) {
-                        o.put("statusId", ParseObject.createWithoutData("Status", "FskciSuqTW"));
-                        o.saveEventually();
-                    }
-                } else {
-                    Log.d("MOVE TO FINISHED STATUS", e.getMessage());
-                }
-            }
-        });
-    }
-
-    private void logout() {
-        //UserListActivity.user.g
-        ParseUser.getCurrentUser().logOut();
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
 }

@@ -96,14 +96,12 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         dialog.setTitle("Please vote");
 
         TextView name = (TextView) dialog.findViewById(R.id.vote_name);
-        RatingBar starRate = (RatingBar) dialog.findViewById(R.id.vote_rating);
+        final RatingBar starRate = (RatingBar) dialog.findViewById(R.id.vote_rating);
+        starRate.setEnabled(true);
         Button ok = (Button) dialog.findViewById(R.id.vote_ok);
         Button cancel = (Button) dialog.findViewById(R.id.vote_cancel);
         getPerformer(getIntent().getStringExtra("newTaskId"));
-
-//        name.setText("Perfrom name: " + perform.getFirstName());
-//        starRate.setText("Perform rating: " + perform.getRating());
-
+        name.setText("Some text will be here");
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,8 +112,21 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                deleteFinishedTask(getIntent().getStringExtra("newTaskId"));
-//                setIntent(getIntent());
+                try {
+                    ParseQuery<ParseUser> userQuery = ParseUser.getQuery();
+                    userQuery.whereEqualTo("objectId", perform.getId());
+                    List<ParseUser> users = userQuery.find();
+                    for (ParseUser user : users) {
+                        float a = (float) user.getDouble("performerRating");
+                        user.put("performerRating", (a + starRate.getRating()) / 2);
+                        user.saveInBackground();
+                    }
+                    deleteFinishedTask(getIntent().getStringExtra("newTaskId"));
+                    moveToFinishedStatus(getIntent().getStringExtra("newTaskId"));
+                    setIntent(getIntent());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         });
         dialog.show();
@@ -126,6 +137,24 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         i.putExtra("group", i.getIntExtra("group", 0));
         setResult(RESULT_OK, i);
         finish();
+    }
+
+    private void moveToFinishedStatus(String id) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        query.whereEqualTo("objectId", id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.put("statusId", ParseObject.createWithoutData("Status", "FskciSuqTW"));
+                        o.saveEventually();
+                    }
+                } else {
+                    Log.d("MOVE TO FINISHED STATUS", e.getMessage());
+                }
+            }
+        });
     }
 
     public void deleteFinishedTask(String task_id) {
@@ -145,7 +174,7 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         });
     }
 
-    public void getPerformer(String task_id){
+    public void getPerformer(String task_id) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
         query.whereEqualTo("taskId", task_id);
         query.findInBackground(new FindCallback<ParseObject>() {
@@ -159,10 +188,11 @@ public class ClientDescriptionActivity extends AppCompatActivity {
                         try {
                             List<ParseUser> users = parseQuery.find();
                             for (ParseUser user : users) {
+                                perform = new Perform();
                                 perform.setId(user.getObjectId());
                                 perform.setFirstName(user.getString("firstName"));
                                 perform.setLastName(user.getString("lastName"));
-                                perform.setRating((Float) user.getNumber("performerRating"));
+                                perform.setRating((float)user.getDouble("performerRating"));
                             }
                         } catch (ParseException e1) {
                             e1.printStackTrace();

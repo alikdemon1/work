@@ -1,6 +1,5 @@
 package com.alisher.work.chat;
 
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -10,10 +9,7 @@ import com.alisher.work.chat.utils.TouchEffect;
 
 public class BaseActivity extends AppCompatActivity implements OnClickListener {
 
-    /**
-     * Apply this Constant as touch listener for views to provide alpha touch
-     * effect. The view must have a Non-Transparent background.
-     */
+
     public static final TouchEffect TOUCH = new TouchEffect();
 
 
@@ -23,12 +19,6 @@ public class BaseActivity extends AppCompatActivity implements OnClickListener {
 
     }
 
-    /**
-     * Sets the touch and click listener for a view with given id.
-     *
-     * @param id the id
-     * @return the view on which listeners applied
-     */
     public View setTouchNClick(int id) {
 
         View v = setClick(id);
@@ -37,12 +27,6 @@ public class BaseActivity extends AppCompatActivity implements OnClickListener {
         return v;
     }
 
-    /**
-     * Sets the click listener for a view with given id.
-     *
-     * @param id the id
-     * @return the view on which listener is applied
-     */
     public View setClick(int id) {
 
         View v = findViewById(id);
