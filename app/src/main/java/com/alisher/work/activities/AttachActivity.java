@@ -206,9 +206,8 @@ public class AttachActivity extends AppCompatActivity {
         if (id == R.id.arbitration_menu) {
             moveToArbiterStatus(getIntent().getStringExtra("task_id"));
             setIntent(getIntent());
-        } else if (id == R.id.home) {
-            setResult(RESULT_CANCELED);
-            finish();
+        } else if (id == android.R.id.home) {
+            onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }

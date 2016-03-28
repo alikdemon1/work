@@ -1,5 +1,6 @@
 package com.alisher.work.adapters;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -10,11 +11,20 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.activities.AttachActivity;
 import com.alisher.work.activities.ClientDescriptionActivity;
+import com.alisher.work.chat.ChatActivity;
+import com.alisher.work.chat.utils.Const;
+import com.alisher.work.chat.utils.Utils;
 import com.alisher.work.models.Task;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +34,7 @@ import java.util.List;
  */
 public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
     private Context _context;
-    private List<String> _listDataHeader; // header titles
-    // child data in format of header title, child title
+    private List<String> _listDataHeader;
     private HashMap<String, List<Task>> _listDataChild;
 
     public ExpandableListAdapterForPerf(Context context, List<String> listDataHeader,
@@ -74,12 +83,19 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
             desc.setEnabled(true);
             chat.setEnabled(true);
             attach.setEnabled(true);
+        } else if (groupPosition == 2) {
+            desc.setEnabled(true);
+            chat.setEnabled(false);
+            attach.setEnabled(true);
+        } else if (groupPosition == 3) {
+            desc.setEnabled(true);
+            chat.setEnabled(false);
+            attach.setEnabled(false);
         } else if (groupPosition == 4) {
             desc.setEnabled(false);
             chat.setEnabled(false);
             attach.setEnabled(false);
         }
-
 
         if (desc.isEnabled()){
             desc.setOnClickListener(new View.OnClickListener() {
@@ -92,6 +108,7 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
                     i.putExtra("newTaskImage",childText.getImage());
                     i.putExtra("newTaskCost",String.valueOf(childText.getPrice()));
                     i.putExtra("newTaskDuration", childText.getEndTime().getTime());
+                    i.putExtra("newTaskDeadline", childText.getEndTime().toString());
 
                     i.putExtra("child", childPosition);
                     i.putExtra("group", groupPosition);
@@ -105,6 +122,7 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
             chat.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    openChat(childText.getId(), groupPosition, childPosition);
                 }
             });
         }
@@ -124,6 +142,34 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
         txtListChild.setText(childText.getTitle());
         image.setImageBitmap(childText.getImage());
         return convertView;
+    }
+
+    private void openChat(final String task_id, final int group_id, final int child_id) {
+        final ProgressDialog dia = ProgressDialog.show(_context, null, _context.getString(R.string.alert_loading));
+        ParseQuery<ParseObject> decQuery = ParseQuery.getQuery("Task");
+        decQuery.whereEqualTo("objectId", task_id);
+        decQuery.include("clientId");
+        decQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                dia.dismiss();
+                if (e == null) {
+                    if (list.size() == 0)
+                        Toast.makeText(_context, R.string.msg_no_user_found, Toast.LENGTH_SHORT).show();
+                    ParseUser user = (ParseUser) list.get(0).getParseObject("clientId");
+                    _context.startActivity(new Intent(_context,
+                            ChatActivity.class).putExtra(
+                            Const.EXTRA_DATA, user.getUsername()).putExtra("columnName", "perfId").putExtra("task_id", task_id).putExtra("firstName", user.getString("firstName")));
+                } else {
+                    Utils.showDialog(
+                            _context,
+                            _context.getString(R.string.err_users) + " "
+                                    + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+        });
     }
 
     @Override

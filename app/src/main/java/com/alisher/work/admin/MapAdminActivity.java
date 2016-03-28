@@ -59,6 +59,8 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
             buildGoogleApiClient();
         }
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10 * 1000)        // 1 minute, in milliseconds
@@ -156,8 +158,7 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
-                setResult(RESULT_CANCELED);
-                finish();
+                onBackPressed();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -234,6 +235,7 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {

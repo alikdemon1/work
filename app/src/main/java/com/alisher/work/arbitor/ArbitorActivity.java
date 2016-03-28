@@ -11,6 +11,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.alisher.work.R;
 import com.alisher.work.models.Task;
@@ -24,7 +26,7 @@ public class ArbitorActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    Task task=new Task();
+    Task task = new Task();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,18 +40,20 @@ public class ArbitorActivity extends AppCompatActivity {
 
         tabLayout = (TabLayout) findViewById(R.id.ar_tabs);
         tabLayout.setupWithViewPager(viewPager);
-        Log.d("newtaskid",getIntent().getStringExtra("newTaskId"));
+        Log.d("newtaskid", getIntent().getStringExtra("newTaskId"));
         task.setId(getIntent().getStringExtra("newTaskId"));
         task.setTitle(getIntent().getStringExtra("newTaskTitle"));
         task.setDesc(getIntent().getStringExtra("newTaskDesc"));
         task.setImage((Bitmap) getIntent().getParcelableExtra("newTaskImage"));
         task.setPrice(Integer.valueOf(getIntent().getStringExtra("newTaskCost")));
-        task.setEndTime(new Date(getIntent().getLongExtra("newTaskDeadline",0)));
+        task.setEndTime(new Date(getIntent().getLongExtra("newTaskDeadline", 0)));
         task.setClientId(getIntent().getStringExtra("newTaskClientId"));
     }
-    public Task getMyData(){
+
+    public Task getMyData() {
         return task;
     }
+
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new DescriptionFragment(), "DESCRIPTION");
@@ -85,6 +89,15 @@ public class ArbitorActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            onBackPressed();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

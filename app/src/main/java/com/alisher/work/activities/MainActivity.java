@@ -75,8 +75,8 @@ public class MainActivity extends AppCompatActivity
                         String frozenBal=String.valueOf(user.getInt("frozenBalance"))+"$";
                         nameText.setText(name);
                         emailText.setText(email);
-                        balanceText.setText(bal+"$");
-                        frozenBalanceText.setText(frozenBal+"$");
+                        balanceText.setText(bal+"");
+                        frozenBalanceText.setText(frozenBal+"");
                     }
                 } else {
                     Log.e("MainActivity", e.getMessage());
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity
     private void initToolbar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Work Zilla");
+        getSupportActionBar().setTitle("XLancer");
     }
 
     @Override
@@ -132,8 +132,6 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
-            return true;
-        } else if (id == R.id.action_search){
             return true;
         }
 

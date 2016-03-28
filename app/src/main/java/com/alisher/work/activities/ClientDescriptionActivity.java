@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.alisher.work.R;
 import com.alisher.work.models.Perform;
 import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -33,6 +34,7 @@ public class ClientDescriptionActivity extends AppCompatActivity {
     ImageView iv;
     TextView tvN, tvDec, tvCost, tvDate;
     private Perform perform;
+    private String perfId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,16 +44,16 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getIntent().getStringExtra("newTaskTitle"));
 
-        iv = (ImageView) findViewById(R.id.img_desc_client);
+        //iv = (ImageView) findViewById(R.id.img_desc_client);
         tvN = (TextView) findViewById(R.id.name_desc_client);
-        tvDec = (TextView) findViewById(R.id.description_desc_client);
+        tvDec = (TextView) findViewById(R.id.desc_desc_client);
         tvCost = (TextView) findViewById(R.id.cost_desc_client);
-        tvDate = (TextView) findViewById(R.id.deadline_desc_client);
+        tvDate = (TextView) findViewById(R.id.deadline_decs_client);
 
         tvN.setText(getIntent().getStringExtra("newTaskTitle"));
         tvDec.setText(getIntent().getStringExtra("newTaskDesc"));
-        iv.setImageBitmap((Bitmap) getIntent().getParcelableExtra("newTaskImage"));
-        tvCost.setText(getIntent().getStringExtra("newTaskCost") + " $");
+        //iv.setImageBitmap((Bitmap) getIntent().getParcelableExtra("newTaskImage"));
+        tvCost.setText(getIntent().getIntExtra("newTaskCost", 0) + " $");
         tvDate.setText(getIntent().getStringExtra("newTaskDeadline"));
         getSupportActionBar().setTitle(tvN.getText().toString());
     }
@@ -83,56 +85,63 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.finished) {
             vote();
-            ParseQuery<ParseUser> clientQuery = ParseUser.getQuery();
-            clientQuery.whereEqualTo("objectId", ParseUser.getCurrentUser().getObjectId());
-            clientQuery.findInBackground(new FindCallback<ParseUser>() {
-                @Override
-                public void done(List<ParseUser> list, ParseException e) {
-                    for (ParseObject o : list) {
-                        int res =o.getInt("frozenBalance") - Integer.valueOf(getIntent().getStringExtra("newTaskCost"));
-                        o.put("frozenBalance", res);
-                        Log.d("forzenResClient",res+" " + Integer.valueOf(getIntent().getStringExtra("newTaskCost")));
-                        o.saveInBackground();
-                    }
-                }
-            });
-            addBalanceForPerf();
-        } else if (id == R.id.home) {
+        } else if (id == android.R.id.home) {
             setResult(RESULT_CANCELED);
             finish();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void addBalanceForPerf() {
-        ParseQuery<ParseObject> queryPerfId = ParseQuery.getQuery("Decision");
-        queryPerfId.whereEqualTo("taskId", getIntent().getStringExtra("newTaskId"));
-        queryPerfId.findInBackground(new FindCallback<ParseObject>() {
+    private void frozenBalance() {
+        ParseQuery<ParseUser> clientQuery = ParseUser.getQuery();
+        clientQuery.whereEqualTo("objectId", ParseUser.getCurrentUser().getObjectId());
+        clientQuery.findInBackground(new FindCallback<ParseUser>() {
             @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null) {
-                    for (ParseObject o : list) {
-                        String perfId = o.getString("perfId");
-                        Log.d("perfId", perfId);
-                        ParseQuery<ParseUser> perfQuery = ParseUser.getQuery();
-                        perfQuery.whereEqualTo("objectId", perfId);
-                        perfQuery.findInBackground(new FindCallback<ParseUser>() {
-                            @Override
-                            public void done(List<ParseUser> list, ParseException e) {
-                                for (ParseObject perfObj : list) {
-                                    int taskCost=Integer.valueOf(getIntent().getStringExtra("newTaskCost"));
-                                    int res=perfObj.getInt("balance") + taskCost;
-                                    Log.d("balance", taskCost+" "+perfObj.getInt("balance")+" " + res);
-                                    perfObj.put("balance", res);
-                                    perfObj.saveInBackground();
+            public void done(List<ParseUser> list, ParseException e) {
+                for (ParseObject o : list) {
+                    int res = o.getInt("frozenBalance") - (getIntent().getIntExtra("newTaskCost", 0));
+                    Log.d("COST", getIntent().getIntExtra("newTaskCost", 0) + "");
+                    o.put("frozenBalance", res);
+                    Log.d("forzenResClient", res + " " + (getIntent().getIntExtra("newTaskCost", 0)));
+                    o.saveInBackground();
+
+
+                    ParseQuery<ParseObject> queryPerfId = ParseQuery.getQuery("Decision");
+                    queryPerfId.whereEqualTo("taskId", getIntent().getStringExtra("newTaskId"));
+                    queryPerfId.findInBackground(new FindCallback<ParseObject>() {
+                        @Override
+                        public void done(List<ParseObject> list, ParseException e) {
+                            if (e == null) {
+                                for (ParseObject o : list) {
+                                    perfId = o.getString("perfId");
+                                    Log.d("perfId", perfId);
 
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
+
+                    ParseQuery<ParseUser> perfQuery = ParseUser.getQuery();
+                    perfQuery.whereEqualTo("objectId", perfId);
+                    perfQuery.findInBackground(new FindCallback<ParseUser>() {
+                        @Override
+                        public void done(List<ParseUser> list, ParseException e) {
+                            for (ParseObject perfObj : list) {
+                                int taskCost = (getIntent().getIntExtra("newTaskCost", 0));
+                                int ress = perfObj.getInt("balance") + taskCost;
+                                Log.d("balance", taskCost + " " + perfObj.getInt("balance") + " " + ress);
+                                perfObj.put("balance", ress);
+                                perfObj.saveInBackground();
+                            }
+                        }
+                    });
                 }
             }
         });
+    }
+
+    private void addBalanceForPerf() {
+
     }
 
     public void vote() {
@@ -157,21 +166,27 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    ParseQuery<ParseUser> userQuery = ParseUser.getQuery();
-                    userQuery.whereEqualTo("objectId", perform.getId());
-                    List<ParseUser> users = userQuery.find();
-                    for (ParseUser user : users) {
-                        float a = (float) user.getDouble("performerRating");
-                        user.put("performerRating", (a + starRate.getRating()) / 2);
-                        user.saveInBackground();
+                ParseQuery<ParseUser> userQuery = ParseUser.getQuery();
+                userQuery.whereEqualTo("objectId", perform.getId());
+                userQuery.getFirstInBackground(new GetCallback<ParseUser>() {
+                    @Override
+                    public void done(ParseUser user, ParseException e) {
+                        if (e == null) {
+                            double a = user.getDouble("performerRating");
+                            double total = (a + starRate.getRating()) / 2;
+                            user.put("performerRating", total);
+                            Log.d("ASd", a + ", " + perform.getId() + ", " + starRate.getRating() + ", " + total);
+                            user.saveInBackground();
+                        } else {
+                            Log.e("DESC_ACTIVITY", e.getMessage());
+                        }
                     }
-                    deleteFinishedTask(getIntent().getStringExtra("newTaskId"));
-                    moveToFinishedStatus(getIntent().getStringExtra("newTaskId"));
-                    setIntent(getIntent());
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                });
+                frozenBalance();
+                addBalanceForPerf();
+                deleteFinishedTask(getIntent().getStringExtra("newTaskId"));
+                moveToFinishedStatus(getIntent().getStringExtra("newTaskId"));
+                setIntent(getIntent());
             }
         });
         dialog.show();
@@ -202,14 +217,29 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         });
     }
 
-    public void deleteFinishedTask(String task_id) {
+    public void deleteFinishedTask(final String task_id) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
         query.whereEqualTo("taskId", task_id);
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
                 if (e == null) {
-                    for (ParseObject o : list) {
+                    for (final ParseObject o : list) {
+                        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("Task");
+                        parseQuery.whereEqualTo("objectId", task_id);
+                        parseQuery.findInBackground(new FindCallback<ParseObject>() {
+                            @Override
+                            public void done(List<ParseObject> list, ParseException e) {
+                                if (e == null) {
+                                    for (ParseObject obj : list) {
+                                        obj.put("finishPerfId", o.getString("perfId"));
+                                        obj.saveInBackground();
+                                    }
+                                } else {
+                                    Log.d("ChatActivity", e.getMessage());
+                                }
+                            }
+                        });
                         o.deleteEventually();
                     }
                 } else {
@@ -237,7 +267,7 @@ public class ClientDescriptionActivity extends AppCompatActivity {
                                 perform.setId(user.getObjectId());
                                 perform.setFirstName(user.getString("firstName"));
                                 perform.setLastName(user.getString("lastName"));
-                                perform.setRating((float)user.getDouble("performerRating"));
+                                perform.setRating((float) user.getDouble("performerRating"));
                             }
                         } catch (ParseException e1) {
                             e1.printStackTrace();

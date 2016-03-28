@@ -11,6 +11,7 @@ import com.alisher.work.admin.AdminActivity;
 import com.alisher.work.admin.AdminAdapter;
 import com.alisher.work.admin.MapAdminActivity;
 import com.alisher.work.chat.UserListActivity;
+import com.alisher.work.chat.utils.ParseUtils;
 import com.parse.ParseUser;
 
 
@@ -31,6 +32,7 @@ public class StartActivity extends AppCompatActivity {
                 if (currentUser != null) {
                     startActivity(new Intent(StartActivity.this, MainActivity.class));
                     UserListActivity.user = currentUser;
+                    ParseUtils.subscribeWithEmail(currentUser.getUsername());
                     finish();
                 } else {
                     startActivity(new Intent(StartActivity.this, LoginActivity.class));

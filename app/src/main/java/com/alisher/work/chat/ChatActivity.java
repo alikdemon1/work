@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.activities.LoginActivity;
+import com.alisher.work.activities.MainActivity;
 import com.alisher.work.chat.utils.Const;
 import com.alisher.work.chat.utils.IOUtil;
 import com.alisher.work.chat.utils.ParseUtils;
@@ -58,7 +59,9 @@ public class ChatActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
-        initToolbar();
+        buddy = getIntent().getStringExtra("firstName");
+        getSupportActionBar().setTitle(buddy);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         convList = new ArrayList<Conversation>();
         ListView list = (ListView) findViewById(R.id.chatlist);
 
@@ -74,16 +77,10 @@ public class ChatActivity extends BaseActivity {
         setTouchNClick(R.id.btnSend);
         setTouchNClick(R.id.btnAttach);
 
-        buddy = getIntent().getStringExtra(Const.EXTRA_DATA);
-        tvname = (TextView) findViewById(R.id.tvName);
-        tvname.setText(buddy);
-        ParseUtils.subscribeWithEmail(ParseUser.getCurrentUser().getUsername());
+//        ParseUtils.subscribeWithEmail(ParseUser.getCurrentUser().getUsername());
         handler = new Handler();
     }
 
-    public void initToolbar() {
-        getSupportActionBar();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -94,11 +91,10 @@ public class ChatActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if(id==R.id.deny){
+        if (id == android.R.id.home){
+            onBackPressed();
+        }else if(id==R.id.deny){
             String taskIdDeny =getIntent().getStringExtra("task_id");
             String s = getIntent().getStringExtra("columnName");
             Log.d("checkColumn",s+"----"+taskIdDeny);
@@ -278,7 +274,7 @@ public class ChatActivity extends BaseActivity {
 
         ParseObject po = new ParseObject("ChatActivity");
         po.put("sender", UserListActivity.user.getUsername());
-        po.put("receiver", buddy);
+        po.put("receiver", getIntent().getStringExtra(Const.EXTRA_DATA));
         po.put("message", s);
         po.saveEventually(new SaveCallback() {
 
@@ -291,7 +287,7 @@ public class ChatActivity extends BaseActivity {
                 mChatAdapter.notifyDataSetChanged();
             }
         });
-        sendNotification(s, ParseUser.getCurrentUser().getString("firstName"), buddy);
+        sendNotification(s, ParseUser.getCurrentUser().getString("firstName"), getIntent().getStringExtra(Const.EXTRA_DATA));
     }
 
     private void sendNotification(String message, String title, String email) {
@@ -319,12 +315,102 @@ public class ChatActivity extends BaseActivity {
         push.sendInBackground();
     }
 
+    private void moveToFinishedStatus(String id) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        query.whereEqualTo("objectId", id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        o.put("statusId", ParseObject.createWithoutData("Status", "FskciSuqTW"));
+                        o.saveEventually();
+                    }
+                } else {
+                    Log.d("MOVE TO FINISHED STATUS", e.getMessage());
+                }
+            }
+        });
+    }
+
+    public void deleteFinishedTask(final String task_id){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
+        query.whereEqualTo("taskId", task_id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (final ParseObject o : list) {
+                        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("Task");
+                        parseQuery.whereEqualTo("objectId", task_id);
+                        parseQuery.findInBackground(new FindCallback<ParseObject>() {
+                            @Override
+                            public void done(List<ParseObject> list, ParseException e) {
+                                if (e == null) {
+                                    for (ParseObject obj : list) {
+                                        obj.put("finishPerfId", o.getString("perfId"));
+                                        Log.d("perfID", o.getString("perfId"));
+                                        obj.saveEventually();
+                                    }
+                                } else {
+                                    Log.d("ChatActivity", e.getMessage());
+                                }
+                            }
+                        });
+                        o.deleteEventually();
+                    }
+                } else {
+
+                }
+            }
+        });
+    }
+
+    private void denyMethod(final String taskIdDeny, final String s) {
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Deny");
+        query.whereEqualTo("taskId",taskIdDeny);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+
+                if (!list.isEmpty()){
+                    for(ParseObject o:list){
+                        if(o.getString("clientId")==null){
+                            o.put("clientId",ParseUser.getCurrentUser().getObjectId());
+                            o.saveEventually();
+                        }
+                        if (o.getString("perfId")==null){
+                            o.put("perfId",ParseUser.getCurrentUser().getObjectId());
+                            o.saveEventually();
+                        }
+
+                        if(o.getString("clientId")!=null && o.getString("perfId")!=null){
+                            deleteFinishedTask(taskIdDeny);
+                            moveToFinishedStatus(taskIdDeny);
+                            Toast.makeText(getApplicationContext(), "Task finished", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "Waiting...", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } else {
+                    ParseObject p = new ParseObject("Deny");
+                    p.put(s, ParseUser.getCurrentUser().getObjectId());
+                    p.put("taskId", taskIdDeny);
+                    p.saveEventually();
+                }
+            }
+        });
+    }
+
+
     private void loadConversationList() {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("ChatActivity");
         if (convList.size() == 0) {
             // load all messages...
             ArrayList<String> al = new ArrayList<String>();
-            al.add(buddy);
+            al.add(getIntent().getStringExtra(Const.EXTRA_DATA));
             al.add(UserListActivity.user.getUsername());
             query.whereContainedIn("sender", al);
             query.whereContainedIn("receiver", al);
@@ -332,7 +418,7 @@ public class ChatActivity extends BaseActivity {
             // load only newly received message..
             if (lastMsgDate != null)
                 query.whereGreaterThan("createdAt", lastMsgDate);
-            query.whereEqualTo("sender", buddy);
+            query.whereEqualTo("sender", getIntent().getStringExtra(Const.EXTRA_DATA));
             query.whereEqualTo("receiver", UserListActivity.user.getUsername());
         }
         query.orderByDescending("createdAt");
@@ -364,25 +450,4 @@ public class ChatActivity extends BaseActivity {
             }
         });
     }
-
-
-
-    private void moveToFinishedStatus(String id) {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-        query.whereEqualTo("objectId", id);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null) {
-                    for (ParseObject o : list) {
-                        o.put("statusId", ParseObject.createWithoutData("Status", "FskciSuqTW"));
-                        o.saveEventually();
-                    }
-                } else {
-                    Log.d("MOVE TO FINISHED STATUS", e.getMessage());
-                }
-            }
-        });
-    }
-
 }

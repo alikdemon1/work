@@ -8,12 +8,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.alisher.work.activities.LoginActivity;
 import com.alisher.work.adapters.PerformsForEachTaskAdapter;
 import com.alisher.work.adapters.RecyclerItemClickListener;
 import com.alisher.work.models.Perform;
@@ -93,5 +96,21 @@ public class AdminActivity extends AppCompatActivity {
                 startActivityForResult(intent, 1);
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.admin_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.exit_admin) {
+            startActivity(new Intent(AdminActivity.this, LoginActivity.class));
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

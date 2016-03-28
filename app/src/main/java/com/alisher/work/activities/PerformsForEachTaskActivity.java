@@ -84,15 +84,8 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                         moveToWorkStatus(i.getStringExtra("taskId"));
                         i.putExtra("child", i.getIntExtra("child_position", 0));
                         i.putExtra("group", i.getIntExtra("group_position", 0));
-                        ParseUser user = ParseUser.getCurrentUser();
-                        int price = i.getIntExtra("taskPriceForBalance", 0);
-                        int bal=user.getInt("balance")- price;
-                        Log.d("frozenBalance",user.getInt("frozenBalance")+"");
-                        int fbal=user.getInt("frozenBalance")+ price;
-                        Log.d("price",price+"$");
-                        user.put("balance", bal);
-                        user.put("frozenBalance", fbal);
-                        user.saveInBackground();
+
+                        frozenBalance();
                         setResult(RESULT_OK, i);
                         finish();
                     }
@@ -102,7 +95,25 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
         }));
     }
 
-    public void choosedPerformer(String id){
+    private void frozenBalance() {
+        ParseQuery<ParseUser> clientQuery = ParseUser.getQuery();
+        clientQuery.whereEqualTo("objectId", ParseUser.getCurrentUser().getObjectId());
+        clientQuery.findInBackground(new FindCallback<ParseUser>() {
+            @Override
+            public void done(List<ParseUser> list, ParseException e) {
+                for (ParseObject o : list) {
+                    int price = getIntent().getIntExtra("taskPriceForBalance", 0);
+                    int bal = list.get(0).getInt("balance") - price;
+                    int fbal = list.get(0).getInt("frozenBalance") + price;
+                    list.get(0).put("balance", bal);
+                    list.get(0).put("frozenBalance", fbal);
+                    o.saveInBackground();
+                }
+            }
+        });
+    }
+
+    public void choosedPerformer(String id) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
         query.whereEqualTo("perfId", id);
         query.whereEqualTo("taskId", getIntent().getStringExtra("taskId"));
@@ -112,7 +123,7 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                 if (e == null) {
                     for (ParseObject o : list) {
                         o.put("clientDec", true);
-                        o.saveEventually();
+                        o.saveInBackground();
                     }
                 } else {
                     Log.d("CHOOSED PERFORMER", e.getMessage());

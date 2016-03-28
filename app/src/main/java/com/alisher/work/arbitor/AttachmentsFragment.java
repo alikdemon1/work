@@ -60,10 +60,11 @@ public class AttachmentsFragment extends Fragment {
         View v = inflater.inflate(R.layout.attach_fragment, container, false);
 
         attachments = new ArrayList<>();
+        ArbitorActivity list = (ArbitorActivity)getActivity();
         mRecyclerView = (RecyclerView) v.findViewById(R.id.attachFr_recycler_view);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mAdapter = new AttachAdapter(getActivity(), attachments);
-        initializeData();
+        initializeData(list.getMyData().getId());
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
@@ -77,9 +78,9 @@ public class AttachmentsFragment extends Fragment {
         return v;
     }
 
-    public void initializeData() {
+    public void initializeData(String task_id) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Result");
-        query.whereEqualTo("taskId", ParseObject.createWithoutData("Task", "8gtxgW2WpR"));
+        query.whereEqualTo("taskId", ParseObject.createWithoutData("Task", task_id));
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {

@@ -57,11 +57,11 @@ public class DecisionFragment extends Fragment {
                             Log.d("clientId", listT.getMyData().getClientId());
                             Log.d("clinetFrozen", o.getInt("frozenBalance") + "");
                             Log.d("clientBalance", o.getInt("balance") + " taskPrice:" + listT.getMyData().getPrice());
-                            int resClientFrozen=o.getInt("frozenBalance") - (listT.getMyData().getPrice() * Integer.valueOf(perfTxt.getText().toString()) / 100);
+                            int resClientFrozen = o.getInt("frozenBalance") - (listT.getMyData().getPrice() * Integer.valueOf(perfTxt.getText().toString()) / 100);
                             o.put("frozenBalance", resClientFrozen);
-                            int resClientBalance=o.getInt("balance") + (listT.getMyData().getPrice() * Integer.valueOf(clientTxt.getText().toString()) / 100);
+                            int resClientBalance = o.getInt("balance") + (listT.getMyData().getPrice() * Integer.valueOf(clientTxt.getText().toString()) / 100);
                             o.put("balance", resClientBalance);
-                            Log.d("clientFrBl",resClientBalance+" fr:" +resClientFrozen);
+                            Log.d("clientFrBl", resClientBalance + " fr:" + resClientFrozen);
                             o.saveInBackground();
                         }
                     }
@@ -80,13 +80,13 @@ public class DecisionFragment extends Fragment {
                                     @Override
                                     public void done(List<ParseUser> list, ParseException e) {
                                         for (ParseObject perfObj : list) {
-                                            Log.d("performerId",perfId);
-                                            Log.d("performerFrozen",perfObj.getInt("frozenBalance")+"");
+                                            Log.d("performerId", perfId);
+                                            Log.d("performerFrozen", perfObj.getInt("frozenBalance") + "");
                                             Log.d("performerBalance", perfObj.getInt("balance") + " taskPrice:" + listT.getMyData().getPrice());
-                                            int resPerfBalance=perfObj.getInt("balance") + (listT.getMyData().getPrice() * Integer.valueOf(perfTxt.getText().toString()) / 100);
-                                            perfObj.put("balance",resPerfBalance );
+                                            int resPerfBalance = perfObj.getInt("balance") + (listT.getMyData().getPrice() * Integer.valueOf(perfTxt.getText().toString()) / 100);
+                                            perfObj.put("balance", resPerfBalance);
                                             perfObj.saveInBackground();
-                                            Log.d("resPerfBal", resPerfBalance+"");
+                                            Log.d("resPerfBal", resPerfBalance + "");
                                         }
                                     }
                                 });
@@ -95,12 +95,46 @@ public class DecisionFragment extends Fragment {
                     }
                 });
                 Toast.makeText(getActivity(), "Shared between them", Toast.LENGTH_SHORT).show();
+                deleteFinishedTask(listT.getMyData().getId());
                 moveToFinishedStatus(listT.getMyData().getId());
-                startActivity(new Intent(getContext(),ListArbitorActivity.class));
+                startActivity(new Intent(getContext(), ListArbitorActivity.class));
             }
         });
         return v;
     }
+
+    public void deleteFinishedTask(final String task_id) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
+        query.whereEqualTo("taskId", task_id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null) {
+                    for (final ParseObject o : list) {
+                        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("Task");
+                        parseQuery.whereEqualTo("objectId", task_id);
+                        parseQuery.findInBackground(new FindCallback<ParseObject>() {
+                            @Override
+                            public void done(List<ParseObject> list, ParseException e) {
+                                if (e == null) {
+                                    for (ParseObject obj : list) {
+                                        obj.put("finishPerfId", o.getString("perfId"));
+                                        obj.saveInBackground();
+                                    }
+                                } else {
+                                    Log.d("ChatActivity", e.getMessage());
+                                }
+                            }
+                        });
+                        o.deleteEventually();
+                    }
+                } else {
+
+                }
+            }
+        });
+    }
+
     private void moveToFinishedStatus(String id) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
         query.whereEqualTo("objectId", id);

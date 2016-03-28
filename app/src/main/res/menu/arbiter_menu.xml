@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/arbitration_menu"
-        android:icon="@drawable/arbitrator"
+        android:icon="@drawable/arbiter"
         android:orderInCategory="100"
         android:title="Arbiter"
         app:showAsAction="always" />

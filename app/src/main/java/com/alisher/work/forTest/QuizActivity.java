@@ -69,6 +69,7 @@ public class QuizActivity extends AppCompatActivity {
                     parseObject.put("result", score);
                     parseObject.put("catId", cat_id);
                     parseObject.put("perfId", ParseUser.getCurrentUser().getObjectId());
+                    parseObject.put("email", ParseUser.getCurrentUser().getUsername());
                     parseObject.saveInBackground();
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(QuizActivity.this);

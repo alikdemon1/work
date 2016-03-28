@@ -4,7 +4,7 @@
     <item
         android:id="@+id/deny"
         android:orderInCategory="100"
-        android:icon="@android:drawable/ic_delete"
+        android:icon="@drawable/deny"
         android:title="@string/action_settings"
         app:showAsAction="always" />
 </menu>
