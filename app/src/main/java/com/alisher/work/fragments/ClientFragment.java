@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -22,7 +21,6 @@ import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
-import com.alisher.work.activities.AttachActivity;
 import com.alisher.work.activities.PerformsForEachTaskActivity;
 import com.alisher.work.adapters.ExpandableListAdapter;
 import com.alisher.work.chat.ChatActivity;
@@ -108,7 +106,6 @@ public class ClientFragment extends Fragment {
                     i.putExtra("taskId", newTask.getId());
                     i.putExtra("child_position", childPosition);
                     i.putExtra("taskPriceForBalance",newTask.getPrice());
-                    Log.d("taskPriceForBalance", newTask.getPrice() + "");
                     startActivityForResult(i, 2);
                 } else if (groupPosition == 1) {
                     openChatActivity(newTask.getId(), groupPosition, childPosition);
@@ -120,7 +117,7 @@ public class ClientFragment extends Fragment {
                     alertDialog.setPositiveButton("yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            getBackFromDraft(groupPosition, childPosition);
+                            getBackFromDraft();
                         }
                     });
                     alertDialog.setNegativeButton("no", new DialogInterface.OnClickListener() {
@@ -189,7 +186,7 @@ public class ClientFragment extends Fragment {
                     refreshData();
                 }
             }
-        }, 1000, 1000);
+        }, 5000, 1000);
     }
 
     @Override
@@ -247,7 +244,7 @@ public class ClientFragment extends Fragment {
         }
     }
 
-    private void getBackFromDraft(int group, int child) {
+    private void getBackFromDraft() {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
         query.whereEqualTo("clientId", ParseUser.getCurrentUser());
         query.whereEqualTo("statusId", ParseObject.createWithoutData("Status", "hPLrQYzPdl"));
@@ -266,12 +263,6 @@ public class ClientFragment extends Fragment {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        Task newTask = listDataChild.get(listDataHeader.get(group)).get(child);
-        listDataChild.get(listDataHeader.get(group)).remove(child);
-        inSearchList.add(newTask);
-        listDataChild.put(listDataHeader.get(0), inSearchList);
-        listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
-        expListView.setAdapter(listAdapter);
     }
 
     private Date getEndDate(int days, int hours, int min) {
@@ -286,6 +277,23 @@ public class ClientFragment extends Fragment {
     }
 
     // Init list methods
+    private void initStatusList() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Status");
+        try {
+            List<ParseObject> statusList = query.find();
+            for (ParseObject obj : statusList) {
+                listDataHeader.add(obj.getString("name"));
+            }
+            listDataChild.put(listDataHeader.get(0), inSearchList);
+            listDataChild.put(listDataHeader.get(1), inWorkList);
+            listDataChild.put(listDataHeader.get(2), arbitrageList);
+            listDataChild.put(listDataHeader.get(3), finishedList);
+            listDataChild.put(listDataHeader.get(4), draftList);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void initSearchList() {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
         ParseObject obj = ParseObject.createWithoutData("Status", "vVMYOEUIeY");
@@ -321,23 +329,6 @@ public class ClientFragment extends Fragment {
                 }
             }
         });
-    }
-
-    private void initStatusList() {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Status");
-        try {
-            List<ParseObject> statusList = query.find();
-            for (ParseObject obj : statusList) {
-                listDataHeader.add(obj.getString("name"));
-            }
-            listDataChild.put(listDataHeader.get(0), inSearchList);
-            listDataChild.put(listDataHeader.get(1), inWorkList);
-            listDataChild.put(listDataHeader.get(2), arbitrageList);
-            listDataChild.put(listDataHeader.get(3), finishedList);
-            listDataChild.put(listDataHeader.get(4), draftList);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
     }
 
     private void initDraftList() {
@@ -527,6 +518,7 @@ public class ClientFragment extends Fragment {
                         i.putExtra("task_id", task_id);
                         i.putExtra("group", group_id);
                         i.putExtra("child", child_id);
+                        i.putExtra("firstName", list.get(0).getString("firstName"));
                         startActivity(i);
                     } else {
                         Utils.showDialog(
@@ -548,23 +540,7 @@ public class ClientFragment extends Fragment {
         } else if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
 
         } else if (requestCode == 3 && resultCode == Activity.RESULT_OK) {
-            int child = data.getIntExtra("child", 0);
-            int group = data.getIntExtra("group", 0);
-            Log.d("REQUEST CODE  = 3", "");
-            Task newTask = listDataChild.get(listDataHeader.get(group)).get(child);
-            listDataChild.get(listDataHeader.get(group)).remove(child);
-            //moveToFinishedStatus(newTask.getId());
-            finishedList.add(newTask);
-            listDataChild.put(listDataHeader.get(3), finishedList);
-            listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
-            expListView.setAdapter(listAdapter);
+
         }
     }
-
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        refreshData();
-//        Log.d("CLIENT_FRAGMENT", "resume");
-//    }
 }

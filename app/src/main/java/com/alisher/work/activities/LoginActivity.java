@@ -15,6 +15,7 @@ import com.alisher.work.admin.AdminActivity;
 import com.alisher.work.arbitor.ListArbitorActivity;
 import com.alisher.work.chat.BaseActivity;
 import com.alisher.work.chat.UserListActivity;
+import com.alisher.work.chat.utils.ParseUtils;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
@@ -22,7 +23,7 @@ import com.parse.ParseUser;
 /**
  * Created by Alisher on 3/2/2016.
  */
-public class LoginActivity extends AppCompatActivity{
+public class LoginActivity extends AppCompatActivity {
     private Button btnLogin;
     private Button btnLinkToRegister;
     private EditText inputEmail;
@@ -54,16 +55,14 @@ public class LoginActivity extends AppCompatActivity{
             public void onClick(View v) {
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
-                if (email.equals("arbitor")&&password.equals("arbitor")){
-                    startActivity(new Intent(LoginActivity.this,ListArbitorActivity.class));
-                } else if (email.equals("admin")&&password.equals("admin")){
-                    startActivity(new Intent(LoginActivity.this,AdminActivity.class));
-                } else if (!email.isEmpty() && !password.isEmpty() && !email.equals("arbitor")&& !password.equals("arbitor")) {
+                if (email.equals("admin") && password.equals("admin")) {
+                    startActivity(new Intent(LoginActivity.this, AdminActivity.class));
+                } else if (email.equals("arbiter") && password.equals("arbiter")) {
+                    startActivity(new Intent(LoginActivity.this, ListArbitorActivity.class));
+                } else if (!email.isEmpty() && !password.isEmpty() && !email.equals("admin") && !password.equals("admin") && !email.equals("arbiter") && !password.equals("arbiter")) {
                     checkLogin(email, password);
                 } else {
-                    Toast.makeText(getApplicationContext(),
-                            "Please enter the credentials!", Toast.LENGTH_LONG)
-                            .show();
+                    Toast.makeText(getApplicationContext(),"Please enter the credentials!", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -89,10 +88,11 @@ public class LoginActivity extends AppCompatActivity{
                     hideDialog();
 
 //                    if (parseUser.getBoolean("emailVerified")){
-                        Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                        UserListActivity.user = parseUser;
-                        startActivity(i);
-                        finish();
+                    Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                    UserListActivity.user = parseUser;
+                    ParseUtils.subscribeWithEmail(parseUser.getUsername());
+                    startActivity(i);
+                    finish();
 //                    } else {
 //                        Toast.makeText(LoginActivity.this, "Please confirm the e-mail address", Toast.LENGTH_SHORT).show();
 //                    }

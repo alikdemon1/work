@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.EditText;
 
@@ -14,9 +15,17 @@ import com.alisher.work.R;
 import com.alisher.work.newtask.steppers.PriceFragment;
 import com.alisher.work.newtask.steppers.TimeFragment;
 import com.alisher.work.newtask.steppers.TitleFragment;
+import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -34,6 +43,7 @@ public class NewTaskActivity extends progressMobileStepper {
 
     List<Class> stepperFragmentList = new ArrayList<>();
     private EditText priceText;
+    private ArrayList<String> recList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +97,8 @@ public class NewTaskActivity extends progressMobileStepper {
                         task.saveInBackground();
                         //task.put("attach", "Some file here");
 
+                        getReceivedList(id_category, desc);
+
                         Intent intent = getIntent();
                         intent.putExtra("name_category", name_category);
                         intent.putExtra("title", title);
@@ -101,6 +113,48 @@ public class NewTaskActivity extends progressMobileStepper {
                 });
         android.support.v7.app.AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
+    }
+
+    private void getReceivedList(String cat_id, final String desc){
+        recList = new ArrayList<String>();
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Test");
+        query.whereEqualTo("catId", cat_id);
+        query.whereGreaterThan("result", 0);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e == null){
+                    for (ParseObject o : list) {
+                        recList.add(o.getString("email"));
+                    }
+                    sendNotification(desc, recList);
+                } else {
+                    Log.d("NEWTASK_ACTIVITY", e.getMessage());
+                }
+            }
+        });
+    }
+
+    private void sendNotification(String message, ArrayList<String> rList) {
+        ParseQuery pushQuery = ParseInstallation.getQuery();
+        pushQuery.whereContainedIn("email", rList);
+        JSONObject data = null;
+        JSONObject main = null;
+        try {
+            data = new JSONObject();
+            main = new JSONObject();
+            data.put("message", message);
+            data.put("title", "New task available");
+            main.put("data", data);
+            main.put("is_background", false);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.d("JSON", main.toString());
+        ParsePush push = new ParsePush();
+        push.setQuery(pushQuery);
+        push.setData(main);
+        push.sendInBackground();
     }
 
     @Override

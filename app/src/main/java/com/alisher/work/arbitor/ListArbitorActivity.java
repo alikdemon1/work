@@ -8,10 +8,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.alisher.work.activities.LoginActivity;
 import com.alisher.work.activities.TaskDescriptionActivity;
 import com.alisher.work.adapters.RecyclerItemClickListener;
 import com.alisher.work.models.Task;
@@ -39,8 +42,6 @@ public class ListArbitorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_arbitor);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         mRecyclerView = (RecyclerView) findViewById(R.id.list_ar_recycler_view);
         mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mAdapter = new ArbitorRecyclerAdapter(getApplicationContext());
@@ -57,12 +58,12 @@ public class ListArbitorActivity extends AppCompatActivity {
                 i.putExtra("newTaskTitle", newTask.getTitle() + "");
                 i.putExtra("newTaskDesc", newTask.getDesc() + "");
                 i.putExtra("newTaskId", newTask.getId() + "");
-                i.putExtra("newTaskImage",newTask.getImage());
-                i.putExtra("newTaskClientId",newTask.getClientId());
-                i.putExtra("newTaskCost",String.valueOf(newTask.getPrice()));
+                i.putExtra("newTaskImage", newTask.getImage());
+                i.putExtra("newTaskClientId", newTask.getClientId());
+                i.putExtra("newTaskCost", String.valueOf(newTask.getPrice()));
                 long mili = newTask.getEndTime().getTime();
-                i.putExtra("newTaskEndtime",mili);
-                Log.d("task id",newTask.getId());
+                i.putExtra("newTaskEndtime", mili);
+                Log.d("task id", newTask.getId());
                 startActivity(i);
             }
         }));
@@ -109,5 +110,21 @@ public class ListArbitorActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.arbitration_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.exit_item) {
+            startActivity(new Intent(ListArbitorActivity.this, LoginActivity.class));
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

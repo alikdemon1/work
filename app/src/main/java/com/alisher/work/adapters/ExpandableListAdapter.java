@@ -41,8 +41,7 @@ import java.util.List;
  */
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private Context _context;
-    private List<String> _listDataHeader; // header titles
-    // child data in format of header title, child title
+    private List<String> _listDataHeader;
     private HashMap<String, List<Task>> _listDataChild;
 
     public ExpandableListAdapter(Context context, List<String> listDataHeader,
@@ -93,6 +92,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             desc.setEnabled(true);
             chat.setEnabled(true);
             attach.setEnabled(true);
+        } else if (groupPosition == 2) {
+            desc.setEnabled(true);
+            chat.setEnabled(false);
+            attach.setEnabled(true);
+        } else if (groupPosition == 3) {
+            desc.setEnabled(true);
+            chat.setEnabled(false);
+            attach.setEnabled(false);
         } else if (groupPosition == 4) {
             desc.setEnabled(false);
             chat.setEnabled(false);
@@ -100,7 +107,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
 
 
-        if (desc.isEnabled()){
+        if (desc.isEnabled()) {
             desc.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -108,27 +115,28 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                     i.putExtra("newTaskTitle", childText.getTitle() + "");
                     i.putExtra("newTaskDesc", childText.getDesc() + "");
                     i.putExtra("newTaskId", childText.getId() + "");
-                    i.putExtra("newTaskImage",childText.getImage());
-                    i.putExtra("newTaskCost",String.valueOf(childText.getPrice()));
-                    i.putExtra("newTaskDuration", childText.getEndTime().getTime());
+                    i.putExtra("newTaskImage", childText.getImage());
+                    i.putExtra("newTaskCost", childText.getPrice());
+                    i.putExtra("newTaskDeadline", childText.getEndTime().toString());
 
                     i.putExtra("child", childPosition);
                     i.putExtra("group", groupPosition);
                     i.putExtra("isEnabled", true);
-                    ((MainActivity) _context).startActivityForResult(i, 3);
+                    _context.startActivity(i);
                 }
             });
         }
 
-        if (chat.isEnabled()){
+        if (chat.isEnabled()) {
             chat.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    openChat(childText.getId(), groupPosition, childPosition);
                 }
             });
         }
 
-        if (attach.isEnabled()){
+        if (attach.isEnabled()) {
             attach.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -145,8 +153,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
-    private void loadUserList(final String task_id, final int group_id, final int child_id, final View v) {
-        final ProgressDialog dia = ProgressDialog.show(v.getContext(), null, v.getContext().getString(R.string.alert_loading));
+    private void openChat(final String task_id, final int group_id, final int child_id) {
+        final ProgressDialog dia = ProgressDialog.show(_context, null, _context.getString(R.string.alert_loading));
         ParseQuery<ParseObject> decQuery = ParseQuery.getQuery("Decision");
         decQuery.whereEqualTo("taskId", task_id);
         decQuery.whereEqualTo("clientDec", true);
@@ -166,17 +174,18 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                     dia.dismiss();
                     if (e == null) {
                         if (list.size() == 0)
-                            Toast.makeText(v.getContext(), R.string.msg_no_user_found, Toast.LENGTH_SHORT).show();
-                        Intent i = new Intent(v.getContext(), ChatActivity.class);
+                            Toast.makeText(_context, R.string.msg_no_user_found, Toast.LENGTH_SHORT).show();
+                        Intent i = new Intent(_context, ChatActivity.class);
                         i.putExtra(Const.EXTRA_DATA, list.get(0).getUsername());
+                        i.putExtra("firstName", list.get(0).getString("firstName"));
                         i.putExtra("task_id", task_id);
                         i.putExtra("group", group_id);
                         i.putExtra("child", child_id);
-                        ((MainActivity)_context).startActivityForResult(i, 3);
+                        _context.startActivity(i);
                     } else {
                         Utils.showDialog(
-                                v.getContext(),
-                                v.getContext().getString(R.string.err_users) + " "
+                                _context,
+                                _context.getString(R.string.err_users) + " "
                                         + e.getMessage());
                         e.printStackTrace();
                     }
