@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +24,7 @@ import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +37,23 @@ public class ListArbitorActivity extends AppCompatActivity {
     RecyclerView.LayoutManager mLayoutManager;
     RecyclerView.Adapter mAdapter;
     private ArrayList<Task> tasks;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private Bitmap bmp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_arbitor);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefresherArbiter);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swipeRefreshLayout.setRefreshing(true);
+                initializeData();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
 
         mRecyclerView = (RecyclerView) findViewById(R.id.list_ar_recycler_view);
         mLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -73,18 +86,25 @@ public class ListArbitorActivity extends AppCompatActivity {
         return "HELLO";
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initializeData();
+    }
+
     private void initializeData() {
         tasks = new ArrayList<>();
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
         query.whereEqualTo("statusId", ParseObject.createWithoutData("Status", "Y5lhU6qfgB"));
+        query.include("clientId");
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
+                tasks.clear();
                 if (e == null) {
                     for (int i = 0; i < list.size(); i++) {
                         final Task taskItem = new Task();
                         ParseObject o = list.get(i);
-
                         taskItem.setId(o.getObjectId());
                         taskItem.setTitle(o.getString("name"));
                         taskItem.setDesc(o.getString("description"));
@@ -93,8 +113,8 @@ public class ListArbitorActivity extends AppCompatActivity {
                         taskItem.setEndTime(o.getDate("endTime"));
                         taskItem.setCatId(o.getString("catId"));
                         taskItem.setPrice(o.getInt("cost"));
-                        taskItem.setClientId(o.getString("clientId"));
-
+                        ParseUser user = (ParseUser) o.getParseObject("clientId");
+                        taskItem.setClientId(user.getObjectId());
                         ParseFile image = (ParseFile) o.get("img");
                         try {
                             bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);

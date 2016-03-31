@@ -8,7 +8,7 @@
     android:padding="@dimen/activity_horizontal_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.letsnurture.ln_202.coordinatorlayoutpart1.ScrollingActivity"
-    tools:showIn="@layout/activity_profile">
+    tools:showIn="@layout/profile_admin">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
             android:padding="@dimen/activity_horizontal_margin">
 
             <TextView
-                android:id="@+id/profile_name"
+                android:id="@+id/admin_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -35,7 +35,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_name"
+                android:layout_below="@id/admin_name"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="8dp"
@@ -56,7 +56,7 @@
 
 
             <TextView
-                android:id="@+id/profile_email"
+                android:id="@+id/admin_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -68,7 +68,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_email"
+                android:layout_below="@id/admin_email"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="8dp"
@@ -85,19 +85,20 @@
             android:clickable="true"
             android:padding="@dimen/activity_horizontal_margin">
 
-            <EditText
-                android:id="@+id/profile_ssn"
+            <TextView
+                android:id="@+id/admin_ssn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:text="donwloading..."
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="#212121" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_ssn"
+                android:layout_below="@id/admin_ssn"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="8dp"
@@ -117,9 +118,9 @@
             android:padding="@dimen/activity_horizontal_margin">
 
 
-            <EditText
-                android:id="@+id/profile_country"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/admin_country"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
@@ -130,7 +131,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_country"
+                android:layout_below="@id/admin_country"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="8dp"
@@ -147,9 +148,9 @@
             android:clickable="true"
             android:padding="@dimen/activity_horizontal_margin">
 
-            <EditText
-                android:id="@+id/profile_city"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/admin_city"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
@@ -160,7 +161,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_city"
+                android:layout_below="@id/admin_city"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="8dp"
@@ -177,9 +178,9 @@
             android:clickable="true"
             android:padding="@dimen/activity_horizontal_margin">
 
-            <EditText
-                android:id="@+id/profile_street"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/admin_street"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
@@ -190,7 +191,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_street"
+                android:layout_below="@id/admin_street"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="8dp"
@@ -209,8 +210,8 @@
             android:clickable="true"
             android:padding="@dimen/activity_horizontal_margin">
 
-            <EditText
-                android:id="@+id/profile_state"
+            <TextView
+                android:id="@+id/admin_state"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -222,7 +223,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_state"
+                android:layout_below="@id/admin_state"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="8dp"
@@ -239,8 +240,8 @@
             android:clickable="true"
             android:padding="@dimen/activity_horizontal_margin">
 
-            <EditText
-                android:id="@+id/profile_zip"
+            <TextView
+                android:id="@+id/admin_zip"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -252,7 +253,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_zip"
+                android:layout_below="@id/admin_zip"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="8dp"
@@ -269,8 +270,8 @@
             android:clickable="true"
             android:padding="@dimen/activity_horizontal_margin">
 
-            <EditText
-                android:id="@+id/profile_buildNo"
+            <TextView
+                android:id="@+id/admin_buildNo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -282,7 +283,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_buildNo"
+                android:layout_below="@id/admin_buildNo"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="8dp"

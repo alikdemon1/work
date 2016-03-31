@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/check_finish"
+        android:icon="@drawable/finished"
+        android:orderInCategory="100"
+        android:title="Finish"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/check_arbiter"
+        android:icon="@drawable/arbiter"
+        android:orderInCategory="100"
+        android:title="Arbiter"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/check_modify"
+        android:icon="@drawable/modify"
+        android:orderInCategory="100"
+        android:title="Arbiter"
+        app:showAsAction="always" />
+</menu>

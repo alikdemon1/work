@@ -54,6 +54,7 @@ public class ChatActivity extends BaseActivity {
     private Date lastMsgDate;
     private boolean isRunning;
     private static Handler handler;
+    private String extra;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,11 +77,11 @@ public class ChatActivity extends BaseActivity {
 
         setTouchNClick(R.id.btnSend);
         setTouchNClick(R.id.btnAttach);
+        extra = getIntent().getStringExtra(Const.EXTRA_DATA);
 
 //        ParseUtils.subscribeWithEmail(ParseUser.getCurrentUser().getUsername());
         handler = new Handler();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -211,7 +212,7 @@ public class ChatActivity extends BaseActivity {
 
         ParseObject po = new ParseObject("ChatActivity");
         po.put("sender", UserListActivity.user.getUsername());
-        po.put("receiver", getIntent().getStringExtra(Const.EXTRA_DATA));
+        po.put("receiver", extra);
         po.put("message", s);
         po.saveEventually(new SaveCallback() {
 
@@ -224,7 +225,7 @@ public class ChatActivity extends BaseActivity {
                 mChatAdapter.notifyDataSetChanged();
             }
         });
-        sendNotification(s, ParseUser.getCurrentUser().getString("firstName"), getIntent().getStringExtra(Const.EXTRA_DATA));
+        sendNotification(s, ParseUser.getCurrentUser().getString("firstName"), extra);
     }
 
     private void sendNotification(String message, String title, String email) {
@@ -238,8 +239,11 @@ public class ChatActivity extends BaseActivity {
             main = new JSONObject();
             data.put("message", message);
             data.put("title", title);
+            data.put("buddy", extra);
             main.put("data", data);
             main.put("is_background", false);
+            main.put("isChat", false);
+            main.put("isNew", true);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -252,7 +256,7 @@ public class ChatActivity extends BaseActivity {
         push.sendInBackground();
     }
 
-    private void moveToFinishedStatus(String id) {
+    private void moveToRejectionStatus(String id) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
         query.whereEqualTo("objectId", id);
         query.findInBackground(new FindCallback<ParseObject>() {
@@ -260,7 +264,7 @@ public class ChatActivity extends BaseActivity {
             public void done(List<ParseObject> list, ParseException e) {
                 if (e == null) {
                     for (ParseObject o : list) {
-                        o.put("statusId", ParseObject.createWithoutData("Status", "FskciSuqTW"));
+                        o.put("statusId", ParseObject.createWithoutData("Status", "1Ts4KSabKd"));
                         o.saveEventually();
                     }
                 } else {
@@ -270,7 +274,7 @@ public class ChatActivity extends BaseActivity {
         });
     }
 
-    public void deleteFinishedTask(final String task_id){
+    public void deleteRejectionTask(final String task_id){
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
         query.whereEqualTo("taskId", task_id);
         query.findInBackground(new FindCallback<ParseObject>() {
@@ -285,7 +289,7 @@ public class ChatActivity extends BaseActivity {
                             public void done(List<ParseObject> list, ParseException e) {
                                 if (e == null) {
                                     for (ParseObject obj : list) {
-                                        obj.put("finishPerfId", o.getString("perfId"));
+                                        obj.put("rejectPerfId", o.getString("perfId"));
                                         Log.d("perfID", o.getString("perfId"));
                                         obj.saveEventually();
                                     }
@@ -323,8 +327,8 @@ public class ChatActivity extends BaseActivity {
                         }
 
                         if(o.getString("clientId")!=null && o.getString("perfId")!=null){
-                            deleteFinishedTask(taskIdDeny);
-                            moveToFinishedStatus(taskIdDeny);
+                            deleteRejectionTask(taskIdDeny);
+                            moveToRejectionStatus(taskIdDeny);
                             Toast.makeText(getApplicationContext(), "Task finished", Toast.LENGTH_SHORT).show();
                         }
                         else {
@@ -347,7 +351,7 @@ public class ChatActivity extends BaseActivity {
         if (convList.size() == 0) {
             // load all messages...
             ArrayList<String> al = new ArrayList<String>();
-            al.add(getIntent().getStringExtra(Const.EXTRA_DATA));
+            al.add(extra);
             al.add(UserListActivity.user.getUsername());
             query.whereContainedIn("sender", al);
             query.whereContainedIn("receiver", al);
@@ -355,7 +359,7 @@ public class ChatActivity extends BaseActivity {
             // load only newly received message..
             if (lastMsgDate != null)
                 query.whereGreaterThan("createdAt", lastMsgDate);
-            query.whereEqualTo("sender", getIntent().getStringExtra(Const.EXTRA_DATA));
+            query.whereEqualTo("sender", extra);
             query.whereEqualTo("receiver", UserListActivity.user.getUsername());
         }
         query.orderByDescending("createdAt");
@@ -377,7 +381,6 @@ public class ChatActivity extends BaseActivity {
                     }
                 }
                 handler.postDelayed(new Runnable() {
-
                     @Override
                     public void run() {
                         if (isRunning)
@@ -387,4 +390,6 @@ public class ChatActivity extends BaseActivity {
             }
         });
     }
+
+
 }

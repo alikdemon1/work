@@ -16,6 +16,8 @@ import android.widget.Toast;
 import com.alisher.work.R;
 import com.alisher.work.activities.MainActivity;
 import com.alisher.work.models.Question;
+import com.parse.FindCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -65,19 +67,37 @@ public class QuizActivity extends AppCompatActivity {
                     currentQ = quesList.get(qid);
                     setQuestionView();
                 } else {
-                    ParseObject parseObject = new ParseObject("Test");
-                    parseObject.put("result", score);
-                    parseObject.put("catId", cat_id);
-                    parseObject.put("perfId", ParseUser.getCurrentUser().getObjectId());
-                    parseObject.put("email", ParseUser.getCurrentUser().getUsername());
-                    parseObject.saveInBackground();
+                    ParseQuery<ParseObject> query = ParseQuery.getQuery("Test");
+                    query.whereEqualTo("perfId", ParseUser.getCurrentUser().getObjectId());
+                    query.whereEqualTo("catId", cat_id);
+                    query.findInBackground(new FindCallback<ParseObject>() {
+                        @Override
+                        public void done(List<ParseObject> objects, ParseException e) {
+                            if (e == null) {
+                                if (objects.isEmpty()) {
+                                    ParseObject parseObject = new ParseObject("Test");
+                                    parseObject.put("result", score);
+                                    parseObject.put("catId", cat_id);
+                                    parseObject.put("perfId", ParseUser.getCurrentUser().getObjectId());
+                                    parseObject.put("email", ParseUser.getCurrentUser().getUsername());
+                                    parseObject.saveInBackground();
+                                } else {
+                                    objects.get(0).put("result", score);
+                                    objects.get(0).saveInBackground();
+                                }
+                            } else {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(QuizActivity.this);
                     builder.setMessage("Your score: " + score)
                             .setCancelable(false)
                             .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    Toast.makeText(QuizActivity.this, "go to main", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(QuizActivity.this, "Calculating result...", Toast.LENGTH_SHORT).show();
                                     Intent i = new Intent(QuizActivity.this, MainActivity.class);
                                     startActivity(i);
                                 }

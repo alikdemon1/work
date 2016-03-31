@@ -1,5 +1,7 @@
 package com.alisher.work.models;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by Alisher Kozhabay on 3/23/2016.
  */
@@ -8,15 +10,35 @@ public class MyMarker
     private String mfName;
     private String mlName;
     private Float rating;
+    private String email;
     private Double mLatitude;
     private Double mLongitude;
+    private Bitmap img;
 
-    public MyMarker(String label, String icon, Float rating, Double latitude, Double longitude) {
+    public MyMarker(String label, String icon, Float rating, Double latitude, Double longitude, String email, Bitmap image) {
         this.mfName = label;
         this.rating = rating;
         this.mLatitude = latitude;
         this.mLongitude = longitude;
         this.mlName = icon;
+        this.email = email;
+        this.img = image;
+    }
+
+    public Bitmap getImg() {
+        return img;
+    }
+
+    public void setImg(Bitmap img) {
+        this.img = img;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getMfName() {

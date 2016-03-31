@@ -2,7 +2,6 @@ package com.alisher.work.activities;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,16 +12,17 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.models.Perform;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
+import com.parse.ParseACL;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.List;
 
@@ -58,34 +58,32 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(tvN.getText().toString());
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.finished_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = menu.findItem(R.id.finished);
-        boolean isEnabled = getIntent().getBooleanExtra("isEnabled", false);
-        int position = getIntent().getIntExtra("group", 0);
-        if (isEnabled && position == 1) {
-            item.setEnabled(true);
-            item.getIcon().setAlpha(255);
-        } else {
-            item.setEnabled(false);
-            item.getIcon().setAlpha(130);
-        }
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.finished_menu, menu);
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onPrepareOptionsMenu(Menu menu) {
+//        MenuItem item = menu.findItem(R.id.finished);
+//        boolean isEnabled = getIntent().getBooleanExtra("isEnabled", false);
+//        int position = getIntent().getIntExtra("group", 0);
+//        if (isEnabled && position == 1) {
+//            item.setEnabled(true);
+//            item.getIcon().setAlpha(255);
+//        } else {
+//            item.setEnabled(false);
+//            item.getIcon().setAlpha(130);
+//        }
+//        return true;
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.finished) {
-            vote();
-        } else if (id == android.R.id.home) {
+        if (id == android.R.id.home) {
             setResult(RESULT_CANCELED);
             finish();
         }
@@ -104,7 +102,6 @@ public class ClientDescriptionActivity extends AppCompatActivity {
                     o.put("frozenBalance", res);
                     Log.d("forzenResClient", res + " " + (getIntent().getIntExtra("newTaskCost", 0)));
                     o.saveInBackground();
-
 
                     ParseQuery<ParseObject> queryPerfId = ParseQuery.getQuery("Decision");
                     queryPerfId.whereEqualTo("taskId", getIntent().getStringExtra("newTaskId"));
@@ -140,10 +137,6 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         });
     }
 
-    private void addBalanceForPerf() {
-
-    }
-
     public void vote() {
         final Dialog dialog = new Dialog(ClientDescriptionActivity.this);
         dialog.setContentView(R.layout.vote_dialog);
@@ -166,24 +159,26 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ParseQuery<ParseUser> userQuery = ParseUser.getQuery();
-                userQuery.whereEqualTo("objectId", perform.getId());
-                userQuery.getFirstInBackground(new GetCallback<ParseUser>() {
+                ParseQuery<ParseObject> userQuery = ParseQuery.getQuery("Achievement");
+                userQuery.whereEqualTo("userId", perform.getId());
+                userQuery.findInBackground(new FindCallback<ParseObject>() {
                     @Override
-                    public void done(ParseUser user, ParseException e) {
+                    public void done(List<ParseObject> objects, ParseException e) {
                         if (e == null) {
-                            double a = user.getDouble("performerRating");
-                            double total = (a + starRate.getRating()) / 2;
-                            user.put("performerRating", total);
-                            Log.d("ASd", a + ", " + perform.getId() + ", " + starRate.getRating() + ", " + total);
-                            user.saveInBackground();
+                            if (objects != null && objects.size() > 0) {
+                                ParseObject user = objects.get(0);
+                                double a = user.getDouble("performerRating");
+                                double total = (a + starRate.getRating()) / 2;
+                                Log.d("ASd", a + ", " + perform.getId() + ", " + starRate.getRating() + ", " + total);
+                                user.put("performerRating", total);
+                                user.saveInBackground();
+                            }
                         } else {
-                            Log.e("DESC_ACTIVITY", e.getMessage());
+                            e.printStackTrace();
                         }
                     }
                 });
                 frozenBalance();
-                addBalanceForPerf();
                 deleteFinishedTask(getIntent().getStringExtra("newTaskId"));
                 moveToFinishedStatus(getIntent().getStringExtra("newTaskId"));
                 setIntent(getIntent());

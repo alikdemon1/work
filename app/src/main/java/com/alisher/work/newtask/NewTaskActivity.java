@@ -147,6 +147,8 @@ public class NewTaskActivity extends progressMobileStepper {
             data.put("title", "New task available");
             main.put("data", data);
             main.put("is_background", false);
+            main.put("isNew", false);
+            main.put("isChat", true);
         } catch (JSONException e) {
             e.printStackTrace();
         }

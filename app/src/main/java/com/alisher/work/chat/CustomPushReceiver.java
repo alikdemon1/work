@@ -57,11 +57,19 @@ public class CustomPushReceiver extends ParsePushBroadcastReceiver {
     private void parsePushJson(Context context, JSONObject json) {
         try {
             boolean isBackground = json.getBoolean("is_background");
+            boolean isNew = json.getBoolean("isNew");
+            boolean isChat = json.getBoolean("isChat");
             JSONObject data = json.getJSONObject("data");
             String title = data.getString("title");
             String message = data.getString("message");
 
-            if (!isBackground) {
+            if (!isBackground && !isChat) {
+                Intent resultIntent = new Intent(context, ChatActivity.class);
+                showNotificationMessage(context, title, message, resultIntent);
+            } else if(!isBackground && !isNew){
+                Intent resultIntent = new Intent(context, MainActivity.class);
+                showNotificationMessage(context, title, message, resultIntent);
+            } else {
                 Intent resultIntent = new Intent(context, MainActivity.class);
                 showNotificationMessage(context, title, message, resultIntent);
             }
@@ -80,5 +88,16 @@ public class CustomPushReceiver extends ParsePushBroadcastReceiver {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         notificationUtils.showNotificationMessage(title, message, intent);
+    }
+
+    private void showNotificationMessage(Context context, String title, String message, Intent intent, String buddy) {
+
+        notificationUtils = new NotificationUtils(context);
+
+        intent.putExtras(parseIntent.getExtras());
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        notificationUtils.showNotificationMessage(title, message, intent, buddy);
     }
 }

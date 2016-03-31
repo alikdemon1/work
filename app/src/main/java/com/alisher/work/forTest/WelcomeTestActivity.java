@@ -16,11 +16,15 @@ import com.alisher.work.adapters.RecyclerItemClickListener;
 import com.alisher.work.models.Category;
 import com.alisher.work.newtask.CategoryAdapter;
 import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class WelcomeTestActivity extends AppCompatActivity {
@@ -47,13 +51,53 @@ public class WelcomeTestActivity extends AppCompatActivity {
             @Override
             public void onItemClick(View view, int position) {
                 Category catItem = categories.get(position);
-                Intent i = new Intent(WelcomeTestActivity.this, QuizActivity.class);
-                i.putExtra("catId", catItem.getId());
-                startActivity(i);
+                check(catItem);
             }
         }));
+    }
 
+    private void check(final Category cat){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Test");
+        query.whereEqualTo("perfId", ParseUser.getCurrentUser().getObjectId());
+        query.whereEqualTo("catId", cat.getId());
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null) {
+                    if (objects.isEmpty()) {
+                        Intent i = new Intent(WelcomeTestActivity.this, QuizActivity.class);
+                        i.putExtra("catId", cat.getId());
+                        startActivity(i);
+                    } else {
+                        ParseObject obj = objects.get(0);
+                        if (obj.getInt("result") == 0) {
+                            Date createdDate = getEndDate(obj.getCreatedAt());
+                            Date nowDate = new Date();
+                            if (nowDate.compareTo(createdDate) > 0){
+                                Intent i = new Intent(WelcomeTestActivity.this, QuizActivity.class);
+                                i.putExtra("catId", cat.getId());
+                                startActivity(i);
+                            } else {
+                                Toast.makeText(WelcomeTestActivity.this, "Please retry after 2 weeks", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(WelcomeTestActivity.this, "Test already passed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } else {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
+    private Date getEndDate(Date date) {
+        date = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, 14);
+        date = c.getTime();
+        return date;
     }
 
 

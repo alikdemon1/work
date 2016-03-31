@@ -12,8 +12,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
+import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import java.util.List;
 
 public class TaskDescriptionActivity extends AppCompatActivity {
     ImageView iv;
@@ -29,14 +34,29 @@ public class TaskDescriptionActivity extends AppCompatActivity {
         fabAccept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"Accepted",Toast.LENGTH_SHORT).show();
 
-                ParseObject parseObject = new ParseObject("Decision");
-                parseObject.put("taskId",getIntent().getStringExtra("newTaskId"));
-                parseObject.put("clientDec",false);
-                parseObject.put("perfDec", true);
-                parseObject.put("perfId", ParseUser.getCurrentUser().getObjectId());
-                parseObject.saveInBackground();
+                ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
+                query.whereEqualTo("taskId", getIntent().getStringExtra("newTaskId"));
+                query.findInBackground(new FindCallback<ParseObject>() {
+                    @Override
+                    public void done(List<ParseObject> objects, ParseException e) {
+                        if (e == null) {
+                            if (objects.isEmpty()) {
+                                ParseObject parseObject = new ParseObject("Decision");
+                                parseObject.put("taskId", getIntent().getStringExtra("newTaskId"));
+                                parseObject.put("clientDec", false);
+                                parseObject.put("perfDec", true);
+                                parseObject.put("perfId", ParseUser.getCurrentUser().getObjectId());
+                                parseObject.saveInBackground();
+                                Toast.makeText(getApplicationContext(),"Accepted",Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(TaskDescriptionActivity.this, "Task already accepted", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            e.printStackTrace();
+                        }
+                    }
+                });
 
                 Intent i = new Intent(TaskDescriptionActivity.this,MainActivity.class);
                 startActivity(i);

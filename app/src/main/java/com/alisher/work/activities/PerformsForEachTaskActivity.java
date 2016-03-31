@@ -2,6 +2,8 @@ package com.alisher.work.activities;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,7 +19,10 @@ import com.alisher.work.adapters.PerformsForEachTaskAdapter;
 import com.alisher.work.adapters.RecyclerItemClickListener;
 import com.alisher.work.models.Perform;
 import com.parse.FindCallback;
+import com.parse.GetCallback;
+import com.parse.GetDataCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -33,6 +38,7 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
     RecyclerView.LayoutManager mLayoutManager;
     RecyclerView.Adapter mAdapter;
     private ArrayList<Perform> pts;
+    private float rating;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,18 +102,20 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
     }
 
     private void frozenBalance() {
-        ParseQuery<ParseUser> clientQuery = ParseUser.getQuery();
-        clientQuery.whereEqualTo("objectId", ParseUser.getCurrentUser().getObjectId());
-        clientQuery.findInBackground(new FindCallback<ParseUser>() {
+        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("Achievement");
+        parseQuery.whereEqualTo("userId", ParseUser.getCurrentUser().getObjectId());
+        parseQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
-            public void done(List<ParseUser> list, ParseException e) {
-                for (ParseObject o : list) {
+            public void done(ParseObject object, ParseException e) {
+                if (e == null) {
                     int price = getIntent().getIntExtra("taskPriceForBalance", 0);
-                    int bal = list.get(0).getInt("balance") - price;
-                    int fbal = list.get(0).getInt("frozenBalance") + price;
-                    list.get(0).put("balance", bal);
-                    list.get(0).put("frozenBalance", fbal);
-                    o.saveInBackground();
+                    int bal = object.getInt("balance") - price;
+                    int fbalance = object.getInt("frozenBalance") + price;
+                    object.put("balance", bal);
+                    object.put("frozenBalance", fbalance);
+                    object.saveInBackground();
+                } else {
+                    e.printStackTrace();
                 }
             }
         });
@@ -141,6 +149,7 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                 if (e == null) {
                     for (ParseObject o : list) {
                         o.put("statusId", ParseObject.createWithoutData("Status", "j6hNwQ01bt"));
+                        o.put("isStarted", true);
                         o.saveEventually();
                     }
                 } else {
@@ -158,19 +167,44 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
         for (ParseObject obj : performs) {
             ParseQuery<ParseUser> userParseQuery = ParseUser.getQuery();
             userParseQuery.whereEqualTo("objectId", obj.getString("perfId"));
-            List<ParseUser> list = userParseQuery.find();
+            final List<ParseUser> list = userParseQuery.find();
             Log.d("LIST", list.size() + "");
-            for (ParseUser o : list) {
-                Perform perf = new Perform();
-                perf.setId(o.getObjectId());
-                perf.setFirstName(o.getString("firstName"));
-                perf.setLastName(o.getString("lastName"));
-                perf.setRating((float) o.getDouble("performerRating"));
-                perf.setImg(R.drawable.ava);
-                pts.add(perf);
+            for (final ParseUser o : list) {
+                ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("Achievement");
+                parseQuery.whereEqualTo("userId", o.getObjectId());
+                parseQuery.findInBackground(new FindCallback<ParseObject>() {
+                    @Override
+                    public void done(List<ParseObject> objects, ParseException e) {
+                        if (e == null) {
+                            for (ParseObject p : objects) {
+                                final Perform perf = new Perform();
+                                perf.setId(o.getObjectId());
+                                perf.setFirstName(o.getString("firstName"));
+                                perf.setLastName(o.getString("lastName"));
+                                rating = (float) p.getDouble("performerRating");
+                                perf.setRating(rating);
+                                ParseFile file = o.getParseFile("photo");
+                                Bitmap photo = null;
+                                try {
+                                    photo = BitmapFactory.decodeByteArray(file.getData(), 0, file.getData().length);
+                                    perf.setAvatar(photo);
+                                } catch (ParseException e1) {
+                                    e1.printStackTrace();
+                                }
+                                pts.add(perf);
+                            }
+                            ((PerformsForEachTaskAdapter) mAdapter).setPerformsTask(pts);
+                        } else {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
-            ((PerformsForEachTaskAdapter) mAdapter).setPerformsTask(pts);
         }
+    }
+
+    private void getRatingForPerf(ParseUser parseUser, final Perform perf) {
+
     }
 
     @Override

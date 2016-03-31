@@ -43,11 +43,8 @@ public class ParseUtils {
 
     public static void subscribeWithEmail(String email) {
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
-
         installation.put("email", email);
-
         installation.saveInBackground();
-
         Log.e(TAG, "Subscribed with email: " + email);
     }
 }

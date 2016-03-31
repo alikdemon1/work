@@ -3,8 +3,7 @@ package com.alisher.work;
 import android.app.Application;
 
 import com.alisher.work.chat.utils.ParseUtils;
-import com.parse.Parse;
-import com.parse.ParseInstallation;
+import com.parse.ParseACL;
 
 /**
  * Created by Alisher Kozhabay on 3/18/2016.

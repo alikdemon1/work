@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.alisher.work.R;
 import com.alisher.work.activities.AttachActivity;
 import com.alisher.work.activities.ClientDescriptionActivity;
+import com.alisher.work.activities.ResultActivity;
 import com.alisher.work.chat.ChatActivity;
 import com.alisher.work.chat.utils.Const;
 import com.alisher.work.chat.utils.Utils;
@@ -75,26 +76,38 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
         ImageButton desc = (ImageButton) convertView.findViewById(R.id.perf_descBtn);
         ImageButton chat = (ImageButton) convertView.findViewById(R.id.perf_chatBtn);
         ImageButton attach = (ImageButton) convertView.findViewById(R.id.perf_attachBtn);
+        ImageButton result = (ImageButton) convertView.findViewById(R.id.perf_resultBtn);
+
         if (groupPosition == 0) {
             desc.setEnabled(true);
             chat.setEnabled(false);
             attach.setEnabled(false);
+            result.setEnabled(false);
         } else if (groupPosition == 1) {
             desc.setEnabled(true);
             chat.setEnabled(true);
             attach.setEnabled(true);
+            result.setEnabled(true);
         } else if (groupPosition == 2) {
             desc.setEnabled(true);
             chat.setEnabled(false);
-            attach.setEnabled(true);
+            attach.setEnabled(false);
+            result.setEnabled(false);
         } else if (groupPosition == 3) {
             desc.setEnabled(true);
             chat.setEnabled(false);
             attach.setEnabled(false);
+            result.setEnabled(false);
         } else if (groupPosition == 4) {
-            desc.setEnabled(false);
-            chat.setEnabled(false);
+            desc.setEnabled(true);
+            chat.setEnabled(true);
             attach.setEnabled(false);
+            result.setEnabled(false);
+        } else if (groupPosition == 5){
+            desc.setEnabled(true);
+            chat.setEnabled(true);
+            attach.setEnabled(true);
+            result.setEnabled(true);
         }
 
         if (desc.isEnabled()){
@@ -135,6 +148,19 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
                     i.putExtra("task_id", childText.getId());
                     i.putExtra("isVisible", false);
                     v.getContext().startActivity(i);
+                }
+            });
+        }
+
+        if(result.isEnabled()){
+            result.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(v.getContext(), ResultActivity.class);
+                    i.putExtra("isVisible", true);
+                    i.putExtra("isAvailable", false);
+                    i.putExtra("task_id", childText.getId());
+                    _context.startActivity(i);
                 }
             });
         }

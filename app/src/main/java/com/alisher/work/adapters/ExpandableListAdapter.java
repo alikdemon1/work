@@ -22,6 +22,7 @@ import com.alisher.work.R;
 import com.alisher.work.activities.AttachActivity;
 import com.alisher.work.activities.ClientDescriptionActivity;
 import com.alisher.work.activities.MainActivity;
+import com.alisher.work.activities.ResultActivity;
 import com.alisher.work.activities.TaskDescriptionActivity;
 import com.alisher.work.chat.ChatActivity;
 import com.alisher.work.chat.utils.Const;
@@ -84,28 +85,44 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         ImageButton desc = (ImageButton) convertView.findViewById(R.id.client_descBtn);
         ImageButton chat = (ImageButton) convertView.findViewById(R.id.client_chatBtn);
         ImageButton attach = (ImageButton) convertView.findViewById(R.id.client_attachBtn);
+        ImageButton result = (ImageButton) convertView.findViewById(R.id.client_resultBtn);
+
         if (groupPosition == 0) {
             desc.setEnabled(true);
             chat.setEnabled(false);
             attach.setEnabled(false);
+            result.setEnabled(false);
         } else if (groupPosition == 1) {
             desc.setEnabled(true);
             chat.setEnabled(true);
             attach.setEnabled(true);
+            result.setEnabled(true);
         } else if (groupPosition == 2) {
             desc.setEnabled(true);
             chat.setEnabled(false);
-            attach.setEnabled(true);
+            attach.setEnabled(false);
+            result.setEnabled(false);
         } else if (groupPosition == 3) {
             desc.setEnabled(true);
             chat.setEnabled(false);
             attach.setEnabled(false);
+            result.setEnabled(false);
         } else if (groupPosition == 4) {
-            desc.setEnabled(false);
+            desc.setEnabled(true);
+            chat.setEnabled(true);
+            attach.setEnabled(false);
+            result.setEnabled(false);
+        } else if (groupPosition == 5){
+            desc.setEnabled(true);
+            chat.setEnabled(true);
+            attach.setEnabled(true);
+            result.setEnabled(true);
+        } else if (groupPosition == 6){
+            desc.setEnabled(true);
             chat.setEnabled(false);
             attach.setEnabled(false);
+            result.setEnabled(false);
         }
-
 
         if (desc.isEnabled()) {
             desc.setOnClickListener(new View.OnClickListener() {
@@ -143,11 +160,30 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                     Intent i = new Intent(v.getContext(), AttachActivity.class);
                     i.putExtra("task_id", childText.getId());
                     i.putExtra("group", groupPosition);
-                    i.putExtra("isVisible", true);
+                    i.putExtra("isVisible", false);
+                    i.putExtra("isAvailable", true);
                     v.getContext().startActivity(i);
                 }
             });
         }
+
+        if(result.isEnabled()){
+            result.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(v.getContext(), ResultActivity.class);
+                    i.putExtra("task_id", childText.getId());
+                    i.putExtra("isAvailable", true);
+                    i.putExtra("newTaskTitle", childText.getTitle());
+                    i.putExtra("newTaskDesc", childText.getDesc());
+                    i.putExtra("newTaskId", childText.getId());
+                    i.putExtra("newTaskCost", childText.getPrice());
+                    i.putExtra("newTaskDeadline", childText.getEndTime().toString());
+                    _context.startActivity(i);
+                }
+            });
+        }
+
         txtListChild.setText(childText.getTitle());
         image.setImageBitmap(childText.getImage());
         return convertView;
@@ -181,6 +217,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         i.putExtra("task_id", task_id);
                         i.putExtra("group", group_id);
                         i.putExtra("child", child_id);
+                        i.putExtra("columnName", "clientId");
                         _context.startActivity(i);
                     } else {
                         Utils.showDialog(

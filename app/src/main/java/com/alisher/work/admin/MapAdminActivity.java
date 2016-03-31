@@ -1,11 +1,15 @@
 package com.alisher.work.admin;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -13,6 +17,7 @@ import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.models.MyMarker;
+import com.alisher.work.models.Perform;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -28,7 +33,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
+import com.parse.GetDataCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -50,6 +58,7 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
     private LocationRequest mLocationRequest;
     private HashMap<Marker, MyMarker> mMarkersHashMap;
     private ArrayList<MyMarker> mMyMarkersArray = new ArrayList<MyMarker>();
+    private Bitmap photo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,28 +126,45 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void getPerformers() {
         mMarkersHashMap = new HashMap<Marker, MyMarker>();
-        ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereGreaterThan("performerRating", 0);
-        query.findInBackground(new FindCallback<ParseUser>() {
+        ParseQuery<ParseObject> mainQuery = ParseQuery.getQuery("Achievement");
+        mainQuery.whereGreaterThan("performerRating", 0);
+        mainQuery.orderByDescending("performerRating");
+        mainQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
-            public void done(List<ParseUser> list, ParseException e) {
+            public void done(List<ParseObject> objects, ParseException e) {
                 if (e == null) {
-                    for (ParseUser p : list) {
-                        String fName = p.getString("firstName");
-                        String lName = p.getString("lastName");
-                        double rating = p.getDouble("performerRating");
-                        double latitude = p.getParseGeoPoint("lat").getLatitude();
-                        double longtitude = p.getParseGeoPoint("lat").getLongitude();
-                        mMyMarkersArray.add(new MyMarker(fName, lName, (float) rating, latitude, longtitude));
-                        setUpMap();
-                        plotMarkers(mMyMarkersArray);
-//                        map.addMarker(new MarkerOptions()
-//                                .title(fName + " " + lName + "\n" + rating)
-//                                .position(new LatLng(latitude, longtitude))
-//                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                    for (final ParseObject p : objects) {
+                        ParseQuery<ParseUser> query = ParseUser.getQuery();
+                        query.whereEqualTo("objectId", p.getString("userId"));
+                        query.findInBackground(new FindCallback<ParseUser>() {
+                            @Override
+                            public void done(List<ParseUser> list, ParseException e) {
+                                if (e == null) {
+                                    for (ParseUser o : list) {
+                                        final double rating = p.getDouble("performerRating");
+                                        String fName = o.getString("firstName");
+                                        String lName = o.getString("lastName");
+                                        double latitude = o.getParseGeoPoint("lat").getLatitude();
+                                        double longtitude = o.getParseGeoPoint("lat").getLongitude();
+                                        String email = o.getUsername();
+                                        ParseFile file = o.getParseFile("photo");
+                                        try {
+                                            photo = BitmapFactory.decodeByteArray(file.getData(), 0, file.getData().length);
+                                        } catch (ParseException e1) {
+                                            e1.printStackTrace();
+                                        }
+                                        mMyMarkersArray.add(new MyMarker(fName, lName, (float) rating, latitude, longtitude, email, photo));
+                                        setUpMap();
+                                        plotMarkers(mMyMarkersArray);
+                                    }
+                                } else {
+                                    Toast.makeText(MapAdminActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
                     }
                 } else {
-                    Log.d("ADMIN_ACTIVITY", e.getMessage());
+                    e.printStackTrace();
                 }
             }
         });
@@ -156,7 +182,7 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
                 break;
@@ -170,7 +196,7 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
 
                 // Create user marker with custom icon and other options
                 MarkerOptions markerOption = new MarkerOptions().position(new LatLng(myMarker.getmLatitude(), myMarker.getmLongitude()));
-                markerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                markerOption.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
 
                 Marker currentMarker = map.addMarker(markerOption);
                 mMarkersHashMap.put(currentMarker, myMarker);
@@ -193,15 +219,38 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
         public View getInfoContents(Marker marker) {
             View v = getLayoutInflater().inflate(R.layout.infomarker_admin, null);
 
-            MyMarker myMarker = mMarkersHashMap.get(marker);
+            final MyMarker myMarker = mMarkersHashMap.get(marker);
 
             ImageView markerIcon = (ImageView) v.findViewById(R.id.admin_image);
             TextView markerLabel = (TextView) v.findViewById(R.id.admin_title);
             RatingBar ratingbar = (RatingBar) v.findViewById(R.id.admin_rating);
-
-            markerIcon.setImageResource(R.drawable.ava);
+            TextView email = (TextView) v.findViewById(R.id.admin_email);
+            ImageView emailImage = (ImageView) v.findViewById(R.id.admin_click_email);
+            email.setText(myMarker.getEmail());
+            markerIcon.setImageBitmap(myMarker.getImg());
             ratingbar.setRating(myMarker.getRating());
             markerLabel.setText(myMarker.getMfName() + " " + myMarker.getMlName());
+
+            map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                @Override
+                public void onInfoWindowClick(Marker marker) {
+                    Log.d("SLICK", "CLICK");
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("plain/text");
+                    shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{myMarker.getEmail()});
+                    shareIntent.putExtra(Intent.EXTRA_SUBJECT, "XLancer");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, "");
+                    startActivity(Intent.createChooser(shareIntent, "Sharing something."));
+                }
+            });
+
+            emailImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d("SLICK", "CLICK2");
+
+                }
+            });
 
             return v;
         }
@@ -235,7 +284,6 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {

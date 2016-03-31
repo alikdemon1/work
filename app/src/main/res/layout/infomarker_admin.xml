@@ -7,8 +7,8 @@
 
     <ImageView
         android:id="@+id/admin_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginRight="16dp"
@@ -23,6 +23,35 @@
         android:textSize="20sp"
         android:text="Name"/>
 
+    <LinearLayout
+        android:id="@+id/liner_admin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/admin_title"
+        android:layout_toRightOf="@+id/admin_image"
+        android:clickable="true">
+
+        <TextView
+            android:id="@+id/admin_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/admin_title"
+            android:layout_toRightOf="@+id/admin_image"
+            android:textSize="15sp"
+            android:text="Email"/>
+
+        <ImageView
+            android:clickable="true"
+            android:id="@+id/admin_click_email"
+            android:layout_width="20dp"
+            android:layout_marginLeft="5dp"
+            android:layout_height="20dp"
+            android:layout_toLeftOf="@+id/admin_email"
+            android:layout_below="@+id/admin_title"
+            android:src="@drawable/email"/>
+
+    </LinearLayout>
+
     <RatingBar
         style="@style/ratingBarStyle"
         android:id="@+id/admin_rating"
@@ -31,6 +60,6 @@
         android:numStars="5"
         android:clickable="false"
         android:isIndicator="true"
-        android:layout_below="@+id/admin_title"
+        android:layout_below="@+id/liner_admin"
         android:layout_toRightOf="@+id/admin_image"/>
 </RelativeLayout>

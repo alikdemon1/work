@@ -1,7 +1,8 @@
 package com.alisher.work.admin;
 
-import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -11,18 +12,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.activities.LoginActivity;
-import com.alisher.work.adapters.PerformsForEachTaskAdapter;
 import com.alisher.work.adapters.RecyclerItemClickListener;
 import com.alisher.work.models.Perform;
-import com.alisher.work.newtask.CategoryActivity;
 import com.parse.FindCallback;
+import com.parse.GetDataCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -44,8 +43,6 @@ public class AdminActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         mRecyclerView = (RecyclerView) findViewById(R.id.admin_recycler_view);
         mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mAdapter = new AdminAdapter(getApplicationContext());
@@ -56,6 +53,18 @@ public class AdminActivity extends AppCompatActivity {
             @Override
             public void onItemClick(View view, int position) {
                 Log.d("AdminActivity", "Clicked performer in position = " + position);
+                Perform perf = admins.get(position);
+                Intent i = new Intent(AdminActivity.this, ProfileAdmin.class);
+                i.putExtra("name", perf.getFirstName() + " " + perf.getLastName());
+                i.putExtra("email", perf.getEmail());
+                i.putExtra("country", perf.getCountry());
+                i.putExtra("city", perf.getCity());
+                i.putExtra("street", perf.getStreet());
+                i.putExtra("state", perf.getState());
+                i.putExtra("ssn", perf.getSsn());
+                i.putExtra("buildNo", perf.getBuildNo());
+                i.putExtra("zip", perf.getZip());
+                startActivity(i);
             }
         }));
         initMap();
@@ -63,25 +72,50 @@ public class AdminActivity extends AppCompatActivity {
 
     private void initializeData() {
         admins = new ArrayList<>();
-        ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereGreaterThan("performerRating", 0);
-        query.orderByDescending("performerRating");
-        query.findInBackground(new FindCallback<ParseUser>() {
+        ParseQuery<ParseObject> mainQuery = ParseQuery.getQuery("Achievement");
+        mainQuery.whereGreaterThan("performerRating", 0);
+        mainQuery.orderByDescending("performerRating");
+        mainQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
-            public void done(List<ParseUser> list, ParseException e) {
+            public void done(List<ParseObject> objects, ParseException e) {
                 if (e == null) {
-                    for (ParseUser o : list) {
-                        Perform perf = new Perform();
-                        perf.setId(o.getObjectId());
-                        perf.setFirstName(o.getString("firstName"));
-                        perf.setLastName(o.getString("lastName"));
-                        perf.setRating((float) o.getDouble("performerRating"));
-                        perf.setImg(R.drawable.ava);
-                        admins.add(perf);
+                    for (final ParseObject p : objects) {
+                        ParseQuery<ParseUser> query = ParseUser.getQuery();
+                        query.whereEqualTo("objectId", p.getString("userId"));
+                        query.findInBackground(new FindCallback<ParseUser>() {
+                            @Override
+                            public void done(List<ParseUser> list, ParseException e) {
+                                if (e == null) {
+                                    for (ParseUser o : list) {
+                                        final Perform perf = new Perform();
+                                        perf.setRating((float) p.getDouble("performerRating"));
+                                        perf.setId(o.getObjectId());
+                                        perf.setFirstName(o.getString("firstName"));
+                                        perf.setLastName(o.getString("lastName"));
+                                        perf.setCountry(o.getString("country"));
+                                        perf.setCity(o.getString("city"));
+                                        perf.setState(o.getString("state"));
+                                        perf.setZip(o.getString("zip"));
+                                        perf.setBuildNo(o.getString("buildingNo"));
+                                        perf.setSsn(o.getInt("ssn"));
+                                        ParseFile file = o.getParseFile("photo");
+                                        try {
+                                            Bitmap photo = BitmapFactory.decodeByteArray(file.getData(), 0, file.getData().length);
+                                            perf.setAvatar(photo);
+                                        } catch (ParseException e1) {
+                                            e1.printStackTrace();
+                                        }
+                                        admins.add(perf);
+                                    }
+                                    ((AdminAdapter) mAdapter).setPerforms(admins);
+                                } else {
+                                    Toast.makeText(AdminActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
                     }
-                    ((AdminAdapter) mAdapter).setPerforms(admins);
                 } else {
-                    Toast.makeText(AdminActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
                 }
             }
         });

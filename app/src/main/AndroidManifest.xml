@@ -91,6 +91,12 @@
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" />
 
+        <activity
+            android:name=".admin.ProfileAdmin"
+            android:label="MCQ"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan" />
+
 
         <activity
             android:name=".chat.UserListActivity"
@@ -143,6 +149,12 @@
 
         <activity
             android:name=".activities.AttachActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan">
+        </activity>
+
+        <activity
+            android:name=".activities.ResultActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan">
         </activity>

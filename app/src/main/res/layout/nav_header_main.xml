@@ -11,10 +11,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-    <ImageView
+    <com.alisher.work.activities.MLRoundedImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:src="@drawable/ava" />
 
@@ -36,6 +36,12 @@
             android:layout_height="wrap_content"
             android:text="android@gmail.com" />
 
+        <ImageView
+            android:src="@drawable/balance"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@+id/userBalance"/>
+
         <TextView
             android:id="@+id/userBalance"
             android:layout_width="wrap_content"
@@ -44,6 +50,13 @@
             android:layout_toLeftOf="@+id/userFrozenBalance"
             android:layout_toStartOf="@+id/userFrozenBalance"
             android:layout_marginRight="30dp"/>
+
+        <ImageView
+            android:src="@drawable/frozen"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@id/userFrozenBalance"/>
+
         <TextView
             android:id="@+id/userFrozenBalance"
             android:layout_width="wrap_content"

@@ -62,6 +62,8 @@ public class PerformerFragment extends Fragment {
     private Bitmap bmp;
     private Timer t;
     private boolean paused;
+    private List<Task> inCheckList;
+    private List<Task> rejectionList;
 
     public PerformerFragment() {
 
@@ -101,11 +103,12 @@ public class PerformerFragment extends Fragment {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 Task newTask = listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition);
-                Toast.makeText(getActivity(), listDataHeader.get(groupPosition) + " : "
-                                + listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition),
-                        Toast.LENGTH_SHORT)
-                        .show();
-                if (groupPosition == 0) {
+//                Toast.makeText(getActivity(), listDataHeader.get(groupPosition) + " : "
+//                                + listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition),
+//                        Toast.LENGTH_SHORT)
+//                        .show();
+
+                if (groupPosition == 0) { // Available list
                     Intent i = new Intent(getActivity(), TaskDescriptionActivity.class);
                     i.putExtra("newTaskTitle", newTask.getTitle() + "");
                     i.putExtra("newTaskDesc", newTask.getDesc() + "");
@@ -114,10 +117,17 @@ public class PerformerFragment extends Fragment {
                     i.putExtra("newTaskCost", String.valueOf(newTask.getPrice()));
                     i.putExtra("newTaskDeadline", newTask.getEndTime().toString());
                     startActivity(i);
-                } else if (groupPosition == 1) {
+
+                } else if (groupPosition == 1) {  //Work list
                     openChat(newTask.getId());
-                } else {
-                    Toast.makeText(getContext(), "else", Toast.LENGTH_SHORT).show();
+                } else if (groupPosition == 2){ //Arbitrage
+
+                } else if (groupPosition == 3){ //Finished
+
+                } else if (groupPosition == 4){ //Check
+
+                } else if (groupPosition == 5){ //Rejection
+
                 }
 
                 return false;
@@ -167,7 +177,7 @@ public class PerformerFragment extends Fragment {
                     resfreshData();
                 }
             }
-        }, 5000, 1000);
+        }, 5000, 100000);
     }
 
     @Override
@@ -195,7 +205,7 @@ public class PerformerFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "passTest", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(getActivity(), WelcomeTestActivity.class));
             }
         });
@@ -209,6 +219,8 @@ public class PerformerFragment extends Fragment {
         arbitrageList = new ArrayList<>();
         finishedList = new ArrayList<>();
         taskIdOnWorkList = new ArrayList<String>();
+        inCheckList = new ArrayList<>();
+        rejectionList = new ArrayList<>();
 
         initStatusList();
     }
@@ -218,11 +230,14 @@ public class PerformerFragment extends Fragment {
         initFinishedList();
         initWorkList();
         initArbitrageList();
+        initCheckList();
+        initRejectionList();
     }
 
     private void initStatusList() {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Status");
-        query.setLimit(4);
+        query.whereNotEqualTo("name", "Draft");
+        query.orderByAscending("createdAt");
         try {
             List<ParseObject> statusList = query.find();
             for (ParseObject obj : statusList) {
@@ -232,9 +247,85 @@ public class PerformerFragment extends Fragment {
             listDataChild.put(listDataHeader.get(1), inWorkList);
             listDataChild.put(listDataHeader.get(2), arbitrageList);
             listDataChild.put(listDataHeader.get(3), finishedList);
+            listDataChild.put(listDataHeader.get(4), inCheckList);
+            listDataChild.put(listDataHeader.get(5), rejectionList);
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    private void initCheckList() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        ParseObject obj = ParseObject.createWithoutData("Status", "o2bnAc0fEy");
+        query.whereEqualTo("checkPerfId", ParseUser.getCurrentUser().getObjectId());
+        query.whereEqualTo("statusId", obj);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                inCheckList.clear();
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        Task task = new Task();
+                        task.setId(o.getObjectId());
+                        task.setTitle(o.getString("name"));
+                        task.setDesc(o.getString("description"));
+                        task.setDuration(o.getString("duration"));
+                        task.setStartTime(o.getDate("startTime"));
+                        task.setEndTime(o.getDate("endTime"));
+                        task.setCatId(o.getString("catId"));
+                        task.setPrice(o.getInt("cost"));
+                        ParseFile image = (ParseFile) o.get("img");
+                        try {
+                            bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
+                        } catch (ParseException e1) {
+                            e1.printStackTrace();
+                        }
+                        task.setImage(bmp);
+                        inCheckList.add(task);
+                        listAdapter.notifyDataSetChanged();
+                    }
+                } else {
+                    Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void initRejectionList() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        ParseObject obj = ParseObject.createWithoutData("Status", "1Ts4KSabKd");
+        query.whereEqualTo("rejectPerfId", ParseUser.getCurrentUser().getObjectId());
+        query.whereEqualTo("statusId", obj);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                rejectionList.clear();
+                if (e == null) {
+                    for (ParseObject o : list) {
+                        Task task = new Task();
+                        task.setId(o.getObjectId());
+                        task.setTitle(o.getString("name"));
+                        task.setDesc(o.getString("description"));
+                        task.setDuration(o.getString("duration"));
+                        task.setStartTime(o.getDate("startTime"));
+                        task.setEndTime(o.getDate("endTime"));
+                        task.setCatId(o.getString("catId"));
+                        task.setPrice(o.getInt("cost"));
+                        ParseFile image = (ParseFile) o.get("img");
+                        try {
+                            bmp = BitmapFactory.decodeByteArray(image.getData(), 0, image.getData().length);
+                        } catch (ParseException e1) {
+                            e1.printStackTrace();
+                        }
+                        task.setImage(bmp);
+                        rejectionList.add(task);
+                        listAdapter.notifyDataSetChanged();
+                    }
+                } else {
+                    Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void initFinishedList() {
@@ -275,7 +366,7 @@ public class PerformerFragment extends Fragment {
     private void initArbitrageList() {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
         ParseObject obj = ParseObject.createWithoutData("Status", "Y5lhU6qfgB");
-        query.whereEqualTo("finishPerfId", ParseUser.getCurrentUser().getObjectId());
+        query.whereEqualTo("arbitragePerfId", ParseUser.getCurrentUser().getObjectId());
         query.whereEqualTo("statusId", obj);
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -377,6 +468,7 @@ public class PerformerFragment extends Fragment {
             ParseObject obj = ParseObject.createWithoutData("Status", "vVMYOEUIeY");
             query.whereEqualTo("statusId", obj);
             query.whereContainedIn("catId", objCat);
+            query.whereNotEqualTo("clientId", ParseUser.getCurrentUser());
             query.findInBackground(new FindCallback<ParseObject>() {
                 @Override
                 public void done(List<ParseObject> list, ParseException e) {
