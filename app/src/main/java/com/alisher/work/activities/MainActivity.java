@@ -27,9 +27,7 @@ import com.alisher.work.R;
 import com.alisher.work.fragments.ClientFragment;
 import com.alisher.work.fragments.PerformerFragment;
 import com.parse.FindCallback;
-import com.parse.GetCallback;
 import com.parse.GetDataCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
@@ -46,11 +44,11 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    private ImageView profileImg;
     private TextView emailText;
     private NavigationView navigationView;
-    private ParseUser currentUser = ParseUser.getCurrentUser();
+    private ParseUser currentUser;
     private TextView nameText,balanceText,frozenBalanceText;
-    private ImageView image;
     private Bitmap photo;
 
     @Override
@@ -58,6 +56,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        currentUser = ParseUser.getCurrentUser();
         initToolbar();
         initViewPager();
         initTablayout();
@@ -69,61 +68,56 @@ public class MainActivity extends AppCompatActivity
         View header = navigationView.getHeaderView(0);
         emailText = (TextView) header.findViewById(R.id.profile_email);
         nameText = (TextView) header.findViewById(R.id.profile_name);
+        profileImg = (ImageView) header.findViewById(R.id.imageView);
         balanceText = (TextView) header.findViewById(R.id.userBalance);
         frozenBalanceText = (TextView) header.findViewById(R.id.userFrozenBalance);
-        image = (ImageView) header.findViewById(R.id.imageView);
-
         ParseQuery<ParseUser> query = ParseUser.getQuery();
         query.whereEqualTo("objectId", currentUser.getObjectId());
         query.findInBackground(new FindCallback<ParseUser>() {
             @Override
             public void done(List<ParseUser> list, ParseException e) {
                 if (e == null) {
-                    for (final ParseUser user : list) {
+                    for (ParseUser user : list) {
                         final String name = user.getString("firstName") + " " + user.getString("lastName");
                         final String email = user.getUsername();
-                        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("Achievement");
-                        parseQuery.whereEqualTo("userId", user.getObjectId());
-                        parseQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                        ParseFile file = user.getParseFile("photo");
+                        file.getDataInBackground(new GetDataCallback() {
                             @Override
-                            public void done(ParseObject object, ParseException e) {
-                                if (e == null) {
-                                    String bal = String.valueOf(object.getInt("balance")) + "$";
-                                    String frozenBal = String.valueOf(object.getInt("frozenBalance")) + "$";
-                                    balanceText.setText(bal + "");
-                                    frozenBalanceText.setText(frozenBal + "");
-
-                                    ParseFile file = user.getParseFile("photo");
-                                    file.getDataInBackground(new GetDataCallback() {
-                                        @Override
-                                        public void done(byte[] data, ParseException e) {
-                                            if (e == null) {
-                                                nameText.setText(name);
-                                                emailText.setText(email);
-                                                photo = BitmapFactory.decodeByteArray(data, 0, data.length);
-                                                image.setImageBitmap(photo);
-                                            } else {
-
-                                            }
-                                        }
-                                    });
+                            public void done(byte[] data, ParseException e) {
+                                if (e == null){
+                                    nameText.setText(name);
+                                    emailText.setText(email);
+                                    photo = BitmapFactory.decodeByteArray(data, 0, data.length);
+                                    profileImg.setImageBitmap(photo);
                                 } else {
-                                    e.printStackTrace();
+
                                 }
                             }
                         });
+
                     }
                 } else {
                     Log.e("MainActivity", e.getMessage());
                 }
             }
         });
-    }
+        ParseQuery<ParseObject> queryBal = ParseQuery.getQuery("Achievement");
+        queryBal.whereEqualTo("userId", currentUser.getObjectId());
+        queryBal.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if(e==null){
+                    for (ParseObject o : objects) {
+                        String bal = String.valueOf(o.getInt("balance")) + "$";
+                        String frozenBal = String.valueOf(o.getInt("frozenBalance")) + "$";
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        initProfile();
+                        balanceText.setText(bal + "");
+                        frozenBalanceText.setText(frozenBal + "");
+                    }
+                }
+            }
+        });
+
     }
 
     private void initTablayout() {
@@ -149,7 +143,7 @@ public class MainActivity extends AppCompatActivity
     private void initToolbar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("X-Lancer");
+        getSupportActionBar().setTitle("XLancer");
     }
 
     @Override
@@ -187,8 +181,7 @@ public class MainActivity extends AppCompatActivity
             ParseUser user = ParseUser.getCurrentUser();
             Toast.makeText(MainActivity.this, "Sign Out", Toast.LENGTH_SHORT).show();
             if (user != null) {
-                user.logOut();
-                user=null;
+                ParseUser.logOut();
             }
             startActivity(new Intent(getApplicationContext(), LoginActivity.class));
         } else if (id == R.id.nav_profile) {

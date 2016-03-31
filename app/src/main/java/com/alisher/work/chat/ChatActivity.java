@@ -104,6 +104,18 @@ public class ChatActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+
+    public void setIntent(Intent i, String s){
+        i.putExtra("child", i.getIntExtra("child", 0));
+        i.putExtra("group", i.getIntExtra("group", 0));
+        i.putExtra("flag", s);
+        setResult(RESULT_OK, i);
+        finish();
+    }
+
+
+
     @Override
     protected void onResume() {
         super.onResume();
