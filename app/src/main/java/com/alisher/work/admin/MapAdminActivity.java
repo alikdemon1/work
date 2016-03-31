@@ -1,5 +1,7 @@
 package com.alisher.work.admin;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -28,7 +30,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
+import com.parse.GetDataCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -50,6 +55,7 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
     private LocationRequest mLocationRequest;
     private HashMap<Marker, MyMarker> mMarkersHashMap;
     private ArrayList<MyMarker> mMyMarkersArray = new ArrayList<MyMarker>();
+    private Bitmap photo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,28 +123,51 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void getPerformers() {
         mMarkersHashMap = new HashMap<Marker, MyMarker>();
-        ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereGreaterThan("performerRating", 0);
-        query.findInBackground(new FindCallback<ParseUser>() {
+        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("Achievement");
+        parseQuery.whereGreaterThan("performerRating", 0);
+        parseQuery.orderByDescending("performerRating");
+        parseQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
-            public void done(List<ParseUser> list, ParseException e) {
+            public void done(List<ParseObject> objects, ParseException e) {
                 if (e == null) {
-                    for (ParseUser p : list) {
-                        String fName = p.getString("firstName");
-                        String lName = p.getString("lastName");
-                        double rating = p.getDouble("performerRating");
-                        double latitude = p.getParseGeoPoint("lat").getLatitude();
-                        double longtitude = p.getParseGeoPoint("lat").getLongitude();
-                        mMyMarkersArray.add(new MyMarker(fName, lName, (float) rating, latitude, longtitude));
-                        setUpMap();
-                        plotMarkers(mMyMarkersArray);
+                    for (final ParseObject o : objects) {
+                        final double rating = o.getDouble("performerRating");
+
+                        ParseQuery<ParseUser> userQ= ParseUser.getQuery();
+                        userQ.whereEqualTo("objectId", o.getString("userId"));
+                        userQ.findInBackground(new FindCallback<ParseUser>() {
+                            @Override
+                            public void done(List<ParseUser> objects, ParseException e) {
+                                for (ParseUser user : objects) {
+                                    String fName = user.getString("firstName");
+                                    String lName = user.getString("lastName");
+                                    double latitude = user.getParseGeoPoint("lat").getLatitude();
+                                    double longtitude = user.getParseGeoPoint("lat").getLongitude();
+                                    ParseFile file = user.getParseFile("photo");
+                                    file.getDataInBackground(new GetDataCallback() {
+                                        @Override
+                                        public void done(byte[] data, ParseException e) {
+                                            if (e == null){
+                                                photo = BitmapFactory.decodeByteArray(data, 0, data.length);
+                                            } else {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                    Log.d("IMAGE_ADMIN_MAP", photo.toString());
+                                    mMyMarkersArray.add(new MyMarker(fName, lName, (float) rating, latitude, longtitude, photo));
+                                    setUpMap();
+                                    plotMarkers(mMyMarkersArray);
 //                        map.addMarker(new MarkerOptions()
 //                                .title(fName + " " + lName + "\n" + rating)
 //                                .position(new LatLng(latitude, longtitude))
 //                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                                }
+                            }
+                        });
                     }
                 } else {
-                    Log.d("ADMIN_ACTIVITY", e.getMessage());
+                    Toast.makeText(MapAdminActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -199,7 +228,7 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
             TextView markerLabel = (TextView) v.findViewById(R.id.admin_title);
             RatingBar ratingbar = (RatingBar) v.findViewById(R.id.admin_rating);
 
-            markerIcon.setImageResource(R.drawable.ava);
+            markerIcon.setImageBitmap(myMarker.getImage());
             ratingbar.setRating(myMarker.getRating());
             markerLabel.setText(myMarker.getMfName() + " " + myMarker.getMlName());
 

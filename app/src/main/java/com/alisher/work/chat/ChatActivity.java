@@ -103,43 +103,7 @@ public class ChatActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void denyMethod(final String taskIdDeny, final String s) {
 
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Deny");
-        query.whereEqualTo("taskId",taskIdDeny);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-
-                if (!list.isEmpty()){
-                    for(ParseObject o:list){
-                        if(o.getString("clientId")==null){
-                            o.put("clientId",ParseUser.getCurrentUser().getObjectId());
-                            o.saveEventually();
-                        }
-                        if (o.getString("perfId")==null){
-                            o.put("perfId",ParseUser.getCurrentUser().getObjectId());
-                            o.saveEventually();
-                        }
-
-                        if(o.getString("clientId")!=null && o.getString("perfId")!=null){
-                            deleteFinishedTask(taskIdDeny);
-                            moveToFinishedStatus(taskIdDeny);
-                            Toast.makeText(getApplicationContext(), "Task finished", Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            Toast.makeText(getApplicationContext(), "Waiting...", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                } else {
-                    ParseObject p = new ParseObject("Deny");
-                    p.put(s, ParseUser.getCurrentUser().getObjectId());
-                    p.put("taskId", taskIdDeny);
-                    p.saveEventually();
-                }
-            }
-        });
-    }
 
     public void setIntent(Intent i, String s){
         i.putExtra("child", i.getIntExtra("child", 0));
@@ -149,22 +113,7 @@ public class ChatActivity extends BaseActivity {
         finish();
     }
 
-    public void deleteFinishedTask(String task_id){
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
-        query.whereEqualTo("taskId", task_id);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null) {
-                    for (ParseObject o : list) {
-                        o.deleteEventually();
-                    }
-                } else {
 
-                }
-            }
-        });
-    }
 
     @Override
     protected void onResume() {

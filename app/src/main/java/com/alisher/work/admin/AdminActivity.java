@@ -2,6 +2,8 @@ package com.alisher.work.admin;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -22,7 +24,9 @@ import com.alisher.work.adapters.RecyclerItemClickListener;
 import com.alisher.work.models.Perform;
 import com.alisher.work.newtask.CategoryActivity;
 import com.parse.FindCallback;
+import com.parse.GetDataCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -63,20 +67,42 @@ public class AdminActivity extends AppCompatActivity {
 
     private void initializeData() {
         admins = new ArrayList<>();
-        ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereGreaterThan("performerRating", 0);
-        query.orderByDescending("performerRating");
-        query.findInBackground(new FindCallback<ParseUser>() {
+        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("Achievement");
+        parseQuery.whereGreaterThan("performerRating", 0);
+        parseQuery.orderByDescending("performerRating");
+        parseQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
-            public void done(List<ParseUser> list, ParseException e) {
+            public void done(List<ParseObject> objects, ParseException e) {
                 if (e == null) {
-                    for (ParseUser o : list) {
-                        Perform perf = new Perform();
-                        perf.setId(o.getObjectId());
-                        perf.setFirstName(o.getString("firstName"));
-                        perf.setLastName(o.getString("lastName"));
+                    for (final ParseObject o : objects) {
+                        final Perform perf = new Perform();
+                        perf.setId(o.getString("userId"));
                         perf.setRating((float) o.getDouble("performerRating"));
-                        perf.setImg(R.drawable.ava);
+
+                        ParseQuery<ParseUser> userQ= ParseUser.getQuery();
+                        userQ.whereEqualTo("objectId", o.getString("userId"));
+                        userQ.findInBackground(new FindCallback<ParseUser>() {
+                            @Override
+                            public void done(List<ParseUser> objects, ParseException e) {
+                                for (ParseUser user : objects) {
+                                    perf.setFirstName(user.getString("firstName"));
+                                    perf.setLastName(user.getString("lastName"));
+                                    ParseFile file = user.getParseFile("photo");
+                                    file.getDataInBackground(new GetDataCallback() {
+                                        @Override
+                                        public void done(byte[] data, ParseException e) {
+                                            if (e == null){
+                                                Bitmap photo = BitmapFactory.decodeByteArray(data, 0, data.length);
+                                                perf.setAvatar(photo);
+                                            } else {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
                         admins.add(perf);
                     }
                     ((AdminAdapter) mAdapter).setPerforms(admins);

@@ -93,18 +93,17 @@ public class ClientDescriptionActivity extends AppCompatActivity {
     }
 
     private void frozenBalance() {
-        ParseQuery<ParseUser> clientQuery = ParseUser.getQuery();
-        clientQuery.whereEqualTo("objectId", ParseUser.getCurrentUser().getObjectId());
-        clientQuery.findInBackground(new FindCallback<ParseUser>() {
+        ParseQuery<ParseObject> clientQuery = ParseQuery.getQuery("Achievement");
+        clientQuery.whereEqualTo("userId",ParseUser.getCurrentUser().getObjectId());
+        clientQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
-            public void done(List<ParseUser> list, ParseException e) {
+            public void done(List<ParseObject> list, ParseException e) {
                 for (ParseObject o : list) {
                     int res = o.getInt("frozenBalance") - (getIntent().getIntExtra("newTaskCost", 0));
                     Log.d("COST", getIntent().getIntExtra("newTaskCost", 0) + "");
                     o.put("frozenBalance", res);
                     Log.d("forzenResClient", res + " " + (getIntent().getIntExtra("newTaskCost", 0)));
                     o.saveInBackground();
-
 
                     ParseQuery<ParseObject> queryPerfId = ParseQuery.getQuery("Decision");
                     queryPerfId.whereEqualTo("taskId", getIntent().getStringExtra("newTaskId"));
@@ -121,12 +120,12 @@ public class ClientDescriptionActivity extends AppCompatActivity {
                         }
                     });
 
-                    ParseQuery<ParseUser> perfQuery = ParseUser.getQuery();
-                    perfQuery.whereEqualTo("objectId", perfId);
-                    perfQuery.findInBackground(new FindCallback<ParseUser>() {
+                    ParseQuery<ParseObject> perfQuery = ParseQuery.getQuery("Achievement");
+                    perfQuery.whereEqualTo("userId", perfId);
+                    perfQuery.findInBackground(new FindCallback<ParseObject>() {
                         @Override
-                        public void done(List<ParseUser> list, ParseException e) {
-                            for (ParseObject perfObj : list) {
+                        public void done(List<ParseObject> objects, ParseException e) {
+                            for (ParseObject perfObj : objects) {
                                 int taskCost = (getIntent().getIntExtra("newTaskCost", 0));
                                 int ress = perfObj.getInt("balance") + taskCost;
                                 Log.d("balance", taskCost + " " + perfObj.getInt("balance") + " " + ress);
@@ -140,9 +139,6 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         });
     }
 
-    private void addBalanceForPerf() {
-
-    }
 
     public void vote() {
         final Dialog dialog = new Dialog(ClientDescriptionActivity.this);
@@ -166,24 +162,25 @@ public class ClientDescriptionActivity extends AppCompatActivity {
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ParseQuery<ParseUser> userQuery = ParseUser.getQuery();
-                userQuery.whereEqualTo("objectId", perform.getId());
-                userQuery.getFirstInBackground(new GetCallback<ParseUser>() {
+                frozenBalance();
+                ParseQuery<ParseObject> perfQuery = ParseQuery.getQuery("Achievement");
+                perfQuery.whereEqualTo("userId", perfId);
+                perfQuery.findInBackground(new FindCallback<ParseObject>() {
                     @Override
-                    public void done(ParseUser user, ParseException e) {
+                    public void done(List<ParseObject> objects, ParseException e) {
                         if (e == null) {
-                            double a = user.getDouble("performerRating");
-                            double total = (a + starRate.getRating()) / 2;
-                            user.put("performerRating", total);
-                            Log.d("ASd", a + ", " + perform.getId() + ", " + starRate.getRating() + ", " + total);
-                            user.saveInBackground();
+                            for (ParseObject o : objects) {
+                                double a = o.getDouble("performerRating");
+                                double total = (a + starRate.getRating()) / 2;
+                                o.put("performerRating", total);
+                                Log.d("ASd", a + ", " + perform.getId() + ", " + starRate.getRating() + ", " + total);
+                                o.saveInBackground();
+                            }
                         } else {
                             Log.e("DESC_ACTIVITY", e.getMessage());
                         }
                     }
                 });
-                frozenBalance();
-                addBalanceForPerf();
                 deleteFinishedTask(getIntent().getStringExtra("newTaskId"));
                 moveToFinishedStatus(getIntent().getStringExtra("newTaskId"));
                 setIntent(getIntent());
@@ -257,7 +254,18 @@ public class ClientDescriptionActivity extends AppCompatActivity {
             public void done(List<ParseObject> list, ParseException e) {
                 if (e == null) {
                     for (ParseObject o : list) {
-                        String perfId = o.getString("perfId");
+                        final String perfId = o.getString("perfId");
+
+                        ParseQuery<ParseObject> perfQuery = ParseQuery.getQuery("Achievement");
+                        perfQuery.whereEqualTo("userId", perfId);
+                        perfQuery.findInBackground(new FindCallback<ParseObject>() {
+                            @Override
+                            public void done(List<ParseObject> objects, ParseException e) {
+                                for (ParseObject perfObj : objects) {
+                                    perform.setRating((float) perfObj.getDouble("performerRating"));
+                                }
+                            }
+                        });
                         ParseQuery<ParseUser> parseQuery = ParseUser.getQuery();
                         parseQuery.whereEqualTo("objectId", perfId);
                         try {
@@ -267,7 +275,6 @@ public class ClientDescriptionActivity extends AppCompatActivity {
                                 perform.setId(user.getObjectId());
                                 perform.setFirstName(user.getString("firstName"));
                                 perform.setLastName(user.getString("lastName"));
-                                perform.setRating((float) user.getDouble("performerRating"));
                             }
                         } catch (ParseException e1) {
                             e1.printStackTrace();

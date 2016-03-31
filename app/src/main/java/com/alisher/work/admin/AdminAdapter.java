@@ -45,7 +45,7 @@ public class AdminAdapter extends RecyclerView.Adapter<AdminAdapter.ViewHolder>{
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
         Perform nature = mItems.get(i);
         viewHolder.title.setText(nature.getFirstName() +" "+ nature.getLastName());
-        viewHolder.img.setImageResource(nature.getImg());
+        viewHolder.img.setImageBitmap(nature.getAvatar());
         viewHolder.ratingBar.setRating(nature.getRating());
     }
 

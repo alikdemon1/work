@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.parse.FindCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -26,7 +27,7 @@ import java.util.List;
  */
 public class DecisionFragment extends Fragment {
     private EditText clientTxt;
-    private EditText perfTxt;
+    private EditText perfTxt, commentEdt;
     private Button saveShareBtn;
 
     public DecisionFragment() {
@@ -44,16 +45,18 @@ public class DecisionFragment extends Fragment {
         clientTxt = (EditText) v.findViewById(R.id.client_share);
         perfTxt = (EditText) v.findViewById(R.id.perf_share);
         saveShareBtn = (Button) v.findViewById(R.id.save_share);
+        commentEdt = (EditText) v.findViewById(R.id.comment);
+
         final ArbitorActivity listT = (ArbitorActivity)getActivity();
         saveShareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ParseQuery<ParseUser> clientQuery = ParseUser.getQuery();
-                clientQuery.whereEqualTo("objectId", listT.getMyData().getClientId());
-                clientQuery.findInBackground(new FindCallback<ParseUser>() {
+                ParseQuery<ParseObject>clientQ = ParseQuery.getQuery("Achievement");
+                clientQ.whereEqualTo("userId", listT.getMyData().getClientId());
+                clientQ.findInBackground(new FindCallback<ParseObject>() {
                     @Override
-                    public void done(List<ParseUser> list, ParseException e) {
-                        for (ParseObject o : list) {
+                    public void done(List<ParseObject> objects, ParseException e) {
+                        for (ParseObject o : objects) {
                             Log.d("clientId", listT.getMyData().getClientId());
                             Log.d("clinetFrozen", o.getInt("frozenBalance") + "");
                             Log.d("clientBalance", o.getInt("balance") + " taskPrice:" + listT.getMyData().getPrice());
@@ -74,12 +77,12 @@ public class DecisionFragment extends Fragment {
                         if (e == null) {
                             for (ParseObject o : list) {
                                 final String perfId = o.getString("perfId");
-                                ParseQuery<ParseUser> perfQuery = ParseUser.getQuery();
-                                perfQuery.whereEqualTo("objectId", perfId);
-                                perfQuery.findInBackground(new FindCallback<ParseUser>() {
+                                ParseQuery<ParseObject>perfQ = ParseQuery.getQuery("Achievement");
+                                perfQ.whereEqualTo("userId", perfId);
+                                perfQ.findInBackground(new FindCallback<ParseObject>() {
                                     @Override
-                                    public void done(List<ParseUser> list, ParseException e) {
-                                        for (ParseObject perfObj : list) {
+                                    public void done(List<ParseObject> objects, ParseException e) {
+                                        for (ParseObject perfObj : objects) {
                                             Log.d("performerId", perfId);
                                             Log.d("performerFrozen", perfObj.getInt("frozenBalance") + "");
                                             Log.d("performerBalance", perfObj.getInt("balance") + " taskPrice:" + listT.getMyData().getPrice());

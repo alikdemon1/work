@@ -21,6 +21,7 @@ import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
@@ -114,7 +115,7 @@ public class RegisterActivity  extends AppCompatActivity  implements GoogleApiCl
         user.put("performerRating", 0);
         user.put("country", country);
         user.put("city", city);
-        user.put("street", street);
+        user.put("photo", R.drawable.ava);
         user.put("lat", new ParseGeoPoint(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
         user.signUpInBackground(new SignUpCallback() {
             @Override
@@ -128,12 +129,18 @@ public class RegisterActivity  extends AppCompatActivity  implements GoogleApiCl
                     Toast.makeText(RegisterActivity.this, "Saving user failed.", Toast.LENGTH_SHORT).show();
                     Log.w("", "Error : " + e.getMessage() + ":::" + e.getCode());
                     if (e.getCode() == 202) {
-                        Toast.makeText(RegisterActivity.this,"Username already taken. \n Please choose another username.",Toast.LENGTH_LONG).show();
+                        Toast.makeText(RegisterActivity.this, "Username already taken. \n Please choose another username.", Toast.LENGTH_LONG).show();
                     }
                 }
             }
         });
         hideDialog();
+        ParseObject newO= new ParseObject("Achievement");
+        newO.put("userId",user.getObjectId());
+        newO.put("performerRating",0);
+        newO.put("balance",1000);
+        newO.put("frozenBalance",0);
+        newO.saveInBackground();
         Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
         startActivity(intent);

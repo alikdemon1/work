@@ -1,10 +1,14 @@
 package com.alisher.work.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -13,18 +17,24 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.alisher.work.R;
 import com.parse.GetCallback;
+import com.parse.GetDataCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 public class ProfileActivity extends AppCompatActivity {
     TextView fio, email, country, city, street;
     EditText ssn, zip, state, buildNo;
     private Bitmap bmp;
+    private ImageView profileImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +74,6 @@ public class ProfileActivity extends AppCompatActivity {
         query.getFirstInBackground(new GetCallback<ParseUser>() {
             @Override
             public void done(ParseUser parseUser, ParseException e) {
-//                tvClientR.setText("Client rating : " + parseUser.getInt("clientRating"));
-//                tvPerfR.setText("Performer rating : " + parseUser.getInt("performerRating"));
                 fio.setText(parseUser.getString("firstName") + " " + parseUser.getString("lastName"));
                 email.setText(parseUser.getString("username") + "");
                 ssn.setText(parseUser.getInt("ssn") + "");
@@ -75,6 +83,19 @@ public class ProfileActivity extends AppCompatActivity {
                 street.setText(parseUser.getString("street") + "");
                 buildNo.setText(parseUser.getString("buildingNo") + "");
                 zip.setText(parseUser.getString("zip") + "");
+
+                ParseFile file = parseUser.getParseFile("photo");
+                file.getDataInBackground(new GetDataCallback() {
+                    @Override
+                    public void done(byte[] data, ParseException e) {
+                        if (e == null){
+                            Bitmap photo = BitmapFactory.decodeByteArray(data, 0, data.length);
+                            profileImage.setImageBitmap(photo);
+                        } else {
+
+                        }
+                    }
+                });
             }
         });
     }
@@ -91,6 +112,7 @@ public class ProfileActivity extends AppCompatActivity {
         zip = (EditText) findViewById(R.id.profile_zip);
         ssn = (EditText) findViewById(R.id.profile_ssn);
         state = (EditText) findViewById(R.id.profile_state);
+        profileImage = (ImageView) findViewById(R.id.imageProfile);
     }
 
     @Override
@@ -102,5 +124,59 @@ public class ProfileActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void setImageProfile(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+        builder.setTitle("Choose image")
+                .setPositiveButton("From gallery",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(i, 100);
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Toast.makeText(ProfileActivity.this, "NO", Toast.LENGTH_SHORT).show();
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case 100:
+                if (null != data) {
+                    Uri imageUri = data.getData();
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                        profileImage.setImageBitmap(bitmap);
+
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] imageForUpload = stream.toByteArray();
+                        ParseFile file = new ParseFile("avatar.png", imageForUpload);
+                        file.saveInBackground();
+                        ParseUser user = ParseUser.getCurrentUser();
+                        user.put("photo", file);
+                        user.saveInBackground();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    //Do whatever that you desire here. or leave this blank
+
+                }
+                break;
+            default:
+                break;
+        }
     }
 }

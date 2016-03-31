@@ -1,5 +1,7 @@
 package com.alisher.work.models;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by Alisher Kozhabay on 3/13/2016.
  */
@@ -10,8 +12,17 @@ public class Perform {
     private String desc;
     private float rating;
     private int img;
+    private Bitmap avatar;
 
     public Perform() {
+    }
+
+    public Bitmap getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(Bitmap avatar) {
+        this.avatar = avatar;
     }
 
     public String getId() {

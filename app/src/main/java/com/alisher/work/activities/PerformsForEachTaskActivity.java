@@ -2,6 +2,8 @@ package com.alisher.work.activities;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,7 +19,9 @@ import com.alisher.work.adapters.PerformsForEachTaskAdapter;
 import com.alisher.work.adapters.RecyclerItemClickListener;
 import com.alisher.work.models.Perform;
 import com.parse.FindCallback;
+import com.parse.GetDataCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -96,17 +100,17 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
     }
 
     private void frozenBalance() {
-        ParseQuery<ParseUser> clientQuery = ParseUser.getQuery();
-        clientQuery.whereEqualTo("objectId", ParseUser.getCurrentUser().getObjectId());
-        clientQuery.findInBackground(new FindCallback<ParseUser>() {
+        ParseQuery<ParseObject> clientQuery = ParseQuery.getQuery("Achievement");
+        clientQuery.whereEqualTo("userId", ParseUser.getCurrentUser().getObjectId());
+        clientQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
-            public void done(List<ParseUser> list, ParseException e) {
-                for (ParseObject o : list) {
+            public void done(List<ParseObject> objects, ParseException e) {
+                for (ParseObject o : objects) {
                     int price = getIntent().getIntExtra("taskPriceForBalance", 0);
-                    int bal = list.get(0).getInt("balance") - price;
-                    int fbal = list.get(0).getInt("frozenBalance") + price;
-                    list.get(0).put("balance", bal);
-                    list.get(0).put("frozenBalance", fbal);
+                    int bal = objects.get(0).getInt("balance") - price;
+                    int fbal = objects.get(0).getInt("frozenBalance") + price;
+                    objects.get(0).put("balance", bal);
+                    objects.get(0).put("frozenBalance", fbal);
                     o.saveInBackground();
                 }
             }
@@ -161,12 +165,32 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
             List<ParseUser> list = userParseQuery.find();
             Log.d("LIST", list.size() + "");
             for (ParseUser o : list) {
-                Perform perf = new Perform();
+                final Perform perf = new Perform();
                 perf.setId(o.getObjectId());
                 perf.setFirstName(o.getString("firstName"));
                 perf.setLastName(o.getString("lastName"));
-                perf.setRating((float) o.getDouble("performerRating"));
-                perf.setImg(R.drawable.ava);
+                ParseFile file = o.getParseFile("photo");
+                file.getDataInBackground(new GetDataCallback() {
+                    @Override
+                    public void done(byte[] data, ParseException e) {
+                        if (e == null) {
+                            Bitmap photo = BitmapFactory.decodeByteArray(data, 0, data.length);
+                            perf.setAvatar(photo);
+                        } else {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                ParseQuery<ParseObject> perfQuery = ParseQuery.getQuery("Achievement");
+                perfQuery.whereEqualTo("userId", obj.getString("perfId"));
+                perfQuery.findInBackground(new FindCallback<ParseObject>() {
+                    @Override
+                    public void done(List<ParseObject> objects, ParseException e) {
+                        for (ParseObject perfObj : objects) {
+                            perf.setRating((float) perfObj.getDouble("performerRating"));
+                        }
+                    }
+                });
                 pts.add(perf);
             }
             ((PerformsForEachTaskAdapter) mAdapter).setPerformsTask(pts);
