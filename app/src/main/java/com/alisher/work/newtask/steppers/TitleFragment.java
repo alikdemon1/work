@@ -25,9 +25,17 @@ public class TitleFragment extends stepperFragment {
 
     @Override
     public boolean onNextButtonHandler() {
-        DataHolder.getInstance().setTitle(titleText.getText().toString());
-        DataHolder.getInstance().setDescription(descText.getText().toString());
-        return true;
+        if(titleText.getText().toString().trim().equalsIgnoreCase("")){
+            titleText.setError("enter title");
+            return false;
+        } else if(descText.getText().toString().trim().equalsIgnoreCase("")){
+            descText.setError("enter description");
+            return false;
+        } else {
+            DataHolder.getInstance().setTitle(titleText.getText().toString());
+            DataHolder.getInstance().setDescription(descText.getText().toString());
+            return true;
+        }
     }
 
     @Override

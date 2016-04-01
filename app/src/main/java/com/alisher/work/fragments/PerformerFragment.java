@@ -96,7 +96,7 @@ public class PerformerFragment extends Fragment {
         prepareListData();
         listAdapter = new ExpandableListAdapterForPerf(getActivity(), listDataHeader, listDataChild);
         resfreshData();
-        repeatRefresh();
+//        repeatRefresh();
         // setting list adapter
         expListView.setAdapter(listAdapter);
         expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -167,18 +167,18 @@ public class PerformerFragment extends Fragment {
         return v;
     }
 
-    private void repeatRefresh() {
-        t = new Timer();
-        t.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (paused) {
-                    Log.d("COUNTER", "counter++");
-                    resfreshData();
-                }
-            }
-        }, 5000, 100000);
-    }
+//    private void repeatRefresh() {
+//        t = new Timer();
+//        t.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                if (paused) {
+//                    Log.d("COUNTER", "counter++");
+//                    resfreshData();
+//                }
+//            }
+//        }, 5000, 100000);
+//    }
 
     @Override
     public void onPause() {
@@ -190,6 +190,7 @@ public class PerformerFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d("RESUME", "RESUME");
+        resfreshData();
         paused = true;
     }
 

@@ -20,11 +20,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.parse.GetCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
@@ -117,19 +119,13 @@ public class RegisterActivity  extends AppCompatActivity  implements GoogleApiCl
         user.put("street", " ");
         user.put("state", " ");
         user.put("city", " ");
-        Bitmap icon = BitmapFactory.decodeResource(RegisterActivity.this.getResources(),R.drawable.ava);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        icon.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] data = stream.toByteArray();
-        ParseFile file = new ParseFile("avatar.png", data);
-        file.saveInBackground();
-        user.put("photo", file);
         user.put("lat", new ParseGeoPoint(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
         user.signUpInBackground(new SignUpCallback() {
             @Override
             public void done(ParseException e) {
                 if (e == null) {
                     //hideDialog();
+                    uploadUserPhoto(user.getObjectId());
                     ParseObject achieve = new ParseObject("Achievement");
                     achieve.put("userId", user.getObjectId());
                     achieve.put("performerRating", 0);
@@ -138,7 +134,6 @@ public class RegisterActivity  extends AppCompatActivity  implements GoogleApiCl
                     achieve.put("balance", 1000);
                     achieve.put("frozenBalance", 1000);
                     achieve.saveInBackground();
-
                     Toast.makeText(RegisterActivity.this, "User Saved", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                 } else {
@@ -156,6 +151,24 @@ public class RegisterActivity  extends AppCompatActivity  implements GoogleApiCl
         Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void uploadUserPhoto(String userId) {
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ava);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        icon.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] data = stream.toByteArray();
+        final ParseFile file = new ParseFile("avatar.png", data);
+        file.saveInBackground();
+        ParseQuery<ParseUser> userQuery = ParseUser.getQuery();
+        userQuery.whereEqualTo("objectId",userId);
+        userQuery.getFirstInBackground(new GetCallback<ParseUser>() {
+            @Override
+            public void done(ParseUser object, ParseException e) {
+                object.put("photo", file);
+                object.saveInBackground();
+            }
+        });
     }
 
     private void showDialog() {

@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -51,8 +53,21 @@ public class NewTaskActivity extends progressMobileStepper {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
+    private boolean showError() {
+
+        return true;
+    }
+
     @Override
     public void onStepperCompleted() {
+        priceText = (EditText) findViewById(R.id.new_price);
+        if (priceText.getText().toString().length() <= 0) {
+            priceText.setError("Enter price");
+            return;
+        } else if(Integer.parseInt(priceText.getText().toString()) < 0){
+            priceText.setError("Enter correct price");
+            return;
+        }
         android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(
                 NewTaskActivity.this);
 
@@ -62,7 +77,6 @@ public class NewTaskActivity extends progressMobileStepper {
                 .setCancelable(true)
                 .setPositiveButton("post", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        priceText = (EditText) findViewById(R.id.new_price);
 
                         String name_category = getIntent().getStringExtra("name");
                         String id_category = getIntent().getStringExtra("id");
@@ -115,7 +129,7 @@ public class NewTaskActivity extends progressMobileStepper {
         alertDialog.show();
     }
 
-    private void getReceivedList(String cat_id, final String desc){
+    private void getReceivedList(String cat_id, final String desc) {
         recList = new ArrayList<String>();
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Test");
         query.whereEqualTo("catId", cat_id);
@@ -123,7 +137,7 @@ public class NewTaskActivity extends progressMobileStepper {
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
-                if (e == null){
+                if (e == null) {
                     for (ParseObject o : list) {
                         recList.add(o.getString("email"));
                     }
@@ -170,7 +184,7 @@ public class NewTaskActivity extends progressMobileStepper {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home:
                 setResult(RESULT_CANCELED);
                 finish();

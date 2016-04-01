@@ -95,7 +95,7 @@ public class ClientFragment extends Fragment {
         prepareListData();
         listAdapter = new ExpandableListAdapter(getActivity(), listDataHeader, listDataChild);
         refreshData();
-        repeatRefresh();
+//        repeatRefresh();
         expListView.setAdapter(listAdapter);
         expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
@@ -199,18 +199,18 @@ public class ClientFragment extends Fragment {
         initArbitrageList();
     }
 
-    private void repeatRefresh() {
-        t = new Timer();
-        t.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (paused) {
-                    Log.d("COUNTER", "counter++");
-                    refreshData();
-                }
-            }
-        }, 5000, 100000);
-    }
+//    private void repeatRefresh() {
+//        t = new Timer();
+//        t.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                if (paused) {
+//                    Log.d("COUNTER", "counter++");
+//                    refreshData();
+//                }
+//            }
+//        }, 5000, 100000);
+//    }
 
     @Override
     public void onPause() {
@@ -222,6 +222,7 @@ public class ClientFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d("RESUME", "RESUME");
+        refreshData();
         paused = true;
     }
 
