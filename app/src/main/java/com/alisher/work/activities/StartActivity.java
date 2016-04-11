@@ -16,7 +16,7 @@ import com.parse.ParseUser;
 
 
 /**
- * Created by Alisher Kozhabay on 3/18/2016.
+ * Created by Sergey Kompaniyets on 3/18/2016.
  */
 public class StartActivity extends AppCompatActivity {
     private static int SPLASH_TIME_OUT = 1000;

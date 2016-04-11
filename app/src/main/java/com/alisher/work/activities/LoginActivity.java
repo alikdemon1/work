@@ -21,7 +21,7 @@ import com.parse.ParseException;
 import com.parse.ParseUser;
 
 /**
- * Created by Alisher on 3/2/2016.
+ * Created by Sergey Kompaniyets on 3/2/2016.
  */
 public class LoginActivity extends AppCompatActivity {
     private Button btnLogin;

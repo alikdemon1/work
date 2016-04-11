@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Alisher Kozhabay on 3/5/2016.
+ * Created by Sergey Kompaniyets on 3/5/2016.
  */
 public class ArbitorRecyclerAdapter extends RecyclerView.Adapter<ArbitorRecyclerAdapter.ViewHolder>{
     private final Context ctx;

@@ -21,7 +21,7 @@ import com.parse.ParseQuery;
 import java.util.List;
 
 /**
- * Created by Yesmakhan on 25.03.2016.
+ * Created by Sergey Kompaniyets on 25.03.2016.
  */
 public class AttachmentsFragment extends Fragment {
 

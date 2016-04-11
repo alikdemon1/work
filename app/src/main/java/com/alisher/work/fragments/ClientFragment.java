@@ -50,7 +50,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Created by Alisher on 3/1/2016.
+ * Created by Sergey Kompaniyets on 3/1/2016.
  */
 public class ClientFragment extends Fragment {
 
@@ -204,19 +204,6 @@ public class ClientFragment extends Fragment {
         initDraftList();
         initArbitrageList();
     }
-
-//    private void repeatRefresh() {
-//        t = new Timer();
-//        t.scheduleAtFixedRate(new TimerTask() {
-//            @Override
-//            public void run() {
-//                if (paused) {
-//                    Log.d("COUNTER", "counter++");
-//                    refreshData();
-//                }
-//            }
-//        }, 5000, 100000);
-//    }
 
     @Override
     public void onPause() {

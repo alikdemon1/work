@@ -20,7 +20,7 @@ import java.util.List;
 
 
 /**
- * Created by Alisher Kozhabay on 3/21/2016.
+ * Created by Sergey Kompaniyets on 3/21/2016.
  */
 public class NotificationUtils {
 

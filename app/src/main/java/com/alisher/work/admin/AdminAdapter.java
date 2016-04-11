@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Alisher Kozhabay on 3/26/2016.
+ * Created by Sergey Kompaniyets on 3/26/2016.
  */
 public class AdminAdapter extends RecyclerView.Adapter<AdminAdapter.ViewHolder>{
     private final Context ctx;

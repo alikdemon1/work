@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.alisher.work.R;
 
 /**
- * Created by Alisher Kozhabay on 3/31/2016.
+ * Created by Sergey Kompaniyets on 3/31/2016.
  */
 public class ProfileAdmin extends AppCompatActivity {
     private TextView name, email, ssn, country, city, street, state, zip, buildNo;

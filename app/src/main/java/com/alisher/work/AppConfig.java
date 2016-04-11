@@ -1,7 +1,7 @@
 package com.alisher.work;
 
 /**
- * Created by Alisher Kozhabay on 3/26/2016.
+ * Created by Sergey Kompaniyets on 3/26/2016.
  */
 public class AppConfig {
     public static final String PARSE_CHANNEL = "xlancer";

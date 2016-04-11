@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by Yesmakhan on 18.03.2016.
+ * Created by Sergey Kompaniyets on 18.03.2016.
  */
 public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
     private Context _context;

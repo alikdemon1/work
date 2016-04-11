@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import java.util.Date;
 
 /**
- * Created by Alisher Kozhabay on 3/5/2016.
+ * Created by Sergey Kompaniyets on 3/5/2016.
  */
 public class Task{
     private String id;

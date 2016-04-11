@@ -1,7 +1,7 @@
 package com.alisher.work.models;
 
 /**
- * Created by Ravi on 01/06/15.
+ * Created by Sergey Kompaniyets on 23/03/16.
  */
 public class Message {
     private String message;

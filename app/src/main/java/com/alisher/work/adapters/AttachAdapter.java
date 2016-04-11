@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Alisher Kozhabay on 3/24/2016.
+ * Created by Sergey Kompaniyets on 3/24/2016.
  */
 public class AttachAdapter extends RecyclerView.Adapter<AttachAdapter.ViewHolder> {
     private final Context ctx;

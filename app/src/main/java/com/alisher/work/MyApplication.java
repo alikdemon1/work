@@ -6,7 +6,7 @@ import com.alisher.work.chat.utils.ParseUtils;
 import com.parse.ParseACL;
 
 /**
- * Created by Alisher Kozhabay on 3/18/2016.
+ * Created by Sergey Kompaniyets on 3/18/2016.
  */
 public class MyApplication extends Application {
     private static MyApplication mInstance;

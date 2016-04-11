@@ -40,7 +40,7 @@ import eu.inmite.android.lib.validations.form.annotations.RegExp;
 import eu.inmite.android.lib.validations.form.callback.SimpleErrorPopupCallback;
 
 /**
- * Created by Alisher on 3/2/2016.
+ * Created by Sergey Kompaniyets on 3/2/2016.
  */
 public class RegisterActivity  extends AppCompatActivity  implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener{

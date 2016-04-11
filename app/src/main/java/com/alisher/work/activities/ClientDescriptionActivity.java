@@ -32,7 +32,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by Alisher Kozhabay on 3/23/2016.
+ * Created by Sergey Kompaniyets on 3/23/2016.
  */
 public class ClientDescriptionActivity extends AppCompatActivity {
 

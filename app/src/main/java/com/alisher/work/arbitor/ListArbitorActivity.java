@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Yesmakhan on 25.03.2016.
+ * Created by Sergey Kompaniyets on 25.03.2016.
  */
 public class ListArbitorActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;

@@ -43,7 +43,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Created by Alisher on 3/1/2016.
+ * Created by Sergey Kompaniyets on 3/1/2016.
  */
 public class PerformerFragment extends Fragment {
 
@@ -162,19 +162,6 @@ public class PerformerFragment extends Fragment {
         });
         return v;
     }
-
-//    private void repeatRefresh() {
-//        t = new Timer();
-//        t.scheduleAtFixedRate(new TimerTask() {
-//            @Override
-//            public void run() {
-//                if (paused) {
-//                    Log.d("COUNTER", "counter++");
-//                    resfreshData();
-//                }
-//            }
-//        }, 5000, 100000);
-//    }
 
     @Override
     public void onPause() {

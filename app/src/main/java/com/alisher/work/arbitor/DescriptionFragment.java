@@ -16,7 +16,7 @@ import com.alisher.work.R;
 import com.alisher.work.chat.utils.Const;
 
 /**
- * Created by Yesmakhan on 25.03.2016.
+ * Created by Sergey Kompaniyets on 25.03.2016.
  */
 public class DescriptionFragment extends Fragment {
 

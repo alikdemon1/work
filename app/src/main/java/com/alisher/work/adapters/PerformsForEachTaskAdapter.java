@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Alisher Kozhabay on 3/13/2016.
+ * Created by Sergey Kompaniyets on 3/13/2016.
  */
 public class PerformsForEachTaskAdapter extends RecyclerView.Adapter<PerformsForEachTaskAdapter.ViewHolder> {
     private final Context ctx;

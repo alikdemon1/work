@@ -15,7 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 
 /**
- * Created by Alisher Kozhabay on 3/31/2016.
+ * Created by Sergey Kompaniyets on 3/31/2016.
  */
 public class MLRoundedImageView  extends ImageView{
     public MLRoundedImageView(Context context) {

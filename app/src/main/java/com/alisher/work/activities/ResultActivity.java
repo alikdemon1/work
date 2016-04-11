@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Alisher Kozhabay on 3/29/2016.
+ * Created by Sergey Kompaniyets on 3/29/2016.
  */
 public class ResultActivity extends AppCompatActivity {
     private Button addAttachBtn;

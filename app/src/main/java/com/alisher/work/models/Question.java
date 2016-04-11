@@ -1,7 +1,7 @@
 package com.alisher.work.models;
 
 /**
- * Created by Yesmakhan on 19.03.2016.
+ * Created by Sergey Kompaniyets on 19.03.2016.
  */
 public class Question {
     private String ID;

@@ -3,7 +3,7 @@ package com.alisher.work.models;
 import android.graphics.Bitmap;
 
 /**
- * Created by Alisher Kozhabay on 3/13/2016.
+ * Created by Sergey Kompaniyets on 3/13/2016.
  */
 public class Perform {
     private String id;
