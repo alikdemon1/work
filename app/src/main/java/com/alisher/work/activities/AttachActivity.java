@@ -1,15 +1,19 @@
 package com.alisher.work.activities;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -26,8 +30,16 @@ import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,6 +53,9 @@ public class AttachActivity extends AppCompatActivity {
     AttachAdapter mAdapter;
     private ArrayList<Attachment> attachments;
     private Button addAttachBtn;
+    private String strURL;
+    private static final int progress_bar_type = 0;
+    private ProgressDialog pDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +93,9 @@ public class AttachActivity extends AppCompatActivity {
             @Override
             public void onItemClick(View view, int position) {
                 Attachment catItem = attachments.get(position);
-                Intent browseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(catItem.getUrl()));
-                startActivity(browseIntent);
+//                Intent browseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(catItem.getUrl()));
+                new DownloadFileFromURL().execute(catItem.getUrl(), catItem.getName());
+//                startActivity(browseIntent);
             }
         }));
     }
@@ -92,7 +108,6 @@ public class AttachActivity extends AppCompatActivity {
                 Log.d("URI", currImageURI.toString());
 
                 File file = new File(getRealPathFromURI(currImageURI));
-
                 if (file.exists()) {
                     String filepath = file.getAbsolutePath();
                     try {
@@ -117,16 +132,27 @@ public class AttachActivity extends AppCompatActivity {
         }
     }
 
-    public String getRealPathFromURI(Uri contentUri) {
-        String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = managedQuery(contentUri,
-                proj, // Which columns to return
-                null, // WHERE clause; which rows to return (all rows)
-                null, // WHERE clause selection arguments (none)
-                null); // Order-by clause (ascending by name)
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
+    private String getRealPathFromURI(Uri contentURI) {
+        String result = null;
+
+        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
+
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = contentURI.getPath();
+        } else {
+            if (cursor.moveToFirst()) {
+                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                result = cursor.getString(idx);
+            }
+            cursor.close();
+        }
+        return result;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initializeData();
     }
 
     public void initializeData() {
@@ -155,51 +181,11 @@ public class AttachActivity extends AppCompatActivity {
         });
     }
 
-    public void moveToArbiterStatus(String id) {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-        query.whereEqualTo("objectId", id);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null) {
-                    for (ParseObject o : list) {
-                        o.put("statusId", ParseObject.createWithoutData("Status", "Y5lhU6qfgB"));
-                        o.saveEventually();
-                    }
-                } else {
-                    Log.d("MOVETARBITRATION STATUS", e.getMessage());
-                }
-            }
-        });
-    }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.arbiter_menu, menu);
-//        return true;
-//    }
 
     public void setIntent(Intent i) {
         setResult(RESULT_OK, i);
         finish();
     }
-
-//    @Override
-//    public boolean onPrepareOptionsMenu(Menu menu) {
-//        MenuItem item = menu.findItem(R.id.arbitration_menu);
-//        boolean isEnabled = getIntent().getBooleanExtra("isVisible", false);
-//        int position = getIntent().getIntExtra("group", 0);
-//        boolean available = getIntent().getBooleanExtra("isAvailable", false);
-//        if (!isEnabled && position == 1 && available) {
-//            item.setEnabled(true);
-//            item.getIcon().setAlpha(255);
-//        } else {
-//            item.setEnabled(false);
-//            item.getIcon().setAlpha(130);
-//        }
-//        return true;
-//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -212,5 +198,95 @@ public class AttachActivity extends AppCompatActivity {
             onBackPressed();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case progress_bar_type: // we set this to 0
+                pDialog = new ProgressDialog(this);
+                pDialog.setMessage("Downloading file. Please wait...");
+                pDialog.setIndeterminate(false);
+                pDialog.setMax(100);
+                pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                pDialog.setCancelable(true);
+                pDialog.show();
+                return pDialog;
+            default:
+                return null;
+        }
+    }
+
+
+    class DownloadFileFromURL extends AsyncTask<String, String, String> {
+
+        /**
+         * Before starting background thread
+         * Show Progress Bar Dialog
+         * */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showDialog(progress_bar_type);
+        }
+
+        /**
+         * Downloading file in background thread
+         * */
+        @Override
+        protected String doInBackground(String... f_url) {
+            int count;
+            try {
+                URL url = new URL(f_url[0]);
+                URLConnection conection = url.openConnection();
+                conection.connect();
+                // getting file length
+                int lenghtOfFile = conection.getContentLength();
+                strURL = f_url[1];
+
+                // input stream to read file - with 8k buffer
+                InputStream input = new BufferedInputStream(url.openStream(), 8192);
+
+                // Output stream to write file
+                OutputStream output = new FileOutputStream("/sdcard/" + f_url[1]);
+
+                byte data[] = new byte[1024];
+
+                long total = 0;
+
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+
+                    output.write(data, 0, count);
+                }
+
+                // flushing output
+                output.flush();
+
+                // closing streams
+                output.close();
+                input.close();
+            } catch (Exception e) {
+                Log.e("Error: ", e.getMessage());
+            }
+            return null;
+        }
+
+        protected void onProgressUpdate(String... progress) {
+            // setting progress percentage
+            pDialog.setProgress(Integer.parseInt(progress[0]));
+        }
+
+        @Override
+        protected void onPostExecute(String file_url) {
+            dismissDialog(progress_bar_type);
+            String imagePath = Environment.getExternalStorageDirectory().toString() + "/" + strURL;
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.fromFile(new File(imagePath)), "*/*");
+            startActivity(intent);
+            Log.d("imagePath", imagePath);
+        }
+
     }
 }

@@ -37,9 +37,7 @@ import com.parse.ParseUser;
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private Toolbar toolbar;
     private TabLayout tabLayout;
@@ -48,7 +46,7 @@ public class MainActivity extends AppCompatActivity
     private TextView emailText;
     private NavigationView navigationView;
     private ParseUser currentUser;
-    private TextView nameText,balanceText,frozenBalanceText;
+    private TextView nameText, balanceText, frozenBalanceText;
     private Bitmap photo;
 
     @Override
@@ -64,7 +62,7 @@ public class MainActivity extends AppCompatActivity
         initProfile();
     }
 
-    private void initProfile(){
+    private void initProfile() {
         View header = navigationView.getHeaderView(0);
         emailText = (TextView) header.findViewById(R.id.profile_email);
         nameText = (TextView) header.findViewById(R.id.profile_name);
@@ -84,17 +82,15 @@ public class MainActivity extends AppCompatActivity
                         file.getDataInBackground(new GetDataCallback() {
                             @Override
                             public void done(byte[] data, ParseException e) {
-                                if (e == null){
+                                if (e == null) {
                                     nameText.setText(name);
                                     emailText.setText(email);
                                     photo = BitmapFactory.decodeByteArray(data, 0, data.length);
                                     profileImg.setImageBitmap(photo);
                                 } else {
-
                                 }
                             }
                         });
-
                     }
                 } else {
                     Log.e("MainActivity", e.getMessage());
@@ -106,7 +102,7 @@ public class MainActivity extends AppCompatActivity
         queryBal.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
-                if(e==null){
+                if (e == null) {
                     for (ParseObject o : objects) {
                         String bal = String.valueOf(o.getInt("balance")) + "$";
                         String frozenBal = String.valueOf(o.getInt("frozenBalance")) + "$";
@@ -143,7 +139,7 @@ public class MainActivity extends AppCompatActivity
     private void initToolbar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("XLancer");
+        getSupportActionBar().setTitle("X-Lancer");
     }
 
     @Override
@@ -152,8 +148,17 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            Intent a = new Intent(Intent.ACTION_MAIN);
+            a.addCategory(Intent.CATEGORY_HOME);
+            a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(a);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initProfile();
     }
 
     @Override
@@ -210,6 +215,7 @@ public class MainActivity extends AppCompatActivity
         adapter.addFragment(new PerformerFragment(), "Performer");
         viewPager.setAdapter(adapter);
     }
+
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();

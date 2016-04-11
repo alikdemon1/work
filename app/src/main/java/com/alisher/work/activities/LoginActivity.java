@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
                 } else if (!email.isEmpty() && !password.isEmpty() && !email.equals("admin") && !password.equals("admin") && !email.equals("arbiter") && !password.equals("arbiter")) {
                     checkLogin(email, password);
                 } else {
-                    Toast.makeText(getApplicationContext(),"Please enter the credentials!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Please enter the credentials!", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -87,18 +87,18 @@ public class LoginActivity extends AppCompatActivity {
                 if (e == null) {
                     hideDialog();
 
-                    if (parseUser.getBoolean("emailVerified")){
-                    Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                    UserListActivity.user = parseUser;
-                    ParseUtils.subscribeWithEmail(parseUser.getUsername());
-                    startActivity(i);
-                    finish();
+                    if (parseUser.getBoolean("emailVerified")) {
+                        Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                        UserListActivity.user = parseUser;
+                        ParseUtils.subscribeWithEmail(parseUser.getUsername());
+                        startActivity(i);
+                        finish();
                     } else {
                         Toast.makeText(LoginActivity.this, "Please confirm the e-mail address", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                   hideDialog();
-                    Toast.makeText(getApplicationContext(),"Incorrect login or password", Toast.LENGTH_LONG).show();
+                    hideDialog();
+                    Toast.makeText(getApplicationContext(), "Incorrect login or password", Toast.LENGTH_LONG).show();
                 }
             }
         });

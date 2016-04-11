@@ -64,8 +64,8 @@ public class CustomPushReceiver extends ParsePushBroadcastReceiver {
             String message = data.getString("message");
 
             if (!isBackground && !isChat) {
-                Intent resultIntent = new Intent(context, ChatActivity.class);
-                showNotificationMessage(context, title, message, resultIntent);
+                Intent resultIntent = new Intent(context, MainActivity.class);
+                showNotificationMessageChat(context, title, message, resultIntent);
             } else if(!isBackground && !isNew){
                 Intent resultIntent = new Intent(context, MainActivity.class);
                 showNotificationMessage(context, title, message, resultIntent);
@@ -90,7 +90,7 @@ public class CustomPushReceiver extends ParsePushBroadcastReceiver {
         notificationUtils.showNotificationMessage(title, message, intent);
     }
 
-    private void showNotificationMessage(Context context, String title, String message, Intent intent, String buddy) {
+    private void showNotificationMessageChat(Context context, String title, String message, Intent intent) {
 
         notificationUtils = new NotificationUtils(context);
 
@@ -98,6 +98,6 @@ public class CustomPushReceiver extends ParsePushBroadcastReceiver {
 
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        notificationUtils.showNotificationMessage(title, message, intent, buddy);
+        notificationUtils.showNotificationMessageChat(title, message, intent);
     }
 }

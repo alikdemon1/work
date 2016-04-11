@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.newtask.steppers.PriceFragment;
@@ -46,6 +47,7 @@ public class NewTaskActivity extends progressMobileStepper {
     List<Class> stepperFragmentList = new ArrayList<>();
     private EditText priceText;
     private ArrayList<String> recList;
+    private boolean isPrice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,69 +66,75 @@ public class NewTaskActivity extends progressMobileStepper {
         if (priceText.getText().toString().length() <= 0) {
             priceText.setError("Enter price");
             return;
-        } else if(Integer.parseInt(priceText.getText().toString()) < 0){
+        } else if (Integer.parseInt(priceText.getText().toString()) < 0) {
             priceText.setError("Enter correct price");
             return;
         }
-        android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(
-                NewTaskActivity.this);
 
-        alertDialogBuilder.setTitle("Post task");
-        alertDialogBuilder
-                .setMessage("Are you sure?")
-                .setCancelable(true)
-                .setPositiveButton("post", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
+        checkPrice(Integer.parseInt(priceText.getText().toString()));
+        if (isPrice){
+            android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(
+                    NewTaskActivity.this);
 
-                        String name_category = getIntent().getStringExtra("name");
-                        String id_category = getIntent().getStringExtra("id");
-                        byte[] image_category = getIntent().getByteArrayExtra("image");
+            alertDialogBuilder.setTitle("Post the Task");
+            alertDialogBuilder
+                    .setMessage("Are you sure?")
+                    .setCancelable(true)
+                    .setPositiveButton("post", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
 
-                        String title = DataHolder.getInstance().getTitle();
-                        String time = DataHolder.getInstance().getTime();
-                        int price = Integer.parseInt(priceText.getText().toString());
-                        String desc = DataHolder.getInstance().getDescription();
+                            String name_category = getIntent().getStringExtra("name");
+                            String id_category = getIntent().getStringExtra("id");
+                            byte[] image_category = getIntent().getByteArrayExtra("image");
 
-                        Date endTime = new Date();
-                        Calendar c = Calendar.getInstance();
-                        c.setTime(endTime);
-                        c.add(Calendar.DATE, DataHolder.getInstance().getDay());
-                        c.add(Calendar.HOUR_OF_DAY, DataHolder.getInstance().getHours());
-                        c.add(Calendar.MINUTE, DataHolder.getInstance().getMinutes());
-                        endTime = c.getTime();
+                            String title = DataHolder.getInstance().getTitle();
+                            String time = DataHolder.getInstance().getTime();
+                            int price = Integer.parseInt(priceText.getText().toString());
+                            String desc = DataHolder.getInstance().getDescription();
 
-                        ParseFile file = new ParseFile("task_logo.png", image_category);
-                        file.saveInBackground();
-                        ParseObject task = new ParseObject("Task");
-                        task.put("name", title);
-                        task.put("catId", ParseObject.createWithoutData("Category", id_category));
-                        task.put("cost", price);
-                        task.put("img", file);
-                        task.put("clientId", ParseObject.createWithoutData(ParseUser.class, ParseUser.getCurrentUser().getObjectId()));
-                        task.put("description", desc);
-                        task.put("statusId", ParseObject.createWithoutData("Status", "vVMYOEUIeY"));
-                        task.put("duration", Arrays.asList(DataHolder.getInstance().getDay(), DataHolder.getInstance().getHours(), DataHolder.getInstance().getMinutes()));
-                        task.put("startTime", new Date());
-                        task.put("endTime", endTime);
-                        task.saveInBackground();
-                        //task.put("attach", "Some file here");
+                            Date endTime = new Date();
+                            Calendar c = Calendar.getInstance();
+                            c.setTime(endTime);
+                            c.add(Calendar.DATE, DataHolder.getInstance().getDay());
+                            c.add(Calendar.HOUR_OF_DAY, DataHolder.getInstance().getHours());
+                            c.add(Calendar.MINUTE, DataHolder.getInstance().getMinutes());
+                            endTime = c.getTime();
 
-                        getReceivedList(id_category, desc);
+                            ParseFile file = new ParseFile("task_logo.png", image_category);
+                            file.saveInBackground();
+                            ParseObject task = new ParseObject("Task");
+                            task.put("name", title);
+                            task.put("catId", ParseObject.createWithoutData("Category", id_category));
+                            task.put("cost", price);
+                            task.put("img", file);
+                            task.put("clientId", ParseObject.createWithoutData(ParseUser.class, ParseUser.getCurrentUser().getObjectId()));
+                            task.put("description", desc);
+                            task.put("statusId", ParseObject.createWithoutData("Status", "vVMYOEUIeY"));
+                            task.put("duration", Arrays.asList(DataHolder.getInstance().getDay(), DataHolder.getInstance().getHours(), DataHolder.getInstance().getMinutes()));
+                            task.put("startTime", new Date());
+                            task.put("endTime", endTime);
+                            task.saveInBackground();
+                            //task.put("attach", "Some file here");
 
-                        Intent intent = getIntent();
-                        intent.putExtra("name_category", name_category);
-                        intent.putExtra("title", title);
-                        intent.putExtra("time", time);
-                        intent.putExtra("image_category", image_category);
-                        intent.putExtra("price", price);
-                        intent.putExtra("desc", desc);
+                            getReceivedList(id_category, desc);
 
-                        setResult(RESULT_OK, intent);
-                        finish();
-                    }
-                });
-        android.support.v7.app.AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
+                            Intent intent = getIntent();
+                            intent.putExtra("name_category", name_category);
+                            intent.putExtra("title", title);
+                            intent.putExtra("time", time);
+                            intent.putExtra("image_category", image_category);
+                            intent.putExtra("price", price);
+                            intent.putExtra("desc", desc);
+
+                            setResult(RESULT_OK, intent);
+                            finish();
+                        }
+                    });
+            android.support.v7.app.AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }else{
+            Toast.makeText(NewTaskActivity.this, "not enough money", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void getReceivedList(String cat_id, final String desc) {
@@ -141,6 +149,7 @@ public class NewTaskActivity extends progressMobileStepper {
                     for (ParseObject o : list) {
                         recList.add(o.getString("email"));
                     }
+                    Log.d("RecList", recList.toString());
                     sendNotification(desc, recList);
                 } else {
                     Log.d("NEWTASK_ACTIVITY", e.getMessage());
@@ -149,9 +158,24 @@ public class NewTaskActivity extends progressMobileStepper {
         });
     }
 
+    public void checkPrice(int price) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Achievement");
+        query.whereEqualTo("userId", ParseUser.getCurrentUser().getObjectId());
+        try {
+            ParseObject obj = query.getFirst();
+            if (obj.getInt("balance") > price) {
+                Log.d("TRUE", "TRUE");
+                isPrice = true;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void sendNotification(String message, ArrayList<String> rList) {
         ParseQuery pushQuery = ParseInstallation.getQuery();
         pushQuery.whereContainedIn("email", rList);
+        pushQuery.whereNotEqualTo("email", ParseUser.getCurrentUser().getUsername());
         JSONObject data = null;
         JSONObject main = null;
         try {

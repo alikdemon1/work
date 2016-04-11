@@ -26,39 +26,82 @@
                 android:layout_marginLeft="4dp"
                 android:layout_marginTop="4dp"
                 android:layout_toRightOf="@+id/download"
-                android:text="HERE WILL BE URL"
-                android:textSize="15sp"
-                android:onClick="uploadFile"/>
+                android:onClick="uploadFile"
+                android:text=""
+                android:textSize="15sp" />
+
         </RelativeLayout>
+
     </android.support.v7.widget.CardView>
+
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/cv">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/text_result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:layout_marginTop="4dp"
+                android:onClick="uploadFile"
+                android:text=""
+                android:textSize="15sp" />
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/InnerRelativeLayout"
+        android:paddingBottom="10dp">
+
+        <EditText
+            android:id="@+id/TextTxt"
+            style="@style/edittext_msg"
+            android:lines="5"
+            android:background="@drawable/comment"
+            android:gravity="top|left"
+            android:scrollbars="vertical"
+            android:inputType="textMultiLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Some comment..." />
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/InnerRelativeLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" >
+        android:layout_alignParentBottom="true">
 
         <Button
-            android:enabled="false"
-            android:text="Send"
-            android:background="@color/colorAccent"
             android:id="@+id/result_finish"
-            android:layout_alignParentRight="true"
             android:layout_width="wrap_content"
-            android:layout_marginLeft="10dp"
             android:layout_height="wrap_content"
-            android:textColor="@color/white_smoke">
-        </Button>
+            android:layout_alignParentRight="true"
+            android:background="@color/colorAccent"
+            android:text="Send"
+            android:layout_marginLeft="10dp"
+            android:textColor="@color/white_smoke" />
 
         <Button
-            android:background="@color/colorAccent"
             android:id="@+id/result_attach"
             android:layout_width="fill_parent"
-            android:layout_toLeftOf="@id/result_finish"
             android:layout_height="wrap_content"
-            android:text="Attach File"
-            android:textColor="@color/white_smoke">
-        </Button>
+            android:layout_toLeftOf="@id/result_finish"
+            android:background="@color/colorAccent"
+            android:text="Attach file"
+            android:textColor="@color/white_smoke" />
 
     </RelativeLayout>
 

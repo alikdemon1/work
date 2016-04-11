@@ -103,11 +103,6 @@ public class PerformerFragment extends Fragment {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 Task newTask = listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition);
-//                Toast.makeText(getActivity(), listDataHeader.get(groupPosition) + " : "
-//                                + listDataChild.get(listDataHeader.get(groupPosition)).get(childPosition),
-//                        Toast.LENGTH_SHORT)
-//                        .show();
-
                 if (groupPosition == 0) { // Available list
                     Intent i = new Intent(getActivity(), TaskDescriptionActivity.class);
                     i.putExtra("newTaskTitle", newTask.getTitle() + "");
@@ -116,6 +111,7 @@ public class PerformerFragment extends Fragment {
                     i.putExtra("newTaskImage", newTask.getImage());
                     i.putExtra("newTaskCost", String.valueOf(newTask.getPrice()));
                     i.putExtra("newTaskDeadline", newTask.getEndTime().toString());
+                    i.putExtra("newTaskCatId", newTask.getCatId());
                     startActivity(i);
 
                 } else if (groupPosition == 1) {  //Work list

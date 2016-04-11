@@ -144,4 +144,13 @@ public class Perform {
     public void setImg(int img) {
         this.img = img;
     }
+
+    @Override
+    public String toString() {
+        return "Perform{" +
+                "firstName='" + firstName + '\'' +
+                ", rating=" + rating +
+                ", LastName='" + LastName + '\'' +
+                '}';
+    }
 }

@@ -1,12 +1,14 @@
 package com.alisher.work.chat;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
@@ -20,11 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alisher.work.R;
-import com.alisher.work.activities.LoginActivity;
-import com.alisher.work.activities.MainActivity;
 import com.alisher.work.chat.utils.Const;
 import com.alisher.work.chat.utils.IOUtil;
-import com.alisher.work.chat.utils.ParseUtils;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -93,20 +92,36 @@ public class ChatActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == android.R.id.home){
+        if (id == android.R.id.home) {
             onBackPressed();
-        }else if(id==R.id.deny){
-            String taskIdDeny =getIntent().getStringExtra("task_id");
-            String s = getIntent().getStringExtra("columnName");
-            Log.d("checkColumn",s+"----"+taskIdDeny);
-            denyMethod(taskIdDeny, s);
+        } else if (id == R.id.deny) {
+            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(ChatActivity.this);
+            alertDialog.setTitle("Rejection");
+            alertDialog.setMessage("Reject this task?");
+            alertDialog.setCancelable(true);
+            alertDialog.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String taskIdDeny = getIntent().getStringExtra("task_id");
+                    String s = getIntent().getStringExtra("columnName");
+                    Log.d("checkColumn", s + "----" + taskIdDeny);
+                    denyMethod(taskIdDeny, s);
+                    finish();
+                }
+            });
+            alertDialog.setNegativeButton("no", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            AlertDialog dialog = alertDialog.create();
+            dialog.show();
         }
         return super.onOptionsItemSelected(item);
     }
 
-
-
-    public void setIntent(Intent i, String s){
+    public void setIntent(Intent i, String s) {
         i.putExtra("child", i.getIntExtra("child", 0));
         i.putExtra("group", i.getIntExtra("group", 0));
         i.putExtra("flag", s);
@@ -114,15 +129,12 @@ public class ChatActivity extends BaseActivity {
         finish();
     }
 
-
-
     @Override
     protected void onResume() {
         super.onResume();
         isRunning = true;
         loadConversationList();
     }
-
 
     @Override
     protected void onPause() {
@@ -192,19 +204,22 @@ public class ChatActivity extends BaseActivity {
         }
     }
 
-    public String getRealPathFromURI(Uri contentUri) {
-        // can post image
-        String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = managedQuery(contentUri,
-                proj, // Which columns to return
-                null, // WHERE clause; which rows to return (all rows)
-                null, // WHERE clause selection arguments (none)
-                null); // Order-by clause (ascending by name)
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
-    }
+    private String getRealPathFromURI(Uri contentURI) {
+        String result = null;
 
+        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
+
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = contentURI.getPath();
+        } else {
+            if (cursor.moveToFirst()) {
+                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                result = cursor.getString(idx);
+            }
+            cursor.close();
+        }
+        return result;
+    }
 
     private void sendMessage() {
         if (etxtMessage.length() == 0)
@@ -286,7 +301,7 @@ public class ChatActivity extends BaseActivity {
         });
     }
 
-    public void deleteRejectionTask(final String task_id){
+    public void deleteRejectionTask(final String task_id) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
         query.whereEqualTo("taskId", task_id);
         query.findInBackground(new FindCallback<ParseObject>() {
@@ -320,30 +335,29 @@ public class ChatActivity extends BaseActivity {
     }
 
     private void denyMethod(final String taskIdDeny, final String s) {
-
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Deny");
-        query.whereEqualTo("taskId",taskIdDeny);
+        query.whereEqualTo("taskId", taskIdDeny);
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
-
-                if (!list.isEmpty()){
-                    for(ParseObject o:list){
-                        if(o.getString("clientId")==null){
-                            o.put("clientId",ParseUser.getCurrentUser().getObjectId());
+                if (!list.isEmpty()) {
+                    for (ParseObject o : list) {
+                        if (o.getString("clientId") == null) {
+                            o.put("clientId", ParseUser.getCurrentUser().getObjectId());
                             o.saveEventually();
                         }
-                        if (o.getString("perfId")==null){
-                            o.put("perfId",ParseUser.getCurrentUser().getObjectId());
+                        if (o.getString("perfId") == null) {
+                            o.put("perfId", ParseUser.getCurrentUser().getObjectId());
                             o.saveEventually();
                         }
-
-                        if(o.getString("clientId")!=null && o.getString("perfId")!=null){
+                        if (o.getString("clientId") != null && o.getString("perfId") != null) {
                             deleteRejectionTask(taskIdDeny);
                             moveToRejectionStatus(taskIdDeny);
-                            Toast.makeText(getApplicationContext(), "Task finished", Toast.LENGTH_SHORT).show();
-                        }
-                        else {
+                            getBackMoney(o.getString("clientId"));
+                            o.deleteInBackground();
+                            finish();
+                            Toast.makeText(getApplicationContext(), "Task rejected", Toast.LENGTH_SHORT).show();
+                        } else {
                             Toast.makeText(getApplicationContext(), "Waiting...", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -352,6 +366,27 @@ public class ChatActivity extends BaseActivity {
                     p.put(s, ParseUser.getCurrentUser().getObjectId());
                     p.put("taskId", taskIdDeny);
                     p.saveEventually();
+                }
+            }
+        });
+    }
+
+    public void getBackMoney(String clientId) {
+        ParseQuery<ParseObject> money = ParseQuery.getQuery("Achievement");
+        money.whereEqualTo("userId", clientId);
+        money.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null) {
+                    for (ParseObject p : objects) {
+                        int m = p.getInt("frozenBalance");
+                        int back = m + p.getInt("balance");
+                        p.put("frozenBalance", 0);
+                        p.put("balance", back);
+                        p.saveInBackground();
+                    }
+                } else {
+
                 }
             }
         });
@@ -402,6 +437,5 @@ public class ChatActivity extends BaseActivity {
             }
         });
     }
-
 
 }

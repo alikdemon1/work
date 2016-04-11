@@ -1,8 +1,14 @@
 package com.alisher.work.admin;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -33,7 +39,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
-import com.parse.GetDataCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
@@ -49,8 +54,8 @@ import java.util.List;
  */
 public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
 
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
     private GoogleMap map;
     private SupportMapFragment mapFragment;
     private GoogleApiClient mGoogleApiClient;
@@ -121,7 +126,6 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void handleNewLocation(Location mLastLocation) {
         map.getUiSettings().setMapToolbarEnabled(false);
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), (float) 16.0));
     }
 
     private void getPerformers() {
@@ -190,17 +194,57 @@ public class MapAdminActivity extends AppCompatActivity implements OnMapReadyCal
         return super.onOptionsItemSelected(item);
     }
 
+    private Bitmap writeTextOnDrawable(int drawableId, String text) {
+
+        Bitmap bm = BitmapFactory.decodeResource(getResources(), drawableId)
+                .copy(Bitmap.Config.ARGB_8888, true);
+
+        Typeface tf = Typeface.create("Roboto", Typeface.BOLD);
+
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.BLACK);
+        paint.setTypeface(tf);
+        paint.setTextAlign(Paint.Align.CENTER);
+        paint.setTextSize(20);
+
+        Rect textRect = new Rect();
+        paint.getTextBounds(text, 0, text.length(), textRect);
+
+        Canvas canvas = new Canvas(bm);
+
+//        //If the text is bigger than the canvas , reduce the font size
+//        if (textRect.width() >= (canvas.getWidth() - 4))     //the padding on either sides is considered as 4, so as to appropriately fit in the text
+//            paint.setTextSize(convertToPixels(this, 7));        //Scaling needs to be used for different dpi's
+
+        //Calculate the positions
+        int xPos = (canvas.getWidth() / 2) - 2;     //-2 is for regulating the x position offset
+
+        //"- ((paint.descent() + paint.ascent()) / 2)" is the distance from the baseline to the center.
+        int yPos = (int) ((canvas.getHeight() / 2) - ((paint.descent() + paint.ascent()) / 2)- 20);
+
+        canvas.drawText(text, xPos, yPos, paint);
+
+        return bm;
+    }
+
+    public static int convertToPixels(Context context, int nDP) {
+        final float conversionScale = context.getResources().getDisplayMetrics().density;
+
+        return (int) ((nDP * conversionScale) + 0.5f);
+
+    }
+
     private void plotMarkers(ArrayList<MyMarker> markers) {
         if (markers.size() > 0) {
             for (MyMarker myMarker : markers) {
 
                 // Create user marker with custom icon and other options
                 MarkerOptions markerOption = new MarkerOptions().position(new LatLng(myMarker.getmLatitude(), myMarker.getmLongitude()));
-                markerOption.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
+                markerOption.icon(BitmapDescriptorFactory.fromBitmap(writeTextOnDrawable(R.drawable.marker, myMarker.getMfName())));
 
                 Marker currentMarker = map.addMarker(markerOption);
                 mMarkersHashMap.put(currentMarker, myMarker);
-
                 map.setInfoWindowAdapter(new MarkerInfoWindowAdapter());
             }
         }

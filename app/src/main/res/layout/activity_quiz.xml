@@ -26,7 +26,6 @@
                 android:id="@+id/radio0"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:checked="true"
                 android:text="RadioButton" />
             <RadioButton
                 android:id="@+id/radio1"

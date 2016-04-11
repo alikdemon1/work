@@ -10,7 +10,15 @@ public class Attachment {
     private String name;
     private String url;
     private Date createdAt;
+    private String comment;
+    
+    public String getComment() {
+        return comment;
+    }
 
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
     public Date getCreatedAt() {
         return createdAt;

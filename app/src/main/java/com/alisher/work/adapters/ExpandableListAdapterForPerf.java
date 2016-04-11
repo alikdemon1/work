@@ -105,9 +105,9 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
             result.setEnabled(false);
         } else if (groupPosition == 5){
             desc.setEnabled(true);
-            chat.setEnabled(true);
-            attach.setEnabled(true);
-            result.setEnabled(true);
+            chat.setEnabled(false);
+            attach.setEnabled(false);
+            result.setEnabled(false);
         }
 
         if (desc.isEnabled()){
@@ -119,9 +119,11 @@ public class ExpandableListAdapterForPerf extends BaseExpandableListAdapter{
                     i.putExtra("newTaskDesc", childText.getDesc() + "");
                     i.putExtra("newTaskId", childText.getId() + "");
                     i.putExtra("newTaskImage",childText.getImage());
-                    i.putExtra("newTaskCost",String.valueOf(childText.getPrice()));
+                    i.putExtra("newTaskCost",childText.getPrice());
                     i.putExtra("newTaskDuration", childText.getEndTime().getTime());
                     i.putExtra("newTaskDeadline", childText.getEndTime().toString());
+
+                    i.putExtra("isVisibleCancel", false);
 
                     i.putExtra("child", childPosition);
                     i.putExtra("group", groupPosition);

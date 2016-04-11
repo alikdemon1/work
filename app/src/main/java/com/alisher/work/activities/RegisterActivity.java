@@ -8,6 +8,9 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,21 +35,32 @@ import com.parse.SignUpCallback;
 
 import java.io.ByteArrayOutputStream;
 
+import eu.inmite.android.lib.validations.form.FormValidator;
+import eu.inmite.android.lib.validations.form.annotations.RegExp;
+import eu.inmite.android.lib.validations.form.callback.SimpleErrorPopupCallback;
+
 /**
  * Created by Alisher on 3/2/2016.
  */
 public class RegisterActivity  extends AppCompatActivity  implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener{
+
+    private static final String PATTERN_EMAIL = "^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$";
+    private static final String PATTERN_FIO = "[A-Za-z]+";
+    private static final String PATTERN_PASSWORD = "^[0-9]{1,5}$";
+
     private Button btnRegister;
     private Button btnLinkToLogin;
+
+    @RegExp(value = PATTERN_FIO, messageId = R.string.valid_firstname)
     private EditText inputFirstName;
+    @RegExp(value = PATTERN_FIO, messageId = R.string.valid_lastname)
     private EditText inputLastName;
+    @RegExp(value = PATTERN_EMAIL, messageId = R.string.valid_email)
     private EditText inputEmail;
+    //@RegExp(value = PATTERN_PASSWORD, messageId = R.string.valid_password)
     private EditText inputPassword;
     private ProgressDialog pDialog;
-    private EditText inputCountry;
-    private EditText inputStreet;
-    private EditText inputCity;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private LocationRequest mLocationRequest;
@@ -65,6 +79,27 @@ public class RegisterActivity  extends AppCompatActivity  implements GoogleApiCl
         btnRegister = (Button) findViewById(R.id.btnRegister);
         btnLinkToLogin = (Button) findViewById(R.id.btnLinkToLoginScreen);
 
+        inputPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() < 6) {
+                    Toast.makeText(RegisterActivity.this, "password to short", Toast.LENGTH_SHORT).show();
+                } else if (s.length() > 50) {
+                    Toast.makeText(RegisterActivity.this, "password to long", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(RegisterActivity.this, "Good password", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
@@ -86,13 +121,22 @@ public class RegisterActivity  extends AppCompatActivity  implements GoogleApiCl
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
 
-                if (!first_name.isEmpty() && !last_name.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
-                    registerUser(first_name, last_name, email, password);
-                } else {
-                    Toast.makeText(getApplicationContext(), "Please enter your details!", Toast.LENGTH_LONG).show();
+                if (validate()){
+                    if (password.length() > 6){
+                        registerUser(first_name, last_name, email, password);
+                    }
                 }
             }
         });
+    }
+
+    public boolean validate() {
+        boolean isValid = FormValidator.validate(this, new SimpleErrorPopupCallback(this, true));
+        if (isValid) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -112,13 +156,6 @@ public class RegisterActivity  extends AppCompatActivity  implements GoogleApiCl
         user.setEmail(email);
         user.put("firstName", firstName);
         user.put("lastName", lastName);
-        user.put("clientRating", 0);
-        user.put("performerRating", 0);
-        user.put("country", " ");
-        user.put("zip", " ");
-        user.put("street", " ");
-        user.put("state", " ");
-        user.put("city", " ");
         user.put("lat", new ParseGeoPoint(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
         user.signUpInBackground(new SignUpCallback() {
             @Override
@@ -132,7 +169,7 @@ public class RegisterActivity  extends AppCompatActivity  implements GoogleApiCl
                     achieve.put("count", 0);
                     achieve.put("sum", 0);
                     achieve.put("balance", 1000);
-                    achieve.put("frozenBalance", 1000);
+                    achieve.put("frozenBalance", 0);
                     achieve.saveInBackground();
                     Toast.makeText(RegisterActivity.this, "User Saved", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(RegisterActivity.this, LoginActivity.class));

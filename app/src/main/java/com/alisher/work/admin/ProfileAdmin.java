@@ -10,7 +10,7 @@ import com.alisher.work.R;
 /**
  * Created by Alisher Kozhabay on 3/31/2016.
  */
-public class ProfileAdmin extends AppCompatActivity{
+public class ProfileAdmin extends AppCompatActivity {
     private TextView name, email, ssn, country, city, street, state, zip, buildNo;
 
     @Override
@@ -22,7 +22,7 @@ public class ProfileAdmin extends AppCompatActivity{
         setComponents();
     }
 
-    public void initComponents(){
+    public void initComponents() {
         name = (TextView) findViewById(R.id.admin_name);
         email = (TextView) findViewById(R.id.admin_email);
         ssn = (TextView) findViewById(R.id.admin_ssn);
@@ -34,16 +34,20 @@ public class ProfileAdmin extends AppCompatActivity{
         buildNo = (TextView) findViewById(R.id.admin_buildNo);
     }
 
-    public void setComponents(){
+    public void setComponents() {
         name.setText(getIntent().getStringExtra("name") + " ");
         email.setText(getIntent().getStringExtra("email") + " ");
         country.setText(getIntent().getStringExtra("country") + " ");
         city.setText(getIntent().getStringExtra("city") + " ");
-        street.setText(getIntent().getStringExtra("street")+" ");
-        state.setText(getIntent().getStringExtra("state")+" ");
-        buildNo.setText(getIntent().getStringExtra("buildNo")+ " ");
-        zip.setText(getIntent().getStringExtra("zip")+" ");
-        ssn.setText(getIntent().getIntExtra("ssn", 0) + " ");
+        street.setText(getIntent().getStringExtra("street") + " ");
+        state.setText(getIntent().getStringExtra("state") + " ");
+        buildNo.setText(getIntent().getStringExtra("buildNo") + " ");
+        zip.setText(getIntent().getStringExtra("zip") + " ");
+        if (getIntent().getIntExtra("ssn", 0) == 0) {
+            ssn.setText(" ");
+        } else {
+            ssn.setText(getIntent().getIntExtra("ssn", 0) + " ");
+        }
     }
 
     @Override

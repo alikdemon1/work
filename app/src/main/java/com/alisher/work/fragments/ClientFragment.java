@@ -26,14 +26,20 @@ import com.alisher.work.adapters.ExpandableListAdapter;
 import com.alisher.work.chat.ChatActivity;
 import com.alisher.work.chat.utils.Const;
 import com.alisher.work.chat.utils.Utils;
+import com.alisher.work.models.Perform;
 import com.alisher.work.models.Task;
 import com.alisher.work.newtask.CategoryActivity;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -327,10 +333,60 @@ public class ClientFragment extends Fragment {
                 p.put("startTime", new Date());
                 p.put("statusId", ParseObject.createWithoutData("Status", "j6hNwQ01bt"));
                 p.saveEventually();
+                Log.d("TASK_ID_CLIENT", p.getObjectId());
+                sendNotificationGiveTime(p.getObjectId(), p.getString("name"));
             }
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    private void sendNotificationGiveTime(String task_id, final String taskName) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Decision");
+        query.whereEqualTo("taskId", task_id);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null){
+                    ParseObject o = objects.get(0);
+                    ParseQuery<ParseUser> userParseQuery = ParseUser.getQuery();
+                    userParseQuery.whereEqualTo("objectId", o.getString("perfId"));
+                    try {
+                        ParseUser user = userParseQuery.getFirst();
+                        Log.d("USERNAME_CLIENT", user.getUsername());
+                        sendNotification(user.getUsername(), taskName);
+                    } catch (ParseException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void sendNotification(String rList, String taskName) {
+        ParseQuery pushQuery = ParseInstallation.getQuery();
+        pushQuery.whereEqualTo("email", rList);
+        JSONObject data = null;
+        JSONObject main = null;
+        try {
+            data = new JSONObject();
+            main = new JSONObject();
+            data.put("message", "For task: " + taskName);
+            data.put("title", "Client give you time");
+            main.put("data", data);
+            main.put("is_background", false);
+            main.put("isNew", false);
+            main.put("isChat", true);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.d("JSON", main.toString());
+        ParsePush push = new ParsePush();
+        push.setQuery(pushQuery);
+        push.setData(main);
+        push.sendInBackground();
     }
 
     private Date getEndDate(int days, int hours, int min) {

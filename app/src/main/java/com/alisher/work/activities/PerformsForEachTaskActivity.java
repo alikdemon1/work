@@ -23,9 +23,14 @@ import com.parse.GetCallback;
 import com.parse.GetDataCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +96,8 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                         i.putExtra("child", i.getIntExtra("child_position", 0));
                         i.putExtra("group", i.getIntExtra("group_position", 0));
 
+                        sendNotific(i, perform);
+
                         frozenBalance();
                         setResult(RESULT_OK, i);
                         finish();
@@ -99,6 +106,47 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                 dialog.show();
             }
         }));
+    }
+
+    private void sendNotific(Intent i, final Perform perform) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+        query.whereEqualTo("objectId", i.getStringExtra("taskId"));
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null) {
+                    for (ParseObject p : objects) {
+                        sendNotification(perform.getEmail(), p.getString("name"));
+                    }
+                } else {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void sendNotification(String rList, String taskName) {
+        ParseQuery pushQuery = ParseInstallation.getQuery();
+        pushQuery.whereEqualTo("email", rList);
+        JSONObject data = null;
+        JSONObject main = null;
+        try {
+            data = new JSONObject();
+            main = new JSONObject();
+            data.put("message", "check");
+            data.put("title", "You accepted for task " + taskName);
+            main.put("data", data);
+            main.put("is_background", false);
+            main.put("isNew", false);
+            main.put("isChat", true);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.d("JSON", main.toString());
+        ParsePush push = new ParsePush();
+        push.setQuery(pushQuery);
+        push.setData(main);
+        push.sendInBackground();
     }
 
     private void frozenBalance() {
@@ -178,6 +226,7 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                         if (e == null) {
                             for (ParseObject p : objects) {
                                 final Perform perf = new Perform();
+                                perf.setEmail(o.getUsername());
                                 perf.setId(o.getObjectId());
                                 perf.setFirstName(o.getString("firstName"));
                                 perf.setLastName(o.getString("lastName"));
@@ -201,10 +250,6 @@ public class PerformsForEachTaskActivity extends AppCompatActivity {
                 });
             }
         }
-    }
-
-    private void getRatingForPerf(ParseUser parseUser, final Perform perf) {
-
     }
 
     @Override

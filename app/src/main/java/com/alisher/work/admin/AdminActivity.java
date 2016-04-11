@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.alisher.work.R;
 import com.alisher.work.activities.LoginActivity;
+import com.alisher.work.adapters.PerformsForEachTaskAdapter;
 import com.alisher.work.adapters.RecyclerItemClickListener;
 import com.alisher.work.models.Perform;
 import com.parse.FindCallback;
@@ -27,6 +28,8 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -43,6 +46,7 @@ public class AdminActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
 
+        admins = new ArrayList<>();
         mRecyclerView = (RecyclerView) findViewById(R.id.admin_recycler_view);
         mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mAdapter = new AdminAdapter(getApplicationContext());
@@ -71,54 +75,62 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     private void initializeData() {
-        admins = new ArrayList<>();
         ParseQuery<ParseObject> mainQuery = ParseQuery.getQuery("Achievement");
         mainQuery.whereGreaterThan("performerRating", 0);
         mainQuery.orderByDescending("performerRating");
-        mainQuery.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if (e == null) {
-                    for (final ParseObject p : objects) {
-                        ParseQuery<ParseUser> query = ParseUser.getQuery();
-                        query.whereEqualTo("objectId", p.getString("userId"));
-                        query.findInBackground(new FindCallback<ParseUser>() {
-                            @Override
-                            public void done(List<ParseUser> list, ParseException e) {
-                                if (e == null) {
-                                    for (ParseUser o : list) {
-                                        final Perform perf = new Perform();
-                                        perf.setRating((float) p.getDouble("performerRating"));
-                                        perf.setId(o.getObjectId());
-                                        perf.setFirstName(o.getString("firstName"));
-                                        perf.setLastName(o.getString("lastName"));
-                                        perf.setCountry(o.getString("country"));
-                                        perf.setCity(o.getString("city"));
-                                        perf.setState(o.getString("state"));
-                                        perf.setZip(o.getString("zip"));
-                                        perf.setBuildNo(o.getString("buildingNo"));
-                                        perf.setSsn(o.getInt("ssn"));
-                                        ParseFile file = o.getParseFile("photo");
-                                        try {
-                                            Bitmap photo = BitmapFactory.decodeByteArray(file.getData(), 0, file.getData().length);
-                                            perf.setAvatar(photo);
-                                        } catch (ParseException e1) {
-                                            e1.printStackTrace();
-                                        }
-                                        admins.add(perf);
-                                    }
-                                    ((AdminAdapter) mAdapter).setPerforms(admins);
-                                } else {
-                                    Toast.makeText(AdminActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        try {
+            List<ParseObject> parseObjects = mainQuery.find();
+            for (final ParseObject p : parseObjects) {
+                ParseQuery<ParseUser> query = ParseUser.getQuery();
+                query.whereEqualTo("objectId", p.getString("userId"));
+                query.findInBackground(new FindCallback<ParseUser>() {
+                    @Override
+                    public void done(List<ParseUser> list, ParseException e) {
+                        if (e == null) {
+                            for (ParseUser o : list) {
+                                Log.d("ADMIN_LIST", o.getString("firstName") + ", " + p.getDouble("performerRating"));
+
+                                final Perform perf = new Perform();
+                                perf.setRating((float) p.getDouble("performerRating"));
+                                perf.setId(o.getObjectId());
+                                perf.setFirstName(o.getString("firstName"));
+                                perf.setLastName(o.getString("lastName"));
+                                perf.setCountry(o.getString("country"));
+                                perf.setCity(o.getString("city"));
+                                perf.setState(o.getString("state"));
+                                perf.setEmail(o.getUsername());
+                                perf.setZip(o.getString("zip"));
+                                perf.setBuildNo(o.getString("buildingNo"));
+                                perf.setSsn(o.getInt("ssn"));
+                                ParseFile file = o.getParseFile("photo");
+                                try {
+                                    Bitmap photo = BitmapFactory.decodeByteArray(file.getData(), 0, file.getData().length);
+                                    perf.setAvatar(photo);
+                                } catch (ParseException e1) {
+                                    e1.printStackTrace();
                                 }
+                                admins.add(perf);
                             }
-                        });
+                            Collections.sort(admins, new Comparator<Perform>() {
+                                @Override
+                                public int compare(Perform z1, Perform z2) {
+                                    if (z1.getRating() < z2.getRating())
+                                        return 1;
+                                    if (z1.getRating() > z2.getRating())
+                                        return -1;
+                                    return 0;
+                                }
+                            });
+                            ((AdminAdapter) mAdapter).setPerforms(admins);
+                        } else {
+                            Toast.makeText(AdminActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                     }
-                } else {
-                    e.printStackTrace();
-                }
+                });
             }
-        });
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     public void initMap() {
@@ -144,6 +156,7 @@ public class AdminActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.exit_admin) {
             startActivity(new Intent(AdminActivity.this, LoginActivity.class));
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }

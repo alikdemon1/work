@@ -23,8 +23,8 @@
 
 
     <!-- New Task -->
-    <string name="hint_desc">Please describe the job as much detail. So you can choose a suitable singer faster.</string>
-    <string name="hint_title">Title task</string>
+    <string name="hint_desc">Please provide a detailed description of the task/job needs to be done. It will help you find the best performers.</string>
+    <string name="hint_title">Task Title</string>
     <string name="new_apply">Apply</string>
     <string name="btn_pass_test">To see any new tasks you have to pass the TEST!!!</string>
 
@@ -62,4 +62,17 @@
     <string name="err_users">Error occurred while finding users:</string>
     <string name="alert_loading">Loading...</string>
     <string name="msg_no_user_found">No users found for chat!</string>
+    <string name="valid_ssn">Enter in the format 111-22-3333</string>
+    <string name="valid_zip">Only numbers</string>
+    <string name="valid_state">Only letters</string>
+    <string name="valid_build">Only letters</string>
+    <string name="valid_country">Only letters</string>
+    <string name="valid_city">Only letters</string>
+    <string name="valid_street">Only letters</string>
+    <string name="valid_firstname">Only letters</string>
+    <string name="valid_lastname">Only Letters</string>
+    <string name="valid_email">Enter valid email</string>
+    <string name="valid_password">incorrect</string>
+    <string name="prompt_country">Choose country</string>
+    <string name="validation_empty">not empty</string>
 </resources>

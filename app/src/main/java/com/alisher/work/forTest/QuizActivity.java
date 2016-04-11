@@ -64,6 +64,7 @@ public class QuizActivity extends AppCompatActivity {
                     Log.d("score", "Your score" + score);
                 }
                 if (qid < quesList.size()) {
+                    grp.clearCheck();
                     currentQ = quesList.get(qid);
                     setQuestionView();
                 } else {
@@ -91,15 +92,13 @@ public class QuizActivity extends AppCompatActivity {
                         }
                     });
 
-
                     AlertDialog.Builder builder = new AlertDialog.Builder(QuizActivity.this);
                     builder.setMessage("Your score: " + score)
                             .setCancelable(false)
                             .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     Toast.makeText(QuizActivity.this, "Calculating result...", Toast.LENGTH_SHORT).show();
-                                    Intent i = new Intent(QuizActivity.this, MainActivity.class);
-                                    startActivity(i);
+                                    finish();
                                 }
                             });
                     AlertDialog alert = builder.create();

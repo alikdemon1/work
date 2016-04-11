@@ -20,7 +20,7 @@
             android:textColor="#000000"
             android:textSize="20sp"
             android:layout_marginBottom="20dp"
-            android:text="You need to specify a particular cost to the performers to evaluate the profitability of the project."/>
+            android:text="Please specify how much you are ready to pay for the task. It will help a performer to make a decision."/>
 
         <EditText
             android:id="@+id/new_price"

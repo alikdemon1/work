@@ -1,14 +1,9 @@
 package com.alisher.work.adapters;
 
 import android.app.ProgressDialog;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.provider.Browser;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +16,7 @@ import android.widget.Toast;
 import com.alisher.work.R;
 import com.alisher.work.activities.AttachActivity;
 import com.alisher.work.activities.ClientDescriptionActivity;
-import com.alisher.work.activities.MainActivity;
 import com.alisher.work.activities.ResultActivity;
-import com.alisher.work.activities.TaskDescriptionActivity;
 import com.alisher.work.chat.ChatActivity;
 import com.alisher.work.chat.utils.Const;
 import com.alisher.work.chat.utils.Utils;
@@ -109,7 +102,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             result.setEnabled(false);
         } else if (groupPosition == 4) {
             desc.setEnabled(true);
-            chat.setEnabled(true);
+            chat.setEnabled(false);
             attach.setEnabled(false);
             result.setEnabled(false);
         } else if (groupPosition == 5){
@@ -135,6 +128,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                     i.putExtra("newTaskImage", childText.getImage());
                     i.putExtra("newTaskCost", childText.getPrice());
                     i.putExtra("newTaskDeadline", childText.getEndTime().toString());
+
+                    i.putExtra("isVisibleCancel", true);
 
                     i.putExtra("child", childPosition);
                     i.putExtra("group", groupPosition);

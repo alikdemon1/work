@@ -41,47 +41,41 @@ public class NotificationUtils {
         if (TextUtils.isEmpty(message))
             return;
 
-        if (isAppIsInBackground(mContext)) {
-            // notification icon
-            int icon = R.drawable.push_big;
+//        if (isAppIsInBackground(mContext)) {
+        // notification icon
+        int icon = R.drawable.push_big;
 
-            int smallIcon = R.drawable.push_small;
+        int smallIcon = R.drawable.push_small;
 
-            int mNotificationId = AppConfig.NOTIFICATION_ID;
+        int mNotificationId = AppConfig.NOTIFICATION_ID;
 
-            PendingIntent resultPendingIntent =
-                    PendingIntent.getActivity(
-                            mContext,
-                            0,
-                            intent,
-                            PendingIntent.FLAG_CANCEL_CURRENT
-                    );
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        mContext,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_CANCEL_CURRENT
+                );
 
-            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
 
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-                    mContext);
-            Notification notification = mBuilder.setSmallIcon(smallIcon).setTicker(title).setWhen(0)
-                    .setAutoCancel(true)
-                    .setContentTitle(title)
-                    .setStyle(inboxStyle)
-                    .setContentIntent(resultPendingIntent)
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                    .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), icon))
-                    .setContentText(message)
-                    .build();
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+                mContext);
+        Notification notification = mBuilder.setSmallIcon(smallIcon).setTicker(title).setWhen(0)
+                .setAutoCancel(true)
+                .setContentTitle(title)
+                .setStyle(inboxStyle)
+                .setContentIntent(resultPendingIntent)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), icon))
+                .setContentText(message)
+                .build();
 
-            NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(mNotificationId, notification);
-        } else {
-            intent.putExtra("title", title);
-            intent.putExtra("message", message);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            mContext.startActivity(intent);
-        }
+        NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(mNotificationId, notification);
     }
 
-    public void showNotificationMessage(String title, String message, Intent intent, String buddy) {
+    public void showNotificationMessageChat(String title, String message, Intent intent) {
 
         // Check for empty push message
         if (TextUtils.isEmpty(message))
@@ -122,9 +116,7 @@ public class NotificationUtils {
         } else {
             intent.putExtra("title", title);
             intent.putExtra("message", message);
-            intent.putExtra("buddy", buddy);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            //mContext.startActivity(intent);
         }
     }
 

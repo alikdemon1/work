@@ -144,6 +144,7 @@ public class ListArbitorActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.exit_item) {
             startActivity(new Intent(ListArbitorActivity.this, LoginActivity.class));
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }

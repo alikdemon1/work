@@ -30,6 +30,7 @@ dependencies {
     compile 'ivb.com.materialstepper:material-stepper:0.0.2'
     compile 'com.google.android.gms:play-services:8.3.0'
     compile 'com.parse:parse-android:1.13.0'
+    compile 'eu.inmite.android.lib:android-validation-komensky:0.9.4@aar'
 //    compile files('libs/Parse-1.10.3.jar')
 //    compile files('libs/bolts-android-1.2.1.jar')
 }

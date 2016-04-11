@@ -24,7 +24,7 @@ public class AdminAdapter extends RecyclerView.Adapter<AdminAdapter.ViewHolder>{
 
     public AdminAdapter(Context context) {
         mItems = new ArrayList<>();
-        ctx = context;
+        this.ctx = context;
     }
 
     public void setPerforms(List<Perform> list){
